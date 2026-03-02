@@ -6,8 +6,29 @@ import {
   DollarSign, CheckCircle, Factory, Search, FileText, Shield,
   Award, MapPin, Users, AlertTriangle, Package,
 } from "lucide-react";
+import type { ProposalProject, ProposalQuote, ProposalStats } from "@/types/notion";
 
-const TOTAL_SECTIONS = 9;
+/* ------------------------------------------------------------------ */
+/*  Formatting helpers                                                  */
+/* ------------------------------------------------------------------ */
+function formatCurrency(n: number | null): string {
+  if (n == null) return "\u2014";
+  return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return "\u2014";
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function weeksFromNow(dateStr: string | null): number {
+  if (!dateStr) return 0;
+  const now = new Date();
+  const target = new Date(dateStr + "T00:00:00");
+  const diff = target.getTime() - now.getTime();
+  return Math.max(0, Math.round(diff / (7 * 24 * 60 * 60 * 1000)));
+}
 
 /* ------------------------------------------------------------------ */
 /*  Hook: intersection observer for scroll-triggered animations        */
@@ -155,31 +176,24 @@ function WorldMapBackground() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Scatter chart data                                                  */
+/*  Scatter chart component                                             */
 /* ------------------------------------------------------------------ */
-const CHART_DATA = [
-  { name: "CEEG", price: 195500, weeks: 20, type: "fluxco" },
-  { name: "Yawei", price: 367866, weeks: 22, type: "fluxco", recommended: true },
-  { name: "Omex", price: 604737, weeks: 31, type: "antora" },
-  { name: "Jiangsu FP", price: 415000, weeks: 26, type: "fluxco" },
-  { name: "Keyuan", price: 305500, weeks: 28, type: "fluxco", recommended: true },
-  { name: "VaOpto", price: 1121100, weeks: 34, type: "fluxco" },
-  { name: "HC (IEN)", price: 1197500, weeks: 35, type: "fluxco" },
-  { name: "PEL", price: 572297, weeks: 40, type: "fluxco", recommended: true },
-  { name: "JST", price: 852068, weeks: 40, type: "antora" },
-  { name: "TX Xfmrs", price: 981875, weeks: 41, type: "antora" },
-  { name: "Astor", price: 967771, weeks: 48, type: "antora" },
-  { name: "TX Xfmr", price: 642000, weeks: 50, type: "fluxco" },
-  { name: "Daelim", price: 596730, weeks: 51, type: "fluxco" },
-  { name: "Bolt", price: 693790, weeks: 66, type: "fluxco" },
-  { name: "T&R", price: 729565, weeks: 94, type: "fluxco" },
-  { name: "Schneider", price: 2000000, weeks: 159, type: "fluxco" },
-  { name: "Delta Star", price: 2750000, weeks: 214, type: "fluxco" },
-];
+interface ChartDatum {
+  name: string;
+  price: number;
+  weeks: number;
+  type: "fluxco" | "antora";
+  recommended?: boolean;
+}
 
-function ScatterChart({ inView }: { inView: boolean }) {
-  const maxPrice = 3000000;
-  const maxWeeks = 220;
+function ScatterChart({ inView, data, maxPrice, maxWeeks, deliveryWeek, deliveryLabel }: {
+  inView: boolean;
+  data: ChartDatum[];
+  maxPrice: number;
+  maxWeeks: number;
+  deliveryWeek: number;
+  deliveryLabel: string;
+}) {
   const chartW = 900;
   const chartH = 400;
   const padL = 80;
@@ -192,8 +206,14 @@ function ScatterChart({ inView }: { inView: boolean }) {
   const x = (w: number) => padL + (w / maxWeeks) * plotW;
   const y = (p: number) => padT + plotH - (p / maxPrice) * plotH;
 
-  const priceTicks = [0, 500000, 1000000, 1500000, 2000000, 2500000, 3000000];
-  const weekTicks = [0, 50, 100, 150, 200];
+  // Compute sensible tick marks
+  const priceStep = maxPrice <= 1000000 ? 200000 : 500000;
+  const priceTicks: number[] = [];
+  for (let p = 0; p <= maxPrice; p += priceStep) priceTicks.push(p);
+
+  const weekStep = maxWeeks <= 60 ? 10 : maxWeeks <= 120 ? 20 : 50;
+  const weekTicks: number[] = [];
+  for (let w = 0; w <= maxWeeks; w += weekStep) weekTicks.push(w);
 
   return (
     <svg viewBox={`0 0 ${chartW} ${chartH}`} className="ap-scatter-svg" style={{ width: "100%", height: "auto" }}>
@@ -216,10 +236,14 @@ function ScatterChart({ inView }: { inView: boolean }) {
       ))}
 
       {/* Delivery deadline line */}
-      <line x1={x(38)} y1={padT} x2={x(38)} y2={chartH - padB} stroke="rgba(230,57,70,0.5)" strokeWidth="1.5" strokeDasharray="4,4" />
-      <text x={x(38) + 6} y={padT + 14} fill="#e63946" fontSize="8" fontFamily="JetBrains Mono" fontWeight="600">
-        11/30 DELIVERY
-      </text>
+      {deliveryWeek > 0 && deliveryWeek <= maxWeeks && (
+        <>
+          <line x1={x(deliveryWeek)} y1={padT} x2={x(deliveryWeek)} y2={chartH - padB} stroke="rgba(230,57,70,0.5)" strokeWidth="1.5" strokeDasharray="4,4" />
+          <text x={x(deliveryWeek) + 6} y={padT + 14} fill="#e63946" fontSize="8" fontFamily="JetBrains Mono" fontWeight="600">
+            {deliveryLabel} DELIVERY
+          </text>
+        </>
+      )}
 
       {/* Axis labels */}
       <text x={chartW / 2} y={chartH - 5} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontFamily="Inter" fontWeight="600" letterSpacing="1">
@@ -230,7 +254,7 @@ function ScatterChart({ inView }: { inView: boolean }) {
       </text>
 
       {/* Data points */}
-      {CHART_DATA.map((d, i) => {
+      {data.map((d, i) => {
         const cx = x(d.weeks);
         const cy = y(d.price);
         const isAntora = d.type === "antora";
@@ -272,7 +296,91 @@ function ScatterChart({ inView }: { inView: boolean }) {
 /* ------------------------------------------------------------------ */
 /*  Main component                                                      */
 /* ------------------------------------------------------------------ */
-export default function AntoraProposal() {
+interface ProposalClientProps {
+  project: ProposalProject;
+  quotes: ProposalQuote[];
+  stats: ProposalStats;
+}
+
+export function ProposalClient({ project, quotes, stats }: ProposalClientProps) {
+  /* ---- Derived data ---- */
+
+  // Recommended quotes
+  const recommendedQuotes = quotes.filter(q => q.recommended);
+
+  // Received quotes (for chart, table)
+  const receivedQuotes = quotes.filter(q => q.status === "Quote Received");
+
+  // Pending quotes
+  const pendingQuotes = quotes.filter(q => q.status === "Preparing Proposal");
+
+  // Other candidates: received but not recommended
+  const otherCandidates = receivedQuotes.filter(q => !q.recommended);
+
+  // Chart data: received quotes with both price and weeks
+  const chartData: ChartDatum[] = receivedQuotes
+    .filter(q => q.totalPrice != null && q.totalWeeks != null)
+    .map(q => ({
+      name: q.shortName || q.name,
+      price: q.totalPrice!,
+      weeks: q.totalWeeks!,
+      type: (q.bidSource === "Antora" ? "antora" : "fluxco") as "fluxco" | "antora",
+      recommended: q.recommended,
+    }));
+
+  // Chart axis bounds (with padding)
+  const chartMaxPrice = chartData.length > 0
+    ? Math.ceil(Math.max(...chartData.map(d => d.price)) * 1.15 / 500000) * 500000
+    : 3000000;
+  const chartMaxWeeks = chartData.length > 0
+    ? Math.ceil(Math.max(...chartData.map(d => d.weeks)) * 1.15 / 10) * 10
+    : 220;
+
+  // Delivery deadline in weeks from now
+  const deliveryWeek = weeksFromNow(project.deliveryDate);
+  const deliveryLabel = project.deliveryDate
+    ? new Date(project.deliveryDate + "T00:00:00").toLocaleDateString("en-US", { month: "numeric", day: "numeric" })
+    : "";
+
+  // Sorted received quotes for table (by totalPrice ascending)
+  const sortedReceivedQuotes = [...receivedQuotes].sort((a, b) => (a.totalPrice ?? Infinity) - (b.totalPrice ?? Infinity));
+
+  // Title split: split productDescription into two lines
+  const descWords = project.productDescription.split(" ");
+  const titleLine1 = descWords.length > 1 ? descWords.slice(0, -1).join(" ") : descWords[0];
+  const titleLine2 = descWords.length > 1 ? descWords[descWords.length - 1] : "";
+
+  // Icons for recommendation cards (cycle through)
+  const recIcons = [Award, Factory, Shield];
+
+  /* ---- Dynamic section count ---- */
+  const hasRecommendations = recommendedQuotes.length > 0;
+  const hasPending = pendingQuotes.length > 0;
+  const hasOtherCandidates = otherCandidates.length > 0;
+
+  // Build ordered list of sections
+  // Always: title, process, chart
+  // Conditionally: recommendations (slide 4), recommendation details (slide 5)
+  // Always: full quote table
+  // Conditionally: pending, other candidates
+  // Always: closing
+  const sections: string[] = [
+    "title",        // 0
+    "process",      // 1
+    "chart",        // 2
+  ];
+  if (hasRecommendations) {
+    sections.push("recommendations");     // 3 (conditional)
+    sections.push("recommendation-details"); // 4 (conditional)
+  }
+  sections.push("quote-table");           // next
+  if (hasPending) sections.push("pending");
+  if (hasOtherCandidates) sections.push("other-candidates");
+  sections.push("closing");
+
+  const TOTAL_SECTIONS = sections.length;
+
+  /* ---- Navigation state ---- */
   const [currentSection, setCurrentSection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -285,6 +393,13 @@ export default function AntoraProposal() {
     };
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
+  }, [TOTAL_SECTIONS]);
+
+  const goTo = useCallback((index: number) => {
+    containerRef.current?.scrollTo({
+      top: index * window.innerHeight,
+      behavior: "smooth",
+    });
   }, []);
 
   useEffect(() => {
@@ -300,14 +415,7 @@ export default function AntoraProposal() {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [currentSection]);
-
-  const goTo = useCallback((index: number) => {
-    containerRef.current?.scrollTo({
-      top: index * window.innerHeight,
-      behavior: "smooth",
-    });
-  }, []);
+  }, [currentSection, TOTAL_SECTIONS, goTo]);
 
   /* Slide in-view trackers */
   const s1 = useInView(0.3);
@@ -321,11 +429,11 @@ export default function AntoraProposal() {
   const s9 = useInView(0.2);
 
   /* Animated counters */
-  const c69 = useCountUp(69, 1800, s2.inView);
-  const c15 = useCountUp(15, 1200, s2.inView);
-  const c13q = useCountUp(13, 1400, s2.inView);
-  const c13p = useCountUp(13, 1400, s2.inView);
-  const c43 = useCountUp(43, 1800, s2.inView);
+  const cContacted = useCountUp(stats.totalContacted, 1800, s2.inView);
+  const cCountries = useCountUp(stats.countries, 1200, s2.inView);
+  const cReceived = useCountUp(stats.quotesReceived, 1400, s2.inView);
+  const cInProcess = useCountUp(stats.inProcess, 1400, s2.inView);
+  const cDeclined = useCountUp(stats.declined, 1800, s2.inView);
 
   return (
     <>
@@ -366,7 +474,7 @@ export default function AntoraProposal() {
 
       <div ref={containerRef} className="ap-container">
 
-        {/* ========== SLIDE 1 — TITLE ========== */}
+        {/* ========== SLIDE 1 -- TITLE ========== */}
         <section className="ap-slide" ref={s1.ref}>
           <GridBackground />
           <div className="ap-glow ap-glow-1" />
@@ -378,20 +486,20 @@ export default function AntoraProposal() {
             </div>
             <div className="ap-badge">PROCUREMENT PROPOSAL</div>
             <h1 className="ap-h1">
-              <span className="ap-h1-line ap-h1-1">20 MVA eBoiler</span>
-              <span className="ap-h1-line ap-h1-2">Transformer</span>
+              <span className="ap-h1-line ap-h1-1">{titleLine1}</span>
+              {titleLine2 && <span className="ap-h1-line ap-h1-2">{titleLine2}</span>}
             </h1>
             <p className="ap-subtitle">
-              Prepared for <strong>Antora Energy</strong> &mdash; Pratt, Kansas
+              Prepared for <strong>{project.customerName}</strong> &mdash; {project.location}
             </p>
             <div className="ap-title-meta">
-              <span><Clock className="w-4 h-4" /> Target Delivery: Nov 30, 2026</span>
-              <span><MapPin className="w-4 h-4" /> Pratt, KS</span>
+              <span><Clock className="w-4 h-4" /> Target Delivery: {formatDate(project.deliveryDate)}</span>
+              <span><MapPin className="w-4 h-4" /> {project.location}</span>
             </div>
           </div>
         </section>
 
-        {/* ========== SLIDE 2 — PROCESS OVERVIEW ========== */}
+        {/* ========== SLIDE 2 -- PROCESS OVERVIEW ========== */}
         <section className="ap-slide" ref={s2.ref}>
           <WorldMapBackground />
           <div className="ap-glow ap-glow-3" />
@@ -399,29 +507,29 @@ export default function AntoraProposal() {
             <div className="ap-slide-label">PROCUREMENT PROCESS</div>
             <h2 className="ap-h2">Process Overview</h2>
             <p className="ap-p">
-              Outreach for the requirement to procure a <strong>20 MVA transformer</strong> with
-              target delivery <strong>Nov 30, 2026</strong>.
+              Outreach for the requirement to procure a <strong>{project.productDescription}</strong> with
+              target delivery <strong>{formatDate(project.deliveryDate)}</strong>.
             </p>
 
             <div className="ap-stats-row">
               <div className="ap-stat-card">
-                <div className="ap-stat-num">{c69}</div>
+                <div className="ap-stat-num">{cContacted}</div>
                 <div className="ap-stat-label">OEMs Contacted</div>
               </div>
               <div className="ap-stat-card">
-                <div className="ap-stat-num">{c15}</div>
+                <div className="ap-stat-num">{cCountries}</div>
                 <div className="ap-stat-label">Countries</div>
               </div>
               <div className="ap-stat-card ap-stat-highlight">
-                <div className="ap-stat-num">{c13q}</div>
+                <div className="ap-stat-num">{cReceived}</div>
                 <div className="ap-stat-label">Quotes Received</div>
               </div>
               <div className="ap-stat-card">
-                <div className="ap-stat-num">{c13p}</div>
+                <div className="ap-stat-num">{cInProcess}</div>
                 <div className="ap-stat-label">Quotes In-Process</div>
               </div>
               <div className="ap-stat-card ap-stat-dim">
-                <div className="ap-stat-num">{c43}</div>
+                <div className="ap-stat-num">{cDeclined}</div>
                 <div className="ap-stat-label">Declined / No Bid</div>
               </div>
             </div>
@@ -450,7 +558,7 @@ export default function AntoraProposal() {
           </div>
         </section>
 
-        {/* ========== SLIDE 3 — PRICE vs LEAD TIME CHART ========== */}
+        {/* ========== SLIDE 3 -- PRICE vs LEAD TIME CHART ========== */}
         <section className="ap-slide" ref={s3.ref}>
           <div className="ap-glow ap-glow-4" />
           <div className={`ap-content ${s3.inView ? "in" : ""}`}>
@@ -458,19 +566,26 @@ export default function AntoraProposal() {
             <h2 className="ap-h2">Quoted Price by Lead Time</h2>
             <p className="ap-p">
               All bids plotted by <strong>total lead time</strong> and <strong>quoted price</strong>.
-              Recommended suppliers highlighted. Red dotted line marks the Nov 30 delivery deadline.
+              Recommended suppliers highlighted. Red dotted line marks the {formatDate(project.deliveryDate)} delivery deadline.
             </p>
 
             <div className="ap-chart-wrap">
               <div className="ap-chart-box">
-                <ScatterChart inView={s3.inView} />
+                <ScatterChart
+                  inView={s3.inView}
+                  data={chartData}
+                  maxPrice={chartMaxPrice}
+                  maxWeeks={chartMaxWeeks}
+                  deliveryWeek={deliveryWeek}
+                  deliveryLabel={deliveryLabel}
+                />
               </div>
               <div className="ap-chart-legend">
                 <div className="ap-legend">
                   <div className="ap-legend-swatch" style={{ background: "#2d8cff" }} /> FluxCo Bid
                 </div>
                 <div className="ap-legend">
-                  <div className="ap-legend-swatch" style={{ background: "#e63946" }} /> Antora Bid
+                  <div className="ap-legend-swatch" style={{ background: "#e63946" }} /> {project.customerName} Bid
                 </div>
                 <div className="ap-legend">
                   <div className="ap-legend-swatch" style={{ background: "#2d8cff", border: "2px solid #2d8cff", boxShadow: "0 0 0 3px rgba(45,140,255,0.2)" }} /> Recommended
@@ -480,134 +595,68 @@ export default function AntoraProposal() {
           </div>
         </section>
 
-        {/* ========== SLIDE 4 — TOP 3 RECOMMENDATIONS ========== */}
-        <section className="ap-slide" ref={s4.ref}>
-          <div className="ap-glow ap-glow-5" />
-          <div className={`ap-content ${s4.inView ? "in" : ""}`}>
-            <div className="ap-slide-label">OUR RECOMMENDATIONS</div>
-            <h2 className="ap-h2">Top 3 Candidates</h2>
+        {/* ========== SLIDE 4 -- TOP 3 RECOMMENDATIONS ========== */}
+        {hasRecommendations && (
+          <section className="ap-slide" ref={s4.ref}>
+            <div className="ap-glow ap-glow-5" />
+            <div className={`ap-content ${s4.inView ? "in" : ""}`}>
+              <div className="ap-slide-label">OUR RECOMMENDATIONS</div>
+              <h2 className="ap-h2">Top {Math.min(recommendedQuotes.length, 3)} Candidates</h2>
 
-            <div className="ap-rec-grid">
-              {/* Keyuan */}
-              <div className="ap-rec-card ap-rec-featured">
-                <div className="ap-rec-badge">BEST VALUE</div>
-                <div className="ap-rec-header">
-                  <div className="ap-rec-icon"><Award className="w-6 h-6" /></div>
-                  <div>
-                    <div className="ap-rec-name">Keyuan Electric</div>
-                    <div className="ap-rec-origin"><MapPin className="w-3 h-3" /> Guangdong, China</div>
-                  </div>
-                </div>
-                <div className="ap-rec-price-row">
-                  <div className="ap-rec-price">$425,500 <span>DDP US Port*</span></div>
-                  <div className="ap-rec-lt"><Clock className="w-3.5 h-3.5" /> 28 wks <span>+6 for options</span></div>
-                </div>
-                <div className="ap-rec-body">
-                  <p>Well-established manufacturer (est. 2007) with major OEMs white-labeling their products. Cooperative relations with <strong>Schneider, ABB, and GE</strong>. Awarded Chinese national projects with stringent quality requirements. US support teams in NY and Dallas.</p>
-                </div>
-                <div className="ap-rec-quals">
-                  <span>IEC</span><span>UL</span><span>CSA</span><span>KEMA</span><span>ISO</span><span>UL/c-UL XPLH</span>
-                </div>
-                <div className="ap-rec-note">Est. Revenue $150M &bull; 5 units/month capacity &bull; UL-listing +$60k &bull; TUV Field Eval IEEE cert +$18k</div>
-              </div>
-
-              {/* Yawei */}
-              <div className="ap-rec-card">
-                <div className="ap-rec-header">
-                  <div className="ap-rec-icon"><Factory className="w-6 h-6" /></div>
-                  <div>
-                    <div className="ap-rec-name">Jiangsu Yawei</div>
-                    <div className="ap-rec-origin"><MapPin className="w-3 h-3" /> Yangzhong, Jiangsu, China</div>
-                  </div>
-                </div>
-                <div className="ap-rec-price-row">
-                  <div className="ap-rec-price">$442,366 <span>DDP US Port</span></div>
-                  <div className="ap-rec-lt"><Clock className="w-3.5 h-3.5" /> 12 wks <span>after drawings</span></div>
-                </div>
-                <div className="ap-rec-body">
-                  <p>Established manufacturer with comprehensive certifications. <strong>2.7M sq ft facility</strong>. Awarded Chinese national projects. Delivered many units to Canada and US including <strong>BGIN</strong> projects.</p>
-                </div>
-                <div className="ap-rec-quals">
-                  <span>ISO 9001:2015</span><span>UL-Canada</span>
-                </div>
-                <div className="ap-rec-note">Est. Revenue $365M &bull; 30 units/month &bull; UL Witnessed FAT available</div>
-              </div>
-
-              {/* PEL */}
-              <div className="ap-rec-card">
-                <div className="ap-rec-header">
-                  <div className="ap-rec-icon"><Shield className="w-6 h-6" /></div>
-                  <div>
-                    <div className="ap-rec-name">PEL (Pak Elektron)</div>
-                    <div className="ap-rec-origin"><MapPin className="w-3 h-3" /> Lahore, Pakistan</div>
-                  </div>
-                </div>
-                <div className="ap-rec-price-row">
-                  <div className="ap-rec-price">$572,297 <span>DDP US Port</span></div>
-                  <div className="ap-rec-lt"><Clock className="w-3.5 h-3.5" /> 40 wks</div>
-                </div>
-                <div className="ap-rec-body">
-                  <p>Highly professional team. Acquired <strong>Ganz technology</strong> (invented transformers in 1885). Shows up with 3-6 technical reps per meeting. Past projects include <strong>Tesla data centers</strong>. ~800 transformers delivered to US in 2024-2025.</p>
-                </div>
-                <div className="ap-rec-quals">
-                  <span>ISO 9001:2015</span><span>UL/c-UL XPLH</span><span>ISO 14001</span><span>ISO 45001</span>
-                </div>
-                <div className="ap-rec-note">Est. Revenue $162M &bull; 50 units/year &bull; Deep BOM + long-lead analysis provided</div>
+              <div className="ap-rec-grid">
+                {recommendedQuotes.slice(0, 3).map((q, idx) => {
+                  const IconComp = recIcons[idx % recIcons.length];
+                  const isFeatured = idx === 0;
+                  return (
+                    <div key={q.name} className={`ap-rec-card ${isFeatured ? "ap-rec-featured" : ""}`}>
+                      {isFeatured && <div className="ap-rec-badge">BEST VALUE</div>}
+                      <div className="ap-rec-header">
+                        <div className="ap-rec-icon"><IconComp className="w-6 h-6" /></div>
+                        <div>
+                          <div className="ap-rec-name">{q.name}</div>
+                          <div className="ap-rec-origin"><MapPin className="w-3 h-3" /> {q.country}</div>
+                        </div>
+                      </div>
+                      <div className="ap-rec-price-row">
+                        <div className="ap-rec-price">{formatCurrency(q.totalPrice)} <span>DDP Total</span></div>
+                        <div className="ap-rec-lt"><Clock className="w-3.5 h-3.5" /> {q.totalWeeks ?? "\u2014"} wks</div>
+                      </div>
+                      <div className="ap-rec-body">
+                        <p>{q.description}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* ========== SLIDE 5 — RECOMMENDATION DETAILS ========== */}
-        <section className="ap-slide" ref={s5.ref}>
-          <div className="ap-glow ap-glow-3" />
-          <div className={`ap-content ${s5.inView ? "in" : ""}`}>
-            <div className="ap-slide-label">WHY THESE THREE</div>
-            <h2 className="ap-h2">Detailed Recommendations</h2>
+        {/* ========== SLIDE 5 -- RECOMMENDATION DETAILS ========== */}
+        {hasRecommendations && (
+          <section className="ap-slide" ref={s5.ref}>
+            <div className="ap-glow ap-glow-3" />
+            <div className={`ap-content ${s5.inView ? "in" : ""}`}>
+              <div className="ap-slide-label">WHY THESE {Math.min(recommendedQuotes.length, 3) === 1 ? "ONE" : Math.min(recommendedQuotes.length, 3) === 2 ? "TWO" : "THREE"}</div>
+              <h2 className="ap-h2">Detailed Recommendations</h2>
 
-            <div className="ap-detail-grid">
-              <div className="ap-detail-card">
-                <h3 className="ap-h3">Keyuan Electric <span className="ap-price-tag">$305,500 FOB</span></h3>
-                <p className="ap-p">
-                  Comprehensive certifications (UL-US, ISO 9001:2015, etc.). Based on our conversations with other OEMs,
-                  {" "}<strong>Keyuan was a name that kept coming up as the white label manufacturer</strong>.
-                  Cooperative relations with Schneider, ABB, and GE. Awarded Chinese national projects with stringent
-                  quality requirements. Delivering directly to the US for 3 years under white labels.
-                  Support teams in <strong>New York and Dallas</strong>.
-                </p>
-              </div>
-              <div className="ap-detail-card">
-                <h3 className="ap-h3">Jiangsu Yawei <span className="ap-price-tag">$367,866 FOB</span></h3>
-                <p className="ap-p">
-                  Comprehensive certifications (UL-Canada, ISO 9001:2015). Organized, large operation in a
-                  {" "}<strong>2.7M square foot facility</strong>. Awarded Chinese national projects with stringent quality
-                  requirements. Delivered many units to Canada and the US including <strong>BGIN</strong> projects.
-                  Offers <strong>UL witnessed factory acceptance testing</strong> certification.
-                </p>
-              </div>
-              <div className="ap-detail-card">
-                <h3 className="ap-h3">Jiangsu First Power <span className="ap-price-tag">$415,000 FOB</span></h3>
-                <p className="ap-p">
-                  JSFP has comprehensive certifications (UL-US and Canada, ISO 9001:2015, etc.). They have what appears
-                  to be an organized and large operation based on our research in a <strong>2.15M square foot facility</strong>.
-                  They have delivered to a few notable US projects notably a <strong>SpaceX project</strong> and a mining
-                  operation by Antspace. Price still feels negotiable.
-                </p>
-              </div>
-              <div className="ap-detail-card">
-                <h3 className="ap-h3">PEL (Pak Elektron) <span className="ap-price-tag">$572,297 DDP</span></h3>
-                <p className="ap-p">
-                  Acquired <strong>Ganz technology</strong> (invented transformers in 1885). 3-6 technical reps per meeting.
-                  Past projects include <strong>Tesla data centers</strong>.
-                  Delivered <strong>~800 transformers to the US in 2024-2025</strong>. Provided detailed BOM + long-lead analysis.
-                  UL/c-UL XPLH, ISO 9001:2015, ISO 14001, ISO 45001. Est. revenue $162M, 50 units/year capacity.
-                </p>
+              <div className="ap-detail-grid">
+                {recommendedQuotes.slice(0, 3).map((q) => {
+                  const priceLabel = q.ddp != null && q.ddp > 0 ? "DDP" : "FOB";
+                  const priceVal = priceLabel === "DDP" ? q.totalPrice : q.quotedPrice;
+                  return (
+                    <div key={q.name} className="ap-detail-card">
+                      <h3 className="ap-h3">{q.name} <span className="ap-price-tag">{formatCurrency(priceVal)} {priceLabel}</span></h3>
+                      <p className="ap-p">{q.description}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* ========== SLIDE 6 — FULL QUOTE TABLE ========== */}
+        {/* ========== SLIDE 6 -- FULL QUOTE TABLE ========== */}
         <section className="ap-slide ap-slide-table" ref={s6.ref}>
           <div className={`ap-content ${s6.inView ? "in" : ""}`}>
             <div className="ap-slide-label">ALL QUOTES</div>
@@ -626,136 +675,86 @@ export default function AntoraProposal() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="ap-row-rec"><td>Keyuan Electric</td><td>China</td><td>28 wks</td><td>$305,500</td><td>$120,000</td><td className="ap-price-cell">$425,500</td></tr>
-                  <tr className="ap-row-rec"><td>Yawei Transformer</td><td>China</td><td>22 wks</td><td>$367,866</td><td>$104,500</td><td className="ap-price-cell">$472,366</td></tr>
-                  <tr className="ap-row-rec"><td>PEL</td><td>Pakistan</td><td>40 wks</td><td>$572,297</td><td>$0</td><td className="ap-price-cell">$572,297</td></tr>
-                  <tr><td>CEEG</td><td>China</td><td>20 wks</td><td>$195,500</td><td>$120,000</td><td>$315,500</td></tr>
-                  <tr><td>Jiangsu First Power</td><td>China</td><td>26 wks</td><td>$415,000</td><td>$205,000</td><td>$620,000</td></tr>
-                  <tr><td>Daelim</td><td>China</td><td>51 wks</td><td>$596,730</td><td>$0</td><td>$596,730</td></tr>
-                  <tr><td>Omex</td><td>US</td><td>31 wks</td><td>$604,737</td><td>&mdash;</td><td>$604,737</td></tr>
-                  <tr><td>Texas Transformer</td><td>India</td><td>50 wks</td><td>$642,000</td><td>$0</td><td>$642,000</td></tr>
-                  <tr><td>Bolt Electrical</td><td>UAE</td><td>66 wks</td><td>$693,790</td><td>$113,744</td><td>$807,534</td></tr>
-                  <tr><td>T&R Electric</td><td>US</td><td>94 wks</td><td>$729,565</td><td>&mdash;</td><td>$729,565</td></tr>
-                  <tr><td>JST</td><td>US</td><td>40 wks</td><td>$852,068</td><td>&mdash;</td><td>$852,068</td></tr>
-                  <tr><td>Astor</td><td>Turkey</td><td>48 wks</td><td>$967,771</td><td>&mdash;</td><td>$967,771</td></tr>
-                  <tr><td>TX Transformers</td><td>India</td><td>41 wks</td><td>$981,875</td><td>&mdash;</td><td>$981,875</td></tr>
-                  <tr><td>VaOpto</td><td>China</td><td>34 wks</td><td>$1,121,100</td><td>$0</td><td>$1,121,100</td></tr>
-                  <tr><td>HC (IEN Hanchang)</td><td>South Korea</td><td>35 wks</td><td>$1,197,500</td><td>$0</td><td>$1,197,500</td></tr>
-                  <tr><td>Schneider</td><td>USA/Mexico</td><td>159 wks</td><td>$2,000,000</td><td>&mdash;</td><td>$2,000,000</td></tr>
-                  <tr><td>Delta Star</td><td>US</td><td>214 wks</td><td>$2,750,000</td><td>&mdash;</td><td>$2,750,000</td></tr>
+                  {sortedReceivedQuotes.map((q) => (
+                    <tr key={q.name} className={q.recommended ? "ap-row-rec" : ""}>
+                      <td>{q.name}</td>
+                      <td>{q.country}</td>
+                      <td>{q.totalWeeks != null ? `${q.totalWeeks} wks` : "\u2014"}</td>
+                      <td>{formatCurrency(q.quotedPrice)}</td>
+                      <td>{q.ddp != null ? (q.ddp === 0 ? "$0" : formatCurrency(q.ddp)) : "\u2014"}</td>
+                      <td className={q.recommended ? "ap-price-cell" : ""}>{formatCurrency(q.totalPrice)}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        {/* ========== SLIDE 7 — PENDING QUOTES ========== */}
-        <section className="ap-slide" ref={s7.ref}>
-          <div className="ap-glow ap-glow-4" />
-          <div className={`ap-content ${s7.inView ? "in" : ""}`}>
-            <div className="ap-slide-label">IN PROGRESS</div>
-            <h2 className="ap-h2">Pending Quotes</h2>
-            <p className="ap-p">Specs have been shared and are under review with the following manufacturers:</p>
+        {/* ========== SLIDE 7 -- PENDING QUOTES ========== */}
+        {hasPending && (
+          <section className="ap-slide" ref={s7.ref}>
+            <div className="ap-glow ap-glow-4" />
+            <div className={`ap-content ${s7.inView ? "in" : ""}`}>
+              <div className="ap-slide-label">IN PROGRESS</div>
+              <h2 className="ap-h2">Pending Quotes</h2>
+              <p className="ap-p">Specs have been shared and are under review with the following manufacturers:</p>
 
-            <div className="ap-pending-grid">
-              {[
-                { name: "Eagle Rise", country: "China", icon: <Globe className="w-5 h-5" /> },
-                { name: "Shandong Fudao", country: "China", icon: <Factory className="w-5 h-5" /> },
-                { name: "Howard Industries", country: "US", icon: <Factory className="w-5 h-5" /> },
-                { name: "IEC", country: "South Korea", icon: <Globe className="w-5 h-5" /> },
-                { name: "LS Electric", country: "South Korea", icon: <Globe className="w-5 h-5" /> },
-                { name: "Bolt Electrical", country: "Mexico / South Korea", icon: <Globe className="w-5 h-5" /> },
-                { name: "Virginia Transformer", country: "US", icon: <Factory className="w-5 h-5" /> },
-                { name: "Grupo Edmar", country: "Mexico", icon: <Globe className="w-5 h-5" /> },
-                { name: "EFACEC", country: "Portugal", icon: <Globe className="w-5 h-5" /> },
-                { name: "Toshiba", country: "India", icon: <Globe className="w-5 h-5" /> },
-              ].map((s) => (
-                <div key={s.name} className="ap-pending-card">
-                  <div className="ap-pending-icon">{s.icon}</div>
-                  <div>
-                    <div className="ap-pending-name">{s.name}</div>
-                    <div className="ap-pending-country">{s.country}</div>
-                  </div>
-                </div>
-              ))}
+              <div className="ap-pending-grid">
+                {pendingQuotes.map((q) => {
+                  const isUS = q.country === "US" || q.country === "USA" || q.country === "United States";
+                  const icon = isUS ? <Factory className="w-5 h-5" /> : <Globe className="w-5 h-5" />;
+                  return (
+                    <div key={q.name} className="ap-pending-card">
+                      <div className="ap-pending-icon">{icon}</div>
+                      <div>
+                        <div className="ap-pending-name">{q.name}</div>
+                        <div className="ap-pending-country">{q.country}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* ========== SLIDE 8 — OTHER CANDIDATES ========== */}
-        <section className="ap-slide ap-slide-table" ref={s8.ref}>
-          <div className={`ap-content ${s8.inView ? "in" : ""}`}>
-            <div className="ap-slide-label">APPENDIX</div>
-            <h2 className="ap-h2">Other Candidates</h2>
+        {/* ========== SLIDE 8 -- OTHER CANDIDATES ========== */}
+        {hasOtherCandidates && (
+          <section className="ap-slide ap-slide-table" ref={s8.ref}>
+            <div className={`ap-content ${s8.inView ? "in" : ""}`}>
+              <div className="ap-slide-label">APPENDIX</div>
+              <h2 className="ap-h2">Other Candidates</h2>
 
-            <div className="ap-table-wrap">
-              <table className="ap-table ap-table-detail">
-                <thead>
-                  <tr>
-                    <th>Company</th>
-                    <th>Overview</th>
-                    <th>Certifications</th>
-                    <th>Price / Lead Time</th>
-                    <th>Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="ap-td-name">Daelim</td>
-                    <td>Beijing, China. Well-established, major OEMs white-labeling. 15 pcs/day capacity.</td>
-                    <td>ISO 9001:2008, UL-US</td>
-                    <td>$596,730<br/><span className="ap-td-lt">36 wks</span></td>
-                    <td>UL Witnessed FAT</td>
-                  </tr>
-                  <tr>
-                    <td className="ap-td-name">Jiangsu First Power</td>
-                    <td>Est. revenue $1B. Government contracts. 10 pcs/day capacity.</td>
-                    <td>ISO 9001:2015, UL-US</td>
-                    <td>$472,366 ($367,866)<br/><span className="ap-td-lt">12 wks after drawings</span></td>
-                    <td>SpaceX, Antpower projects. UL Witnessed FAT.</td>
-                  </tr>
-                  <tr>
-                    <td className="ap-td-name">CEEG</td>
-                    <td>Three large facilities in China. White label for ABB, Siemens, Schneider, Hitachi. 2M sq ft mfg.</td>
-                    <td>ISO 9001:2015, UL/c-UL XPLH</td>
-                    <td>$315,500<br/><span className="ap-td-lt">($195,500)</span><br/><span className="ap-td-lt">8 wks after drawings</span></td>
-                    <td>Limited US project history. No established US servicing.</td>
-                  </tr>
-                  <tr>
-                    <td className="ap-td-name">HC (IEN Hanchang)</td>
-                    <td>South Korea based manufacturer.</td>
-                    <td>NEMA, IEEE, KSA</td>
-                    <td>$1,197,500<br/><span className="ap-td-lt">28 wks</span></td>
-                    <td>&mdash;</td>
-                  </tr>
-                  <tr>
-                    <td className="ap-td-name">Delta Star</td>
-                    <td>Facilities in VA, CA, and Canada.</td>
-                    <td>ISO 9001:2015, UL-US</td>
-                    <td>$2,700,000<br/><span className="ap-td-lt">210 wks</span></td>
-                    <td>&mdash;</td>
-                  </tr>
-                  <tr>
-                    <td className="ap-td-name">Schneider</td>
-                    <td>US/Mexico based.</td>
-                    <td>&mdash;</td>
-                    <td>$2,000,000<br/><span className="ap-td-lt">156 wks</span></td>
-                    <td>&mdash;</td>
-                  </tr>
-                  <tr>
-                    <td className="ap-td-name">Texas Transformers</td>
-                    <td>Distributes for Telawne Transformers (India).</td>
-                    <td>ISO 9001:2015, UL/c-UL XPLH, NEMA, IEEE</td>
-                    <td>$642,500<br/><span className="ap-td-lt">36 wks fab</span></td>
-                    <td>&mdash;</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="ap-table-wrap">
+                <table className="ap-table ap-table-detail">
+                  <thead>
+                    <tr>
+                      <th>Company</th>
+                      <th>Country</th>
+                      <th>Price / Lead Time</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {otherCandidates
+                      .sort((a, b) => (a.totalPrice ?? Infinity) - (b.totalPrice ?? Infinity))
+                      .map((q) => (
+                        <tr key={q.name}>
+                          <td className="ap-td-name">{q.name}</td>
+                          <td>{q.country}</td>
+                          <td>{formatCurrency(q.totalPrice)}<br/><span className="ap-td-lt">{q.totalWeeks != null ? `${q.totalWeeks} wks` : "\u2014"}</span></td>
+                          <td>{q.description || "\u2014"}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* ========== SLIDE 9 — CLOSING ========== */}
+        {/* ========== SLIDE 9 -- CLOSING ========== */}
         <section className="ap-slide" ref={s9.ref}>
           <GridBackground />
           <div className="ap-glow ap-glow-1" />
