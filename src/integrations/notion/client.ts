@@ -9,7 +9,7 @@ let _client: Client | null = null;
 export function getNotionClient(): Client {
   if (_client) return _client;
 
-  const key = process.env.NOTION_API_KEY;
+  const key = process.env.NOTION_API_KEY?.trim();
   if (!key) {
     throw new Error("NOTION_API_KEY is not set");
   }
