@@ -3,6 +3,22 @@ import { getProjectBySlug } from "@/lib/notion";
 
 export async function POST(request: NextRequest) {
   try {
+    // Check that Notion env vars are available
+    if (!process.env.NOTION_API_KEY) {
+      console.error("NOTION_API_KEY is not set");
+      return NextResponse.json(
+        { error: "Server configuration error: missing Notion API key" },
+        { status: 500 }
+      );
+    }
+    if (!process.env.NOTION_PROJECTS_DB_ID) {
+      console.error("NOTION_PROJECTS_DB_ID is not set");
+      return NextResponse.json(
+        { error: "Server configuration error: missing Projects DB ID" },
+        { status: 500 }
+      );
+    }
+
     const { slug, password } = await request.json();
 
     if (!slug || !password) {
@@ -42,9 +58,10 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("Proposal auth error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Proposal auth error:", message, error);
     return NextResponse.json(
-      { error: "Authentication failed" },
+      { error: "Authentication failed", detail: message },
       { status: 500 }
     );
   }

@@ -1,12 +1,24 @@
-import { notion } from "@/integrations/notion/client";
+import { getNotionClient } from "@/integrations/notion/client";
 import type {
   ProposalProject,
   ProposalQuote,
   ProposalStats,
 } from "@/types/notion";
 
-const PROJECTS_DB_ID = process.env.NOTION_PROJECTS_DB_ID!;
-const QUOTES_DB_ID = process.env.NOTION_QUOTES_DB_ID!;
+/**
+ * Read DB IDs lazily at call time so Vercel runtime env vars are available.
+ */
+function getProjectsDbId(): string {
+  const id = process.env.NOTION_PROJECTS_DB_ID;
+  if (!id) throw new Error("NOTION_PROJECTS_DB_ID is not set");
+  return id;
+}
+
+function getQuotesDbId(): string {
+  const id = process.env.NOTION_QUOTES_DB_ID;
+  if (!id) throw new Error("NOTION_QUOTES_DB_ID is not set");
+  return id;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Helpers to extract typed values from Notion property objects        */
@@ -79,8 +91,9 @@ function getRelationIds(prop: any): string[] {
 export async function getProjectBySlug(
   slug: string
 ): Promise<ProposalProject | null> {
+  const notion = getNotionClient();
   const response = await notion.databases.query({
-    database_id: PROJECTS_DB_ID,
+    database_id: getProjectsDbId(),
     filter: {
       property: "Proposal Slug",
       rich_text: { equals: slug },
@@ -98,7 +111,7 @@ export async function getProjectBySlug(
   const customerRelation = getRelationIds(p["Customer Name"]);
   if (customerRelation.length > 0) {
     try {
-      const customerPage = await notion.pages.retrieve({
+      const customerPage = await getNotionClient().pages.retrieve({
         page_id: customerRelation[0],
       }) as any;
       // Get the title property (the Customer name)
@@ -134,13 +147,14 @@ export async function getProjectBySlug(
 export async function getQuotesForProject(
   projectId: string
 ): Promise<ProposalQuote[]> {
+  const notion = getNotionClient();
   const allPages: any[] = [];
   let cursor: string | undefined = undefined;
 
   // Paginate through all quotes in the database
   do {
     const response: any = await notion.databases.query({
-      database_id: QUOTES_DB_ID,
+      database_id: getQuotesDbId(),
       filter: {
         property: "Project",
         relation: { contains: projectId },
