@@ -7,7 +7,7 @@ import {
   Award, MapPin, Users, AlertTriangle, Package, Star,
 } from "lucide-react";
 
-const TOTAL_SECTIONS = 9;
+const TOTAL_SECTIONS = 10;
 
 /* ------------------------------------------------------------------ */
 /*  Hook: intersection observer for scroll-triggered animations        */
@@ -185,6 +185,99 @@ function QualityBadge({ score }: { score: number }) {
     </span>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/*  Harvey ball — Consumer Reports style fill indicator                */
+/* ------------------------------------------------------------------ */
+function HarveyBall({ level, size = 18 }: { level: 0 | 1 | 2 | 3 | 4; size?: number }) {
+  const r = size / 2 - 1;
+  const cx = size / 2;
+  const cy = size / 2;
+
+  if (level === 0) {
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+      </svg>
+    );
+  }
+
+  if (level === 4) {
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={cx} cy={cy} r={r} fill="#22c55e" stroke="rgba(34,197,94,0.4)" strokeWidth="0.5" />
+      </svg>
+    );
+  }
+
+  const angle = (level / 4) * 360;
+  const rad = (angle - 90) * Math.PI / 180;
+  const ex = cx + r * Math.cos(rad);
+  const ey = cy + r * Math.sin(rad);
+  const largeArc = angle > 180 ? 1 : 0;
+  const d = `M ${cx} ${cy} L ${cx} ${cy - r} A ${r} ${r} 0 ${largeArc} 1 ${ex} ${ey} Z`;
+  const color = level >= 3 ? "#22c55e" : level >= 2 ? "#2d8cff" : "#f59e0b";
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5" />
+      <path d={d} fill={color} />
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Quality matrix data — Consumer Reports style                       */
+/* ------------------------------------------------------------------ */
+const QUALITY_METRICS = [
+  "UL Certification",
+  "NRTL Listing",
+  "ISO Certifications",
+  "Units Deployed in USA",
+  "Manufacturing Scale",
+  "US-Based Support",
+  "Warranty & Service",
+  "Documentation & BOM Detail",
+] as const;
+
+const QUALITY_SUPPLIERS: {
+  name: string;
+  quality: number;
+  badge?: string;
+  ratings: (0 | 1 | 2 | 3 | 4)[];
+  certs: string[];
+  highlight: string;
+}[] = [
+  {
+    name: "Supplier G",
+    quality: 9.0,
+    badge: "BEST VALUE",
+    ratings: [4, 3, 3, 2, 2, 4, 3, 3],
+    certs: ["UL", "CSA", "KEMA", "IEC", "UL/c-UL XPLH"],
+    highlight: "Strongest US support footprint with teams on East Coast and Southwest",
+  },
+  {
+    name: "Supplier B",
+    quality: 8.5,
+    ratings: [2, 2, 2, 3, 4, 2, 3, 3],
+    certs: ["ISO 9001:2015", "UL-Canada"],
+    highlight: "Largest facility (2.7M sq ft) with 30 units/month capacity",
+  },
+  {
+    name: "Supplier R",
+    quality: 8.5,
+    ratings: [4, 4, 4, 4, 3, 3, 3, 4],
+    certs: ["UL/c-UL XPLH", "ISO 9001", "ISO 14001", "ISO 45001"],
+    highlight: "~800 units deployed to US; deepest BOM and long-lead analysis",
+  },
+  {
+    name: "Supplier E",
+    quality: 8.0,
+    ratings: [4, 3, 3, 2, 4, 2, 2, 2],
+    certs: ["UL-US", "UL-Canada", "ISO 9001:2015"],
+    highlight: "2.15M sq ft facility; delivered to aerospace and mining sectors",
+  },
+];
 
 /* ------------------------------------------------------------------ */
 /*  Scatter chart data — 40 of 69 OEMs responded                      */
@@ -374,6 +467,7 @@ export default function RedactedProposal() {
   const s3 = useInView(0.2);
   const s4 = useInView(0.2);
   const s5 = useInView(0.2);
+  const s5b = useInView(0.2);
   const s6 = useInView(0.2);
   const s7 = useInView(0.2);
   const s8 = useInView(0.2);
@@ -699,6 +793,77 @@ export default function RedactedProposal() {
           </div>
         </section>
 
+        {/* ========== SLIDE 5B — SUPPLIER QUALITY REPORT ========== */}
+        <section className="ap-slide ap-slide-table" ref={s5b.ref}>
+          <div className={`ap-content ${s5b.inView ? "in" : ""}`}>
+            <div className="ap-slide-label">SUPPLIER QUALITY REPORT</div>
+            <h2 className="ap-h2">Quality Comparison</h2>
+            <p className="ap-p">
+              Side-by-side assessment of our recommended suppliers across <strong>8 key dimensions</strong>.
+              Ratings based on verified certifications, deployment history, and FluxCo diligence.
+            </p>
+
+            <div className="ap-qm-wrap">
+              <table className="ap-table ap-qm-table">
+                <thead>
+                  <tr>
+                    <th className="ap-qm-metric-header">Metric</th>
+                    {QUALITY_SUPPLIERS.map((s) => (
+                      <th key={s.name} className="ap-qm-supplier-header">
+                        <div className="ap-qm-supplier-name">{s.name}</div>
+                        {s.badge && <div className="ap-qm-supplier-badge">{s.badge}</div>}
+                        <div style={{ marginTop: 6 }}><QualityBadge score={s.quality} /></div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {QUALITY_METRICS.map((metric, mi) => (
+                    <tr key={metric}>
+                      <td className="ap-qm-metric-cell">{metric}</td>
+                      {QUALITY_SUPPLIERS.map((s) => (
+                        <td key={s.name} className="ap-qm-ball-cell">
+                          <HarveyBall level={s.ratings[mi]} size={20} />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                  {/* Certifications row */}
+                  <tr className="ap-qm-certs-row">
+                    <td className="ap-qm-metric-cell">Key Certifications</td>
+                    {QUALITY_SUPPLIERS.map((s) => (
+                      <td key={s.name} className="ap-qm-certs-cell">
+                        <div className="ap-qm-certs">
+                          {s.certs.map((c) => <span key={c}>{c}</span>)}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Supplier highlights */}
+            <div className="ap-qm-highlights">
+              {QUALITY_SUPPLIERS.map((s) => (
+                <div key={s.name} className="ap-qm-hl-card">
+                  <div className="ap-qm-hl-name">{s.name}</div>
+                  <p>{s.highlight}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Harvey ball legend */}
+            <div className="ap-qm-legend">
+              <div className="ap-qm-legend-item"><HarveyBall level={0} size={14} /><span>Not Available</span></div>
+              <div className="ap-qm-legend-item"><HarveyBall level={1} size={14} /><span>Basic</span></div>
+              <div className="ap-qm-legend-item"><HarveyBall level={2} size={14} /><span>Standard</span></div>
+              <div className="ap-qm-legend-item"><HarveyBall level={3} size={14} /><span>Strong</span></div>
+              <div className="ap-qm-legend-item"><HarveyBall level={4} size={14} /><span>Excellent</span></div>
+            </div>
+          </div>
+        </section>
+
         {/* ========== SLIDE 6 — FULL QUOTE TABLE ========== */}
         <section className="ap-slide ap-slide-table" ref={s6.ref}>
           <div className={`ap-content ${s6.inView ? "in" : ""}`}>
@@ -997,7 +1162,10 @@ const apStyles = `
   .ap-content.in .ap-rec-grid,
   .ap-content.in .ap-detail-grid,
   .ap-content.in .ap-table-wrap,
-  .ap-content.in .ap-pending-grid {
+  .ap-content.in .ap-pending-grid,
+  .ap-content.in .ap-qm-wrap,
+  .ap-content.in .ap-qm-highlights,
+  .ap-content.in .ap-qm-legend {
     animation: ap-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .ap-content .ap-slide-label { opacity: 0; animation-delay: 0s; }
@@ -1010,6 +1178,9 @@ const apStyles = `
   .ap-content .ap-detail-grid { opacity: 0; animation-delay: 0.2s; }
   .ap-content .ap-table-wrap { opacity: 0; animation-delay: 0.15s; }
   .ap-content .ap-pending-grid { opacity: 0; animation-delay: 0.2s; }
+  .ap-content .ap-qm-wrap { opacity: 0; animation-delay: 0.15s; }
+  .ap-content .ap-qm-highlights { opacity: 0; animation-delay: 0.25s; }
+  .ap-content .ap-qm-legend { opacity: 0; animation-delay: 0.3s; }
 
   @keyframes ap-fade-up {
     from { opacity: 0; transform: translateY(30px); }
@@ -1362,6 +1533,82 @@ const apStyles = `
     color: var(--ap-text-dim); margin-top: 2px;
   }
 
+  /* ---- QUALITY MATRIX ---- */
+  .ap-qm-wrap {
+    margin-top: 16px;
+    border-radius: var(--ap-radius);
+    overflow: hidden;
+    border: 1px solid var(--ap-border);
+  }
+  .ap-qm-table th, .ap-qm-table td { text-align: center; }
+  .ap-qm-metric-header { text-align: left !important; min-width: 180px; }
+  .ap-qm-supplier-header {
+    text-align: center !important; padding: 16px 12px !important;
+    vertical-align: bottom;
+  }
+  .ap-qm-supplier-name {
+    font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 600;
+    color: #fff; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .ap-qm-supplier-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 8px;
+    color: var(--ap-blue); letter-spacing: 2px; font-weight: 700;
+    margin-top: 4px;
+  }
+  .ap-qm-metric-cell {
+    text-align: left !important;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,0.8); letter-spacing: 0.3px;
+  }
+  .ap-qm-ball-cell {
+    text-align: center !important; padding: 10px 16px !important;
+  }
+  .ap-qm-ball-cell svg { display: inline-block; }
+  .ap-qm-certs-row td {
+    border-top: 1px solid rgba(45,140,255,0.15) !important;
+    padding-top: 14px !important; padding-bottom: 14px !important;
+  }
+  .ap-qm-certs-cell { text-align: center !important; }
+  .ap-qm-certs {
+    display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;
+  }
+  .ap-qm-certs span {
+    font-family: 'JetBrains Mono', monospace; font-size: 8px;
+    color: var(--ap-blue); letter-spacing: 0.3px;
+    padding: 2px 6px; border-radius: 3px;
+    background: rgba(45,140,255,0.08); border: 1px solid rgba(45,140,255,0.15);
+    white-space: nowrap;
+  }
+
+  .ap-qm-highlights {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-top: 16px;
+  }
+  .ap-qm-hl-card {
+    padding: 12px 14px; border-radius: 8px;
+    background: var(--ap-surface); border: 1px solid var(--ap-border);
+  }
+  .ap-qm-hl-name {
+    font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 600;
+    color: #fff; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+  .ap-qm-hl-card p {
+    font-family: 'Inter', sans-serif; font-size: 11px;
+    color: var(--ap-text-dim); line-height: 1.5; margin: 0;
+  }
+
+  .ap-qm-legend {
+    display: flex; justify-content: center; gap: 20px; margin-top: 14px;
+    padding: 10px 0;
+  }
+  .ap-qm-legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Inter', sans-serif; font-size: 10px;
+    color: var(--ap-text-dim); text-transform: uppercase; font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .ap-qm-legend-item svg { flex-shrink: 0; }
+
   /* ---- CLOSING ---- */
   .ap-closing {
     display: flex; flex-direction: column; align-items: center;
@@ -1425,6 +1672,9 @@ const apStyles = `
     .ap-rec-grid { grid-template-columns: 1fr; }
     .ap-detail-grid { grid-template-columns: 1fr; }
     .ap-pending-grid { grid-template-columns: 1fr; }
+    .ap-qm-highlights { grid-template-columns: 1fr 1fr; }
+    .ap-qm-wrap { overflow-x: auto; }
+    .ap-qm-legend { flex-wrap: wrap; gap: 12px; }
     .ap-progress { display: none; }
     .ap-nav { display: none; }
     .ap-scroll-hint { display: none; }
