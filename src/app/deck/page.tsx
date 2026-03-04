@@ -664,7 +664,7 @@ export default function Deck2Page() {
                   photo: "/team/brian.jpg",
                   name: "Brian Tochman",
                   title: "CEO",
-                  bio: "Co-Founder of Trust Ventures. Operator and investor across deep tech, energy, and industrial sectors.",
+                  bio: "Multi-time founder. Venture investor in numerous energy tech companies. First half of career in manufacturing and engineering.",
                   linkedin: "https://www.linkedin.com/in/briantochman/",
                 },
                 {
