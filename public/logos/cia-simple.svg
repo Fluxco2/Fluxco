@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="#000">
-  <circle cx="100" cy="100" r="100"/>
-  <circle cx="100" cy="100" r="85" fill="none" stroke="#fff" stroke-width="3"/>
-  <text x="100" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="14" fill="#fff" letter-spacing="5">CENTRAL</text>
-  <text x="100" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="14" fill="#fff" letter-spacing="3">UNITED STATES</text>
-  <text x="100" y="115" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="44" fill="#fff" letter-spacing="4">CIA</text>
-</svg>
