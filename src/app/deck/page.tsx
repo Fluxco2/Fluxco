@@ -714,7 +714,7 @@ export default function Deck2Page() {
                   { src: "/logos/platinum-equity.png", alt: "Platinum Equity", withText: "", stacked: false },
                   { src: "/logos/trust-ventures.svg", alt: "Trust Ventures", withText: "TRUST VENTURES", stacked: true },
                   { src: "/logos/bell-clean.svg", alt: "Bell", withText: "", stacked: false },
-                  { src: "/logos/cia.png", alt: "CIA", withText: "CENTRAL\nINTELLIGENCE\nAGENCY", stacked: false },
+                  { src: "/logos/cia-clean.svg", alt: "CIA", withText: "", stacked: false },
                   { src: "/logos/houlihan-lokey.png", alt: "Houlihan Lokey", withText: "", stacked: false },
                   { src: "/logos/tesla.png", alt: "Tesla", withText: "", stacked: false },
                 ] as const).map((logo) => (
@@ -1473,7 +1473,7 @@ const deck2Styles = `
     gap: 36px; flex-wrap: wrap;
   }
   .d2-logo-item {
-    height: 32px; display: flex; align-items: center;
+    height: 36px; display: flex; align-items: center;
   }
   .d2-logo-item img {
     height: 100%; width: auto; object-fit: contain;
@@ -1481,29 +1481,16 @@ const deck2Styles = `
     transition: opacity 0.3s;
   }
   .d2-logo-item:hover img { opacity: 0.8; }
-  .d2-logo-text {
-    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700;
-    letter-spacing: 3px; color: #fff; opacity: 0.45;
-    transition: opacity 0.3s;
-  }
-  .d2-logo-item:hover .d2-logo-text { opacity: 0.8; }
-  .d2-logo-combo {
-    display: flex; align-items: center; gap: 8px; height: auto;
-  }
-  .d2-logo-combo img.d2-logo-color {
-    height: 36px; width: auto; object-fit: contain;
-    filter: brightness(0) invert(1) !important; opacity: 0.45; transition: opacity 0.3s;
-  }
-  .d2-logo-combo:hover img.d2-logo-color { opacity: 0.8; }
-  .d2-logo-text-sm {
-    font-size: 10px; letter-spacing: 2px; line-height: 1.3;
-    white-space: pre-line; text-align: left;
-  }
   .d2-logo-stacked {
-    flex-direction: column; gap: 4px; height: auto;
+    flex-direction: column; justify-content: center; gap: 2px; height: 36px;
   }
-  .d2-logo-stacked .d2-logo-text-sm {
-    text-align: center; font-size: 8px; letter-spacing: 2.5px;
+  .d2-logo-stacked img {
+    height: 22px;
+  }
+  .d2-logo-text-sm {
+    font-family: 'Inter', sans-serif; font-size: 7px; font-weight: 700;
+    letter-spacing: 2px; color: #fff; opacity: 0.45;
+    text-align: center; text-transform: uppercase;
   }
 
   /* ---- TIMELINE (slide 9) ---- */
