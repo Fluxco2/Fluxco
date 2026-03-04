@@ -710,23 +710,17 @@ export default function Deck2Page() {
             <div className="d2-logo-strip">
               <div className="d2-logo-strip-label">Previously at</div>
               <div className="d2-logo-row">
-                {([
-                  { src: "/logos/platinum-equity.png", alt: "Platinum Equity", withText: "", stacked: false },
-                  { src: "/logos/trust-ventures.svg", alt: "Trust Ventures", withText: "TRUST VENTURES", stacked: true },
-                  { src: "/logos/bell.png", alt: "Bell Helicopter", withText: "BELL", stacked: false },
-                  { src: "/logos/cia.png", alt: "CIA", withText: "CENTRAL\nINTELLIGENCE\nAGENCY", stacked: false },
-                  { src: "/logos/houlihan-lokey.png", alt: "Houlihan Lokey", withText: "", stacked: false },
-                  { src: "/logos/tesla.png", alt: "Tesla", withText: "", stacked: false },
-                ] as const).map((logo) => (
-                  <div key={logo.alt} className={`d2-logo-item ${logo.withText ? "d2-logo-combo" : ""} ${logo.stacked ? "d2-logo-stacked" : ""}`}>
-                    {logo.withText ? (
-                      <>
-                        <img src={logo.src} alt={logo.alt} className="d2-logo-color" />
-                        <span className="d2-logo-text d2-logo-text-sm">{logo.withText}</span>
-                      </>
-                    ) : (
-                      <img src={logo.src} alt={logo.alt} />
-                    )}
+                {[
+                  { src: "/logos/platinum-equity.png", alt: "Platinum Equity" },
+                  { src: "/logos/trust-ventures.svg", alt: "Trust Ventures", label: "TRUST VENTURES" },
+                  { src: "/logos/bell-simple.svg", alt: "Bell" },
+                  { src: "/logos/cia-simple.svg", alt: "CIA" },
+                  { src: "/logos/houlihan-lokey.png", alt: "Houlihan Lokey" },
+                  { src: "/logos/tesla.png", alt: "Tesla" },
+                ].map((logo) => (
+                  <div key={logo.alt} className={`d2-logo-item ${"label" in logo ? "d2-logo-stacked" : ""}`}>
+                    <img src={logo.src} alt={logo.alt} />
+                    {"label" in logo && <span className="d2-logo-sublabel">{logo.label}</span>}
                   </div>
                 ))}
               </div>
@@ -1481,29 +1475,13 @@ const deck2Styles = `
     transition: opacity 0.3s;
   }
   .d2-logo-item:hover img { opacity: 0.8; }
-  .d2-logo-text {
-    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700;
-    letter-spacing: 3px; color: #fff; opacity: 0.45;
-    transition: opacity 0.3s;
-  }
-  .d2-logo-item:hover .d2-logo-text { opacity: 0.8; }
-  .d2-logo-combo {
-    display: flex; align-items: center; gap: 8px; height: auto;
-  }
-  .d2-logo-combo img.d2-logo-color {
-    height: 36px; width: auto; object-fit: contain;
-    filter: brightness(0) invert(1) !important; opacity: 0.45; transition: opacity 0.3s;
-  }
-  .d2-logo-combo:hover img.d2-logo-color { opacity: 0.8; }
-  .d2-logo-text-sm {
-    font-size: 10px; letter-spacing: 2px; line-height: 1.3;
-    white-space: pre-line; text-align: left;
-  }
   .d2-logo-stacked {
     flex-direction: column; gap: 4px; height: auto;
   }
-  .d2-logo-stacked .d2-logo-text-sm {
-    text-align: center; font-size: 8px; letter-spacing: 2.5px;
+  .d2-logo-sublabel {
+    font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 700;
+    letter-spacing: 2.5px; color: #fff; opacity: 0.45;
+    text-align: center; text-transform: uppercase;
   }
 
   /* ---- TIMELINE (slide 9) ---- */
