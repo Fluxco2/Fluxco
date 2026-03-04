@@ -337,8 +337,8 @@ export function TransformerDesigner() {
     y = drawTable([
       ['HV Turns', `${design.hvWinding.turns}`],
       ['LV Turns', `${design.lvWinding.turns}`],
-      ['HV Conductor', `${design.hvWinding.conductorMaterial}`],
-      ['LV Conductor', `${design.lvWinding.conductorMaterial}`],
+      ['HV Conductor', `${design.hvWinding.conductorType}`],
+      ['LV Conductor', `${design.lvWinding.conductorType}`],
       ['Target Impedance', `${requirements.targetImpedance.toFixed(2)}%`],
       ['Achieved Impedance', `${design.impedance.percentZ.toFixed(2)}%`],
     ], y);
@@ -356,7 +356,7 @@ export function TransformerDesigner() {
     y = drawSectionHeader('Thermal Performance', y);
     y = drawTable([
       ['Top Oil Rise', `${design.thermal?.topOilRise?.toFixed(1) ?? 'N/A'} °C`],
-      ['Average Winding Rise', `${design.thermal?.avgWindingRise?.toFixed(1) ?? 'N/A'} °C`],
+      ['Average Winding Rise', `${design.thermal?.averageWindingRise?.toFixed(1) ?? 'N/A'} °C`],
       ['Hot Spot Rise', `${design.thermal?.hotSpotRise?.toFixed(1) ?? 'N/A'} °C`],
       ['Oil Volume', `${design.thermal?.oilVolume?.toFixed(0) ?? 'N/A'} L`],
     ], y);

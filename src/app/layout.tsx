@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { OrganizationSchema, WebSiteSchema } from "@/components/SchemaOrg";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://fluxco.com"),
@@ -76,7 +70,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+      <body className="antialiased">
         <OrganizationSchema />
         <WebSiteSchema />
         <Providers>{children}</Providers>
