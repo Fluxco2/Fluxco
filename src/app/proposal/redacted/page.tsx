@@ -298,12 +298,12 @@ function ScatterChart({ inView }: { inView: boolean }) {
             transformOrigin: `${cx}px ${cy}px`,
             transition: `all 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.02}s`,
           }}>
-            {isRec && <circle cx={cx} cy={cy} r={dotR + 6} fill="rgba(45,140,255,0.1)" stroke="rgba(45,140,255,0.3)" strokeWidth="0.5" />}
+            {isRec && <circle cx={cx} cy={cy} r={dotR + 6} fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.3)" strokeWidth="0.5" />}
             <circle
               cx={cx} cy={cy}
               r={dotR}
-              fill={isClient ? "#e63946" : isRec ? "#2d8cff" : "rgba(45,140,255,0.6)"}
-              stroke={isRec ? "#2d8cff" : "none"}
+              fill={isClient ? "#e63946" : isRec ? "#22c55e" : "rgba(45,140,255,0.6)"}
+              stroke={isRec ? "#22c55e" : "none"}
               strokeWidth={isRec ? "1.5" : "0"}
             />
             {/* Only show labels for recommended or notable entries */}
@@ -312,7 +312,7 @@ function ScatterChart({ inView }: { inView: boolean }) {
                 x={cx}
                 y={cy - dotR - 4}
                 textAnchor="middle"
-                fill={isClient ? "#e63946" : isRec ? "#2d8cff" : "rgba(255,255,255,0.45)"}
+                fill={isClient ? "#e63946" : isRec ? "#22c55e" : "rgba(255,255,255,0.45)"}
                 fontSize="7"
                 fontFamily="Inter"
                 fontWeight={isRec ? "600" : "400"}
@@ -557,7 +557,7 @@ export default function RedactedProposal() {
                   <div className="ap-legend-swatch" style={{ background: "#e63946" }} /> Client Sourced
                 </div>
                 <div className="ap-legend">
-                  <div className="ap-legend-swatch" style={{ background: "#2d8cff", border: "2px solid #2d8cff", boxShadow: "0 0 0 3px rgba(45,140,255,0.2)" }} /> Recommended
+                  <div className="ap-legend-swatch" style={{ background: "#22c55e", border: "2px solid #22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,0.2)" }} /> Recommended
                 </div>
                 <div className="ap-legend">
                   <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, color: "rgba(255,255,255,0.4)" }}>

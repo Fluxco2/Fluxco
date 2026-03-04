@@ -267,19 +267,19 @@ function ScatterChart({ inView, data, maxPrice, maxWeeks, deliveryWeek, delivery
             transformOrigin: `${cx}px ${cy}px`,
             transition: `all 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.04}s`,
           }}>
-            {isRec && <circle cx={cx} cy={cy} r="12" fill={isCustSourced ? "rgba(230,57,70,0.1)" : "rgba(45,140,255,0.1)"} stroke={isCustSourced ? "rgba(230,57,70,0.3)" : "rgba(45,140,255,0.3)"} strokeWidth="0.5" />}
+            {isRec && <circle cx={cx} cy={cy} r="12" fill={isCustSourced ? "rgba(230,57,70,0.1)" : "rgba(34,197,94,0.1)"} stroke={isCustSourced ? "rgba(230,57,70,0.3)" : "rgba(34,197,94,0.3)"} strokeWidth="0.5" />}
             <circle
               cx={cx} cy={cy}
               r={isRec ? "6" : "5"}
-              fill={isCustSourced ? "#e63946" : isRec ? "#2d8cff" : "rgba(45,140,255,0.6)"}
-              stroke={isCustSourced ? "#e63946" : isRec ? "#2d8cff" : "none"}
+              fill={isCustSourced ? "#e63946" : isRec ? "#22c55e" : "rgba(45,140,255,0.6)"}
+              stroke={isCustSourced ? "#e63946" : isRec ? "#22c55e" : "none"}
               strokeWidth={isRec || isCustSourced ? "1.5" : "0"}
             />
             <text
               x={cx}
               y={cy - 10}
               textAnchor="middle"
-              fill={isCustSourced ? "#e63946" : isRec ? "#2d8cff" : "rgba(255,255,255,0.45)"}
+              fill={isCustSourced ? "#e63946" : isRec ? "#22c55e" : "rgba(255,255,255,0.45)"}
               fontSize="7.5"
               fontFamily="Inter"
               fontWeight={isRec || isCustSourced ? "600" : "400"}
@@ -590,8 +590,8 @@ export function ProposalClient({ project, quotes, stats }: ProposalClientProps) 
                 <div className="ap-legend">
                   <div className="ap-legend-swatch" style={{ background: "#e63946" }} /> {project.customerName} Bid
                 </div>
-                <div className="ap-legend">
-                  <div className="ap-legend-swatch" style={{ background: "#2d8cff", border: "2px solid #2d8cff", boxShadow: "0 0 0 3px rgba(45,140,255,0.2)" }} /> Recommended
+                <div className="ap-legend" style={{ color: "#22c55e" }}>
+                  <div className="ap-legend-swatch" style={{ background: "#22c55e", border: "2px solid #22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,0.2)" }} /> Recommended
                 </div>
               </div>
             </div>
