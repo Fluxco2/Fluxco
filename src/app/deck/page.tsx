@@ -589,6 +589,24 @@ export default function Deck2Page() {
                 </a>
               ))}
             </div>
+
+            <div className="d2-logo-strip">
+              <div className="d2-logo-strip-label">Previously at</div>
+              <div className="d2-logo-row">
+                {[
+                  { src: "/logos/platinum-equity.png", alt: "Platinum Equity" },
+                  { src: "/logos/trust-ventures.svg", alt: "Trust Ventures" },
+                  { src: "/logos/bell.png", alt: "Bell Helicopter" },
+                  { src: "/logos/cia.png", alt: "CIA" },
+                  { src: "/logos/houlihan-lokey.png", alt: "Houlihan Lokey" },
+                  { src: "/logos/tesla.png", alt: "Tesla" },
+                ].map((logo) => (
+                  <div key={logo.alt} className="d2-logo-item">
+                    <img src={logo.src} alt={logo.alt} />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -799,6 +817,7 @@ const deck2Styles = `
   .d2-content.in .d2-compare,
   .d2-content.in .d2-moats,
   .d2-content.in .d2-team-grid,
+  .d2-content.in .d2-logo-strip,
   .d2-content.in .d2-timeline,
   .d2-content.in > .d2-p {
     animation: d2-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -814,6 +833,7 @@ const deck2Styles = `
   .d2-content .d2-compare { opacity: 0; animation-delay: 0.2s; }
   .d2-content .d2-moats { opacity: 0; animation-delay: 0.15s; }
   .d2-content .d2-team-grid { opacity: 0; animation-delay: 0.2s; }
+  .d2-content .d2-logo-strip { opacity: 0; animation-delay: 0.8s; }
   .d2-content .d2-timeline { opacity: 0; animation-delay: 0.2s; }
 
   @keyframes d2-fade-up {
@@ -1222,6 +1242,29 @@ const deck2Styles = `
     animation: d2-float 10s ease-in-out infinite;
   }
 
+  /* ---- LOGO STRIP (team slide) ---- */
+  .d2-logo-strip {
+    margin-top: 40px; text-align: center; width: 100%;
+  }
+  .d2-logo-strip-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--d2-text); text-transform: uppercase; letter-spacing: 2px;
+    margin-bottom: 20px; opacity: 0.6;
+  }
+  .d2-logo-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 36px; flex-wrap: wrap;
+  }
+  .d2-logo-item {
+    height: 32px; display: flex; align-items: center;
+  }
+  .d2-logo-item img {
+    height: 100%; width: auto; object-fit: contain;
+    filter: brightness(0) invert(1); opacity: 0.45;
+    transition: opacity 0.3s;
+  }
+  .d2-logo-item:hover img { opacity: 0.8; }
+
   /* ---- TIMELINE (slide 10) ---- */
   .d2-timeline {
     display: flex; gap: 0; position: relative;
@@ -1321,6 +1364,8 @@ const deck2Styles = `
     .d2-tech-grid { grid-template-columns: 1fr 1fr; }
     .d2-moats { grid-template-columns: 1fr; }
     .d2-team-grid { grid-template-columns: 1fr 1fr; }
+    .d2-logo-row { gap: 24px; }
+    .d2-logo-item { height: 24px; }
     .d2-compare { flex-direction: column; }
     .d2-compare-arrow { transform: rotate(90deg); justify-content: center; }
     .d2-flow { flex-direction: column; }
