@@ -37,6 +37,19 @@ export interface ProposalStats {
   declined: number;
 }
 
+export interface CustomerProject {
+  id: string;
+  slug: string;
+  customerName: string;
+  productDescription: string;
+  mvaSize: number | null;
+  deliveryDate: string | null;
+  deliveryRequirement: string | null;
+  location: string;
+  zipCode: string;
+  status: string;
+}
+
 export interface ProposalData {
   project: ProposalProject;
   quotes: ProposalQuote[];
