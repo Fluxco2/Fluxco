@@ -100,6 +100,11 @@ interface CustomerProject {
   status: string;
 }
 
+interface NotionCustomer {
+  id: string;
+  name: string;
+}
+
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
@@ -125,6 +130,10 @@ export default function AdminPage() {
   const [linkingCustomer, setLinkingCustomer] = useState<string | null>(null);
   const [linkNotionId, setLinkNotionId] = useState("");
   const [savingLink, setSavingLink] = useState(false);
+
+  // Notion customers list (for linking dropdown)
+  const [notionCustomers, setNotionCustomers] = useState<NotionCustomer[]>([]);
+  const [loadingNotionCustomers, setLoadingNotionCustomers] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,6 +253,26 @@ export default function AdminPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const fetchNotionCustomers = async () => {
+    if (notionCustomers.length > 0) return; // Already fetched
+    setLoadingNotionCustomers(true);
+    try {
+      const res = await fetch("/api/admin/notion-customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: savedPassword }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotionCustomers(data.customers || []);
+      }
+    } catch (err) {
+      console.error("Error fetching Notion customers:", err);
+    } finally {
+      setLoadingNotionCustomers(false);
+    }
+  };
+
   const handleLinkCustomer = async (customerId: string) => {
     setSavingLink(true);
     try {
@@ -283,21 +312,6 @@ export default function AdminPage() {
       setSavingLink(false);
     }
   };
-
-  // Get unique Notion Customer IDs already in use (for quick-link suggestions)
-  const linkedNotionIds = Array.from(
-    new Set(
-      customers
-        .filter((c) => c.notion_customer_id)
-        .map((c) => ({
-          id: c.notion_customer_id!,
-          name: c.company_name,
-        }))
-    )
-  ).reduce((acc, item) => {
-    if (!acc.find((a) => a.id === item.id)) acc.push(item);
-    return acc;
-  }, [] as { id: string; name: string }[]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -582,7 +596,7 @@ export default function AdminPage() {
                                 <span className="font-semibold">{customer.company_name}</span>
                                 {customer.notion_customer_id ? (
                                   <Badge variant="default" className="bg-green-500/10 text-green-500 border-green-500/30 text-xs">
-                                    Linked
+                                    {notionCustomers.find((nc) => nc.id === customer.notion_customer_id)?.name || "Linked"}
                                   </Badge>
                                 ) : (
                                   <Badge variant="outline" className="text-xs">
@@ -612,6 +626,7 @@ export default function AdminPage() {
                                 } else {
                                   setLinkingCustomer(customer.id);
                                   setLinkNotionId(customer.notion_customer_id || "");
+                                  fetchNotionCustomers();
                                 }
                               }}
                               className={`text-xs ${linkingCustomer === customer.id ? "border-primary text-primary" : ""}`}
@@ -667,17 +682,29 @@ export default function AdminPage() {
                               Link to Notion Customer
                             </div>
                             <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                value={linkNotionId}
-                                onChange={(e) => setLinkNotionId(e.target.value)}
-                                placeholder="Notion Customer Page ID"
-                                className="flex-1 px-3 py-1.5 text-sm border border-border rounded-md bg-background"
-                              />
+                              {loadingNotionCustomers ? (
+                                <div className="flex-1 flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  Loading customers...
+                                </div>
+                              ) : (
+                                <select
+                                  value={linkNotionId}
+                                  onChange={(e) => setLinkNotionId(e.target.value)}
+                                  className="flex-1 px-3 py-1.5 text-sm border border-border rounded-md bg-background"
+                                >
+                                  <option value="">— Select a customer —</option>
+                                  {notionCustomers.map((nc) => (
+                                    <option key={nc.id} value={nc.id}>
+                                      {nc.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              )}
                               <Button
                                 size="sm"
                                 onClick={() => handleLinkCustomer(customer.id)}
-                                disabled={savingLink}
+                                disabled={savingLink || loadingNotionCustomers}
                                 className="text-xs"
                               >
                                 {savingLink ? (
@@ -711,27 +738,11 @@ export default function AdminPage() {
                                 </Button>
                               )}
                             </div>
-                            {/* Quick-link suggestions from existing linked customers */}
-                            {linkedNotionIds.length > 0 && (
-                              <div className="mt-2">
-                                <div className="text-xs text-muted-foreground mb-1">
-                                  Quick link to existing customer:
-                                </div>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {linkedNotionIds.map((linked) => (
-                                    <button
-                                      key={linked.id}
-                                      onClick={() => setLinkNotionId(linked.id)}
-                                      className={`text-xs px-2 py-1 rounded-md border transition-colors ${
-                                        linkNotionId === linked.id
-                                          ? "border-primary bg-primary/10 text-primary"
-                                          : "border-border bg-background text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                                      }`}
-                                    >
-                                      {linked.name}
-                                    </button>
-                                  ))}
-                                </div>
+                            {customer.notion_customer_id && (
+                              <div className="mt-2 text-xs text-muted-foreground">
+                                Currently linked to: <span className="font-medium text-foreground">
+                                  {notionCustomers.find((nc) => nc.id === customer.notion_customer_id)?.name || customer.notion_customer_id}
+                                </span>
                               </div>
                             )}
                           </div>
