@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Fetch all data using service role (bypasses RLS)
-    const [bidsResult, listingsResult, suppliersResult] = await Promise.all([
+    const [bidsResult, listingsResult, suppliersResult, customersResult] = await Promise.all([
       supabase
         .from("supplier_bids")
         .select(`
@@ -43,12 +43,18 @@ export async function POST(request: NextRequest) {
         .from("suppliers")
         .select("*")
         .order("created_at", { ascending: false }),
+
+      supabase
+        .from("customers")
+        .select("*")
+        .order("created_at", { ascending: false }),
     ]);
 
     return NextResponse.json({
       bids: bidsResult.data || [],
       listings: listingsResult.data || [],
       suppliers: suppliersResult.data || [],
+      customers: customersResult.data || [],
     });
   } catch (error: any) {
     console.error("Admin API error:", error);

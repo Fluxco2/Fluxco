@@ -227,6 +227,22 @@ export interface JobApplication {
   updated_at: string;
 }
 
+export interface Customer {
+  id: string;
+  user_id: string;
+  email: string;
+  company_name: string;
+  contact_name: string;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  country: string;
+  notion_customer_id: string | null;
+  created_at: string;
+  last_login: string | null;
+}
+
 export interface InventoryItem {
   id: string;
   sku: string | null;

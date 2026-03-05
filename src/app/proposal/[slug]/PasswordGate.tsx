@@ -1,12 +1,50 @@
 "use client";
 
-import { useState } from "react";
-import { Zap, Lock, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Zap, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export function PasswordGate({ slug }: { slug: string }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingCustomer, setCheckingCustomer] = useState(true);
+
+  // On mount, check if the user is a logged-in customer linked to this project
+  useEffect(() => {
+    async function tryCustomerAuth() {
+      try {
+        if (!supabase?.auth) {
+          setCheckingCustomer(false);
+          return;
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          setCheckingCustomer(false);
+          return;
+        }
+
+        // Try to auto-authenticate as a linked customer
+        const res = await fetch("/api/proposal/customer-auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug, token: session.access_token }),
+        });
+
+        if (res.ok) {
+          // Cookie has been set — reload to access the proposal
+          window.location.reload();
+          return;
+        }
+      } catch {
+        // Silently fail — fall through to password form
+      }
+      setCheckingCustomer(false);
+    }
+
+    tryCustomerAuth();
+  }, [slug]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,6 +70,29 @@ export function PasswordGate({ slug }: { slug: string }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Show a loading state while checking customer auth
+  if (checkingCustomer) {
+    return (
+      <>
+        <style>{styles}</style>
+        <div className="pg-container">
+          <div className="pg-card" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+            <div className="pg-logo">
+              <div className="pg-logo-icon">
+                <Zap className="w-6 h-6" />
+              </div>
+              <span>FLUXCO</span>
+            </div>
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--pg-text-dim)" }} />
+            <p style={{ color: "var(--pg-text-dim)", fontSize: "14px", margin: 0 }}>
+              Verifying access...
+            </p>
+          </div>
+        </div>
+      </>
+    );
   }
 
   return (
