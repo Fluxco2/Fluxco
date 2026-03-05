@@ -27,6 +27,7 @@ import { TopViewDrawing } from '@/components/transformer/drawings/TopViewDrawing
 import { designTransformer } from '@/engine/TransformerDesignEngine';
 import type { DesignRequirements, TransformerDesign } from '@/engine/types/transformer.types';
 import { STEEL_GRADES, CONDUCTOR_TYPES, COOLING_CLASSES, VECTOR_GROUPS, calculatePowerRatings } from '@/engine/constants/materials';
+import { MANUFACTURING_REGIONS } from '@/engine/constants/pricing';
 
 const defaultRequirements: DesignRequirements = {
   ratedPower: 1500,
@@ -64,6 +65,16 @@ export function SpecBuilder() {
     contactPhone: '',
     zipcode: '',
   });
+
+  const getRegionMultiplier = () => {
+    let regions = requirements.manufacturingRegions || ['usa'];
+    if (requirements.requireFEOC) {
+      regions = regions.filter(r => MANUFACTURING_REGIONS[r]?.feocCompliant !== false);
+    }
+    if (regions.length === 0) regions = ['usa'];
+    const multipliers = regions.map(r => MANUFACTURING_REGIONS[r]?.multiplier ?? 1.0);
+    return multipliers.reduce((sum, m) => sum + m, 0) / multipliers.length;
+  };
 
   const handleCalculate = () => {
     setIsCalculating(true);
@@ -368,6 +379,9 @@ export function SpecBuilder() {
     y = 22;
 
     const costBreakdown = calculateCostEstimate(design, requirements, { oilType: 'mineral' });
+    const regionMultiplier = getRegionMultiplier();
+    const adjustedTotalCost = costBreakdown.totalCost * regionMultiplier;
+    const adjustedCostPerKVA = costBreakdown.costPerKVA * regionMultiplier;
     const lifecycleCost = calculateLifecycleCost(design, requirements, {
       electricityRate: 0.10,
       yearsOfOperation: 25,
@@ -383,10 +397,10 @@ export function SpecBuilder() {
     pdf.text('Estimated Total Cost', margin + 4, y + 6);
     pdf.setFontSize(15);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(formatCurrency(costBreakdown.totalCost), margin + 4, y + 13);
+    pdf.text(formatCurrency(adjustedTotalCost), margin + 4, y + 13);
     pdf.setFontSize(9);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`${formatCurrency(costBreakdown.costPerKVA)} / kVA`, pageWidth - margin - 4, y + 10, { align: 'right' });
+    pdf.text(`${formatCurrency(adjustedCostPerKVA)} / kVA`, pageWidth - margin - 4, y + 10, { align: 'right' });
     pdf.setTextColor(30, 30, 30);
     y += 22;
 
@@ -420,7 +434,7 @@ export function SpecBuilder() {
       ['Warranty Reserve', formatCurrency(costBreakdown.warrantyReserve)],
       ['Profit Margin (12%)', formatCurrency(costBreakdown.profitMargin)],
     ], y, margin + 90);
-    y = drawSubtotalRow('Grand Total', formatCurrency(costBreakdown.totalCost), y);
+    y = drawSubtotalRow('Grand Total', formatCurrency(adjustedTotalCost), y);
 
     y += 4;
     y = drawSectionHeader('Lifecycle Cost Analysis  (25 yr · $0.10/kWh · 50% load factor)', y);
@@ -554,6 +568,7 @@ export function SpecBuilder() {
     setMarketplaceSubmitting(true);
 
     const costBreakdown = calculateCostEstimate(design, requirements, { oilType: 'mineral' });
+    const regionMult = getRegionMultiplier();
 
     // Round numeric values to fit database column constraints
     const round2 = (n: number | null | undefined) => n != null ? Math.round(n * 100) / 100 : null;
@@ -570,7 +585,7 @@ export function SpecBuilder() {
       cooling_class: requirements.coolingClass.name,
       conductor_type: requirements.conductorType.name,
       steel_grade: requirements.steelGrade.name,
-      estimated_cost: round2(costBreakdown.totalCost),
+      estimated_cost: round2(costBreakdown.totalCost * regionMult),
       no_load_loss_w: round2(design.losses.noLoadLoss),
       load_loss_w: round2(design.losses.loadLoss),
       efficiency_percent: round2(efficiency),
@@ -622,8 +637,8 @@ export function SpecBuilder() {
           coreWeightKg: round2(design.core.coreWeight),
         },
         cost: {
-          totalCost: round2(costBreakdown.totalCost),
-          costPerKVA: round2(costBreakdown.costPerKVA),
+          totalCost: round2(costBreakdown.totalCost * regionMult),
+          costPerKVA: round2(costBreakdown.costPerKVA * regionMult),
         },
         powerRating: calculatePowerRatings(requirements.ratedPower, requirements.coolingClass.id).display,
       },
