@@ -664,7 +664,7 @@ export default function Deck2Page() {
                   photo: "/team/brian.jpg",
                   name: "Brian Tochman",
                   title: "CEO",
-                  bio: "Multi-time founder. Venture investor in numerous energy tech companies. First half of career in manufacturing and engineering.",
+                  bio: "Multi-time founder. Venture investor in numerous energy tech companies. 10+ years in manufacturing and supply chain leadership.",
                   linkedin: "https://www.linkedin.com/in/briantochman/",
                 },
                 {
