@@ -147,7 +147,11 @@ export function MarketplaceList() {
                 };
 
                 return (
-                  <TableRow key={listing.id} className="border-border hover:bg-secondary/50">
+                  <TableRow
+                    key={listing.id}
+                    className="border-border hover:bg-secondary/50 cursor-pointer"
+                    onClick={() => handleViewSpecs(listing)}
+                  >
                     <TableCell className="font-mono text-sm text-primary">
                       {listing.serial_number || "-"}
                     </TableCell>
@@ -228,7 +232,7 @@ export function MarketplaceList() {
                           size="sm"
                           variant="ghost"
                           className="text-muted-foreground hover:text-primary"
-                          onClick={() => handleViewSpecs(listing)}
+                          onClick={(e) => { e.stopPropagation(); handleViewSpecs(listing); }}
                         >
                           <FileText className="w-3 h-3 mr-1" />
                           Specs
@@ -243,7 +247,7 @@ export function MarketplaceList() {
                             size="sm"
                             variant="outline"
                             className="border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground"
-                            onClick={() => handleBidClick(listing)}
+                            onClick={(e) => { e.stopPropagation(); handleBidClick(listing); }}
                           >
                             Place Bid
                           </Button>
