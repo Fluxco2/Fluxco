@@ -4,6 +4,7 @@ import {
   getProjectBySlug,
   getQuotesForProject,
   computeStats,
+  getOEMQualityData,
 } from "@/lib/notion";
 import { ProposalClient } from "./ProposalClient";
 import { PasswordGate } from "./PasswordGate";
@@ -36,5 +37,10 @@ export default async function ProposalPage({ params }: Props) {
   const quotes = await getQuotesForProject(project.id);
   const stats = computeStats(quotes);
 
-  return <ProposalClient project={project} quotes={quotes} stats={stats} />;
+  const oemIds = quotes
+    .filter(q => q.recommended && q.oemId)
+    .map(q => q.oemId as string);
+  const oemQualityData = await getOEMQualityData(oemIds);
+
+  return <ProposalClient project={project} quotes={quotes} stats={stats} oemQualityData={oemQualityData} />;
 }

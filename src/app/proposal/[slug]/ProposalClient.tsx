@@ -7,6 +7,7 @@ import {
   Award, MapPin, Users, AlertTriangle, Package,
 } from "lucide-react";
 import type { ProposalProject, ProposalQuote, ProposalStats } from "@/types/notion";
+import type { OEMQualityData } from "@/lib/notion";
 
 /* ------------------------------------------------------------------ */
 /*  Formatting helpers                                                  */
@@ -301,9 +302,10 @@ interface ProposalClientProps {
   project: ProposalProject;
   quotes: ProposalQuote[];
   stats: ProposalStats;
+  oemQualityData: Record<string, OEMQualityData>;
 }
 
-export function ProposalClient({ project, quotes, stats }: ProposalClientProps) {
+export function ProposalClient({ project, quotes, stats, oemQualityData }: ProposalClientProps) {
   /* ---- Derived data ---- */
 
   // Recommended quotes
@@ -375,6 +377,7 @@ export function ProposalClient({ project, quotes, stats }: ProposalClientProps) 
   if (hasRecommendations) {
     sections.push("recommendations");     // 3 (conditional)
     sections.push("recommendation-details"); // 4 (conditional)
+    sections.push("oem-quality");         // 5 (conditional)
   }
   sections.push("quote-table");           // next
   if (hasPending) sections.push("pending");
@@ -430,6 +433,7 @@ export function ProposalClient({ project, quotes, stats }: ProposalClientProps) 
   const s7 = useInView(0.2);
   const s8 = useInView(0.2);
   const s9 = useInView(0.2);
+  const s10 = useInView(0.2);
 
   /* Animated counters */
   const cContacted = useCountUp(stats.totalContacted, 1800, s2.inView);
@@ -654,6 +658,57 @@ export function ProposalClient({ project, quotes, stats }: ProposalClientProps) 
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ========== SLIDE 5b -- OEM QUALITY ASSESSMENT ========== */}
+        {hasRecommendations && (
+          <section className="ap-slide ap-slide-table" ref={s10.ref}>
+            <div className={`ap-content ${s10.inView ? "in" : ""}`}>
+              <div className="ap-slide-label">DUE DILIGENCE</div>
+              <h2 className="ap-h2">OEM Quality Assessment</h2>
+              <p className="ap-p">
+                Independent evaluation of recommended manufacturers across key quality,
+                compliance, and performance indicators.
+              </p>
+              <div className="ap-table-wrap">
+                <table className="ap-table ap-table-quality">
+                  <thead>
+                    <tr>
+                      <th>OEM</th>
+                      <th>Year Founded</th>
+                      <th>Capacity</th>
+                      <th>Past Performance</th>
+                      <th>Quality Certifications</th>
+                      <th>Compliance / Ethics</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recommendedQuotes.slice(0, 3).map((q) => {
+                      const qa = (q.oemId && oemQualityData[q.oemId]) ? oemQualityData[q.oemId] : {};
+                      return (
+                        <tr key={q.name} className="ap-row-rec">
+                          <td className="ap-td-name">{q.name}</td>
+                          <td>{qa.yearFounded ?? "—"}</td>
+                          <td>{qa.capacity ?? "—"}</td>
+                          <td>{qa.pastPerformance ?? "—"}</td>
+                          <td>
+                            {qa.certifications?.length
+                              ? <div className="ap-cert-list">
+                                  {qa.certifications.map((c) => (
+                                    <span key={c} className="ap-cert-tag">{c}</span>
+                                  ))}
+                                </div>
+                              : "—"}
+                          </td>
+                          <td>{qa.compliance ?? "—"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           </section>
@@ -1325,6 +1380,17 @@ const apStyles = `
     font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ap-text-dim);
   }
   .ap-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--ap-text-dim); }
+
+  /* ---- OEM QUALITY TABLE ---- */
+  .ap-table-quality td { font-size: 12px; vertical-align: middle; }
+  .ap-cert-list { display: flex; flex-wrap: wrap; gap: 5px; }
+  .ap-cert-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: var(--ap-blue); letter-spacing: 0.5px;
+    padding: 3px 8px; border-radius: 4px;
+    background: rgba(45,140,255,0.08); border: 1px solid rgba(45,140,255,0.15);
+    white-space: nowrap;
+  }
 
   /* ---- MOBILE ---- */
   @media (max-width: 768px) {
