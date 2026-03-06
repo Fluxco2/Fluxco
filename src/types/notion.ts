@@ -27,6 +27,7 @@ export interface ProposalQuote {
   recommended: boolean;
   customerSourced: boolean;
   description: string;
+  oemId: string | null;
 }
 
 export interface ProposalStats {

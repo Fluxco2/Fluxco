@@ -87,6 +87,26 @@ function getRelationIds(prop: any): string[] {
   return (prop.relation || []).map((r: any) => r.id);
 }
 
+function getRollupMultiSelect(prop: any): string[] {
+  if (!prop || prop.type !== "rollup") return [];
+  const arr = prop.rollup?.array || [];
+  const results: string[] = [];
+  for (const item of arr) {
+    if (item.type === "multi_select") {
+      results.push(...(item.multi_select || []).map((ms: any) => ms.name));
+    }
+  }
+  return results;
+}
+
+export interface OEMQualityData {
+  yearFounded?: number | null;
+  capacity?: string;
+  pastPerformance?: string;
+  certifications?: string[];
+  compliance?: string;
+}
+
 /* ------------------------------------------------------------------ */
 /*  getProjectBySlug                                                    */
 /* ------------------------------------------------------------------ */
@@ -196,6 +216,7 @@ export async function getQuotesForProject(
         : null;
 
     return {
+      oemId: getRelationIds(p["Identify OEM"])[0] ?? null,
       name: getRollupText(p["Supplier Profile"]),
       shortName: getText(p["Quote Name/No."]),
       supplierShort: getRollupText(p["Supplier Short"]) || getText(p["Supplier Short"]),
@@ -214,6 +235,36 @@ export async function getQuotesForProject(
       description: getText(p["Rec Description"]),
     };
   });
+}
+
+/* ------------------------------------------------------------------ */
+/*  getOEMQualityData                                                   */
+/* ------------------------------------------------------------------ */
+
+export async function getOEMQualityData(
+  oemIds: string[]
+): Promise<Record<string, OEMQualityData>> {
+  if (oemIds.length === 0) return {};
+  const notion = getNotionClient();
+  const result: Record<string, OEMQualityData> = {};
+  await Promise.all(
+    oemIds.map(async (id) => {
+      try {
+        const page = await notion.pages.retrieve({ page_id: id }) as any;
+        const p = page.properties;
+        result[id] = {
+          yearFounded: getNumber(p["Founded"]),
+          capacity: getText(p["Capacity (pcs/yr)"]),
+          pastPerformance: getText(p["N.A. Past Performance"]),
+          certifications: getRollupMultiSelect(p["Quality Certifications"]),
+          compliance: getText(p["Compliance/Ethics"]),
+        };
+      } catch {
+        result[id] = {};
+      }
+    })
+  );
+  return result;
 }
 
 /* ------------------------------------------------------------------ */
