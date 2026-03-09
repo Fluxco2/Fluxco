@@ -536,9 +536,9 @@ export default function Deck2Page() {
 
             <div className="d2-rev-grid">
               {[
-                { icon: <DollarSign className="w-6 h-6" />, title: "Marketplace Commission", points: ["15–25% take rate on every transaction.", "Volume grows as OEM network expands.", "Higher margins on complex/custom specs."] },
+                { icon: <DollarSign className="w-6 h-6" />, title: "Marketplace Take Rate", points: ["15–25% take rate on every transaction.", "Volume grows as OEM network expands.", "Higher margins on complex/custom specs."] },
+                { icon: <Repeat className="w-6 h-6" />, title: "Transformer as a Service (TaaS)", points: ["Leasing model for companies that don't want to own.", "Recurring monthly revenue per unit.", "Lower barrier to entry for customers."] },
                 { icon: <TrendingUp className="w-6 h-6" />, title: "OEM Volume Pricing", points: ["Negotiate volume discounts across OEM network.", "Customer sees market price, FluxCo captures the spread.", "Looks custom to buyer — commodity to us."] },
-                { icon: <Repeat className="w-6 h-6" />, title: "Transformer as a Service", points: ["Leasing model for companies that don't want to own.", "Recurring monthly revenue per unit.", "Lower barrier to entry for customers."] },
                 { icon: <Wrench className="w-6 h-6" />, title: "Warranty & Fleet Service", points: ["Service contracts across full deployed fleet.", "Scale advantage: hundreds of units = predictable revenue.", "Cross-sell upgrades, monitoring, replacements."] },
               ].map((card, i) => (
                 <div key={card.title} className="d2-rev-card" style={{ animationDelay: `${0.2 + i * 0.15}s` }}>
@@ -552,7 +552,7 @@ export default function Deck2Page() {
             </div>
 
             <div className="d2-rev-insight">
-              &ldquo;Every unit looks like a custom order to the customer. To us, it&apos;s a commodity we&apos;ve seen a thousand times.&rdquo;
+              Every unit looks like a custom order to the customer. To us, it&apos;s a commodity we&apos;ve seen a thousand times.
             </div>
           </div>
         </section>
