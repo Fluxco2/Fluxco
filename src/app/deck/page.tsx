@@ -518,8 +518,8 @@ export default function Deck2Page() {
         <section className="d2-slide d2-slide-dark" ref={s6.ref}>
           <div className="d2-bg-img" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1619885067109-e1dbec4e7cd0?w=1920&q=80)' }} />
           <div className={`d2-content ${s6.inView ? "in" : ""}`}>
-            <div className="d2-slide-label">THE PRODUCT</div>
-            <h2 className="d2-h2">Perfect the Process</h2>
+            <div className="d2-slide-label">MANUFACTURING</div>
+            <h2 className="d2-h2">The Process Is the Product</h2>
             <p className="d2-p" style={{ maxWidth: 800, marginBottom: 24 }}>
               The transformer is proven technology. What&apos;s broken is <strong>how they&apos;re built</strong> &mdash; hand-cut steel, hand-stacked cores, hand-wound coils. We use <strong>non-deterministic automation</strong> so a custom product flows through the line like a repetitive one.
             </p>
