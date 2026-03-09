@@ -667,14 +667,14 @@ export default function Deck2Page() {
               <div className="d2-logo-strip-label">Previously at</div>
               <div className="d2-logo-row">
                 {([
-                  { src: "/logos/platinum-equity.png", alt: "Platinum Equity", withText: "", stacked: false },
-                  { src: "/logos/trust-ventures.svg", alt: "Trust Ventures", withText: "TRUST VENTURES", stacked: true },
-                  { src: "/logos/bell-clean.svg", alt: "Bell", withText: "", stacked: false },
-                  { src: "/logos/cia-clean.svg", alt: "CIA", withText: "", stacked: false },
-                  { src: "/logos/houlihan-lokey.png", alt: "Houlihan Lokey", withText: "", stacked: false },
-                  { src: "/logos/tesla.png", alt: "Tesla", withText: "", stacked: false },
+                  { src: "/logos/platinum-equity.png", alt: "Platinum Equity", withText: "", stacked: false, href: "https://www.platinumequity.com/" },
+                  { src: "/logos/trust-ventures.svg", alt: "Trust Ventures", withText: "TRUST VENTURES", stacked: true, href: "https://www.trustventures.com/" },
+                  { src: "/logos/bell-clean.svg", alt: "Bell", withText: "", stacked: false, href: "https://www.bellflight.com/" },
+                  { src: "/logos/cia-clean.svg", alt: "CIA", withText: "", stacked: false, href: "https://www.cia.gov/" },
+                  { src: "/logos/houlihan-lokey.png", alt: "Houlihan Lokey", withText: "", stacked: false, href: "https://www.hl.com/" },
+                  { src: "/logos/tesla.png", alt: "Tesla", withText: "", stacked: false, href: "https://www.tesla.com/" },
                 ] as const).map((logo) => (
-                  <div key={logo.alt} className={`d2-logo-item ${logo.withText ? "d2-logo-combo" : ""} ${logo.stacked ? "d2-logo-stacked" : ""}`}>
+                  <a key={logo.alt} href={logo.href} target="_blank" rel="noopener noreferrer" className={`d2-logo-item ${logo.withText ? "d2-logo-combo" : ""} ${logo.stacked ? "d2-logo-stacked" : ""}`}>
                     {logo.withText ? (
                       <>
                         <img src={logo.src} alt={logo.alt} className="d2-logo-color" />
@@ -683,7 +683,7 @@ export default function Deck2Page() {
                     ) : (
                       <img src={logo.src} alt={logo.alt} />
                     )}
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
