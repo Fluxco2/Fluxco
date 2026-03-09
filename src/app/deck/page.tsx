@@ -672,6 +672,7 @@ export default function Deck2Page() {
                   { src: "/logos/bell-clean.svg", alt: "Bell", withText: "", stacked: false, href: "https://www.bellflight.com/" },
                   { src: "/logos/cia-clean.svg", alt: "CIA", withText: "", stacked: false, href: "https://www.cia.gov/" },
                   { src: "/logos/houlihan-lokey.png", alt: "Houlihan Lokey", withText: "", stacked: false, href: "https://www.hl.com/" },
+                  { src: "/logos/schneider-electric.svg", alt: "Schneider Electric", withText: "", stacked: false, href: "https://www.se.com/" },
                   { src: "/logos/platinum-equity.png", alt: "Platinum Equity", withText: "", stacked: false, href: "https://www.platinumequity.com/" },
                 ] as const).map((logo) => (
                   <a key={logo.alt} href={logo.href} target="_blank" rel="noopener noreferrer" className={`d2-logo-item ${logo.withText ? "d2-logo-combo" : ""} ${logo.stacked ? "d2-logo-stacked" : ""}`}>
