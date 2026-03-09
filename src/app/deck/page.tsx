@@ -525,7 +525,7 @@ export default function Deck2Page() {
               {[
                 { value: "15–25%", label: "Marketplace Take Rate" },
                 { value: "$20B+", label: "Addressable Market" },
-                { value: "12 Month", label: "ROI" },
+                { value: "9 Month", label: "ROI" },
               ].map((stat) => (
                 <div key={stat.label} className="d2-rev-stat">
                   <div className="d2-rev-stat-value">{stat.value}</div>
