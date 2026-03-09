@@ -627,7 +627,7 @@ export default function Deck2Page() {
                   photo: "/team/eric.jpg",
                   name: "Eric Hobby",
                   title: "Manufacturing",
-                  bio: "Deep tech specialist with transformer industry expertise. UT McCombs MBA.",
+                  bio: "Tesla manufacturing lead turned venture capitalist going back to his roots.",
                   linkedin: "https://www.linkedin.com/in/eric-hobby-8261a4101/",
                 },
                 {
