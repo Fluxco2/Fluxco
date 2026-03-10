@@ -5,11 +5,11 @@ import {
   Zap, ArrowRight, ArrowLeft, ChevronDown, Shield, Factory, Cpu, Building2,
   Globe, Clock, DollarSign, CheckCircle, TrendingUp, Search, BarChart3,
   Users, Wrench, Bot, Sparkles, AlertTriangle, Eye, Target, Repeat,
-  RefreshCw, Package, ShieldCheck, CircleDollarSign, Landmark, Briefcase, BadgeDollarSign,
+  RefreshCw, Package, ShieldCheck, CircleDollarSign, Landmark, Briefcase, BadgeDollarSign, Database,
 } from "lucide-react";
 import { EmailGate } from "./EmailGate";
 
-const TOTAL_SECTIONS = 13;
+const TOTAL_SECTIONS = 14;
 
 /* ------------------------------------------------------------------ */
 /*  Hook: animate numbers counting up                                  */
@@ -276,6 +276,7 @@ export default function Deck2Page() {
   const s10 = useInView(0.2, ready);
   const s11 = useInView(0.2, ready);
   const s12 = useInView(0.2, ready);
+  const s13 = useInView(0.2, ready);
 
   /* Animated counters */
   const c85 = useCountUp(85, 1800, s3.inView);
@@ -530,6 +531,61 @@ export default function Deck2Page() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ========== SLIDE 4B — WHY MARKETPLACE FIRST ========== */}
+        <section className="d2-slide" ref={s13.ref}>
+          <div className="d2-glow d2-glow-3" />
+          <div className={`d2-content ${isMobile || s13.inView ? "in" : ""}`}>
+            <div className="d2-slide-label">THE PLAYBOOK</div>
+            <h2 className="d2-h2">Why Marketplace First</h2>
+            <p className="d2-p" style={{ maxWidth: 800, marginBottom: 32 }}>
+              Most companies raise $200M and guess what to build. We let the market tell us. Every transaction through the marketplace generates real demand data &mdash; what specs, what volumes, what regions, what price the market will bear. <strong>By the time we break ground, we already know exactly what to manufacture.</strong>
+            </p>
+
+            <div className="d2-playbook-flow">
+              <div className="d2-playbook-step">
+                <div className="d2-playbook-num">1</div>
+                <div className="d2-playbook-icon"><Search className="w-6 h-6" /></div>
+                <div className="d2-playbook-info">
+                  <div className="d2-playbook-label">Marketplace</div>
+                  <div className="d2-playbook-desc">Capital-light launch. Revenue from day one. Aggregate demand across thousands of buyers.</div>
+                </div>
+              </div>
+              <div className="d2-playbook-arrow"><ArrowRight className="w-5 h-5" /></div>
+              <div className="d2-playbook-step">
+                <div className="d2-playbook-num">2</div>
+                <div className="d2-playbook-icon"><Database className="w-6 h-6" /></div>
+                <div className="d2-playbook-info">
+                  <div className="d2-playbook-label">Intelligence</div>
+                  <div className="d2-playbook-desc">Every bid reveals pricing, lead times, capacity gaps, and margin opportunities no one else can see.</div>
+                </div>
+              </div>
+              <div className="d2-playbook-arrow"><ArrowRight className="w-5 h-5" /></div>
+              <div className="d2-playbook-step">
+                <div className="d2-playbook-num">3</div>
+                <div className="d2-playbook-icon"><Factory className="w-6 h-6" /></div>
+                <div className="d2-playbook-info">
+                  <div className="d2-playbook-label">Factory</div>
+                  <div className="d2-playbook-desc">Build exactly what the market needs. No guessing. Informed by thousands of real transactions.</div>
+                </div>
+              </div>
+              <div className="d2-playbook-arrow"><ArrowRight className="w-5 h-5" /></div>
+              <div className="d2-playbook-step">
+                <div className="d2-playbook-num">4</div>
+                <div className="d2-playbook-icon"><TrendingUp className="w-6 h-6" /></div>
+                <div className="d2-playbook-info">
+                  <div className="d2-playbook-label">Flywheel</div>
+                  <div className="d2-playbook-desc">Our own production feeds back into the marketplace with better pricing and faster delivery than any competitor.</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="d2-playbook-insight">
+              <Eye className="w-5 h-5" style={{ color: "var(--d2-blue)", flexShrink: 0 }} />
+              <span>The marketplace isn&apos;t just a business &mdash; it&apos;s the most expensive market research in the industry, and our customers are paying us to do it.</span>
             </div>
           </div>
         </section>
@@ -1312,6 +1368,49 @@ const mobileDeckStyles = `
   .d2-intel-card strong {
     font-family: 'Inter', sans-serif; font-size: 14px; color: #fff;
     display: block;
+  }
+
+  /* ---- PLAYBOOK FLOW ---- */
+  .d2-playbook-flow {
+    display: flex; flex-direction: column; gap: 0; margin-bottom: 24px;
+  }
+  .d2-playbook-step {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px; border-radius: var(--d2-radius);
+    background: var(--d2-surface); border: 1px solid var(--d2-border);
+  }
+  .d2-playbook-num {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    background: var(--d2-bg); border: 2px solid var(--d2-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--d2-blue); font-weight: 700;
+  }
+  .d2-playbook-icon {
+    width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+    background: rgba(45,140,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--d2-blue);
+  }
+  .d2-playbook-info { flex: 1; }
+  .d2-playbook-label {
+    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700;
+    color: #fff; margin-bottom: 4px;
+  }
+  .d2-playbook-desc {
+    font-family: 'Inter', sans-serif; font-size: 13px;
+    color: var(--d2-text); line-height: 1.5;
+  }
+  .d2-playbook-arrow {
+    display: flex; justify-content: center; padding: 8px 0;
+    color: var(--d2-blue); transform: rotate(90deg);
+  }
+  .d2-playbook-insight {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 16px 20px; border-radius: var(--d2-radius);
+    background: rgba(45,140,255,0.04); border: 1px solid rgba(45,140,255,0.15);
+    font-family: 'Inter', sans-serif; font-size: 14px;
+    color: var(--d2-text); line-height: 1.6;
   }
 
   /* ---- TECH GRID ---- */
@@ -2156,6 +2255,51 @@ const deck2Styles = `
   .d2-intel-card strong {
     font-family: 'Inter', sans-serif; font-size: 14px; color: #fff;
     display: block;
+  }
+
+  /* ---- PLAYBOOK FLOW ---- */
+  .d2-playbook-flow {
+    display: flex; align-items: flex-start; gap: 0; margin-bottom: 28px;
+  }
+  .d2-playbook-step {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 12px; padding: 24px 16px; border-radius: var(--d2-radius);
+    background: var(--d2-surface); border: 1px solid var(--d2-border);
+    text-align: center; transition: border-color 0.3s;
+  }
+  .d2-playbook-step:hover { border-color: rgba(45,140,255,0.3); }
+  .d2-playbook-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--d2-bg); border: 2px solid var(--d2-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--d2-blue); font-weight: 700;
+  }
+  .d2-playbook-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: rgba(45,140,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--d2-blue);
+  }
+  .d2-playbook-info { }
+  .d2-playbook-label {
+    font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 700;
+    color: #fff; margin-bottom: 6px;
+  }
+  .d2-playbook-desc {
+    font-family: 'Inter', sans-serif; font-size: 13px;
+    color: var(--d2-text); line-height: 1.5;
+  }
+  .d2-playbook-arrow {
+    display: flex; align-items: center; padding: 0 8px;
+    color: var(--d2-blue); margin-top: 48px;
+  }
+  .d2-playbook-insight {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 18px 24px; border-radius: var(--d2-radius);
+    background: rgba(45,140,255,0.04); border: 1px solid rgba(45,140,255,0.15);
+    font-family: 'Inter', sans-serif; font-size: 14px;
+    color: var(--d2-text); line-height: 1.6;
   }
 
   /* ---- TECH GRID (slide 6) ---- */
