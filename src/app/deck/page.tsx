@@ -559,7 +559,7 @@ export default function Deck2Page() {
             </div>
             <div className="d2-metric-row">
               {[
-                { value: `-${c60}%`, label: "Production Time" },
+                { value: `-${c60}%`, label: "Production Set Up Time" },
                 { value: `-${c40}%`, label: "Labor Cost" },
                 { value: "\u221E", label: "Variants" },
                 { value: "100%", label: "Inspected" },
