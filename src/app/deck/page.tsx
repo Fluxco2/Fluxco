@@ -1583,14 +1583,16 @@ const deck2Styles = `
 
   /* ---- MOBILE ---- */
   @media (max-width: 768px) {
-    html, body { overflow: auto !important; }
+    html, body { overflow: auto !important; height: auto !important; }
     .d2-container {
-      position: relative !important; inset: auto !important;
-      overflow-y: visible !important; scroll-snap-type: none !important;
+      position: static !important; inset: auto !important;
+      overflow: visible !important; scroll-snap-type: none !important;
+      height: auto !important;
     }
     .d2-slide {
       min-height: auto; padding: 48px 0;
       scroll-snap-align: none;
+      height: auto !important;
     }
     .d2-slide:first-child, .d2-slide:last-child { min-height: 100vh; min-height: 100svh; padding: 0; }
     .d2-content { padding: 24px 20px; }
