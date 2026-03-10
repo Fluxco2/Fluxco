@@ -236,15 +236,15 @@ export default function Deck2Page() {
     };
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [hasAccess]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown" || e.key === " " || e.key === "ArrowRight") {
+      if (e.key === "ArrowDown" || e.key === " " || e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
         goTo(Math.min(currentSection + 1, TOTAL_SECTIONS - 1));
       }
-      if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      if (e.key === "ArrowUp" || e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
         goTo(Math.max(currentSection - 1, 0));
       }
