@@ -799,7 +799,7 @@ export default function Deck2Page() {
           <div className="d2-bg-img" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1619033476025-71cc6bd8c3f5?w=1920&q=80)' }} />
           <div className={`d2-content ${isMobile || s3.inView ? "in" : ""}`}>
             <div className="d2-slide-label">APPENDIX</div>
-            <h2 className="d2-h2">Everything Is Offshore</h2>
+            <h2 className="d2-h2">America's Grid Vulnerability</h2>
             <div className="d2-grid-2">
               <div className="d2-text-col">
                 <p className="d2-p">
