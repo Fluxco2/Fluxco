@@ -761,11 +761,11 @@ export default function Deck2Page() {
                   { src: "/logos/trust-ventures.svg", alt: "Trust Ventures", withText: "TRUST VENTURES", stacked: true, href: "https://www.trustventures.com/" },
                   { src: "/logos/tesla.png", alt: "Tesla", withText: "", stacked: false, href: "https://www.tesla.com/" },
                   { src: "/logos/bell-clean.svg", alt: "Bell", withText: "", stacked: false, href: "https://www.bellflight.com/" },
-                  { src: "/logos/cia-seal.png", alt: "CIA", withText: "", stacked: false, href: "https://www.cia.gov/" },
+                  { src: "/logos/cia-seal.png", alt: "CIA", withText: "", stacked: false, href: "https://www.cia.gov/", noFlatten: true },
                   { src: "/logos/houlihan-lokey.png", alt: "Houlihan Lokey", withText: "", stacked: false, href: "https://www.hl.com/" },
                   { src: "/logos/schneider-electric.svg", alt: "Schneider Electric", withText: "", stacked: false, href: "https://www.se.com/" },
                   { src: "/logos/platinum-equity.png", alt: "Platinum Equity", withText: "", stacked: false, href: "https://www.platinumequity.com/" },
-                ] as const).map((logo) => (
+                ] as {src:string;alt:string;withText:string;stacked:boolean;href:string;noFlatten?:boolean}[]).map((logo) => (
                   <a key={logo.alt} href={logo.href} target="_blank" rel="noopener noreferrer" className={`d2-logo-item ${logo.withText ? "d2-logo-combo" : ""} ${logo.stacked ? "d2-logo-stacked" : ""}`}>
                     {logo.withText ? (
                       <>
@@ -773,7 +773,7 @@ export default function Deck2Page() {
                         <span className="d2-logo-text d2-logo-text-sm">{logo.withText}</span>
                       </>
                     ) : (
-                      <img src={logo.src} alt={logo.alt} />
+                      <img src={logo.src} alt={logo.alt} className={logo.noFlatten ? "d2-logo-detail" : ""} />
                     )}
                   </a>
                 ))}
@@ -1721,6 +1721,9 @@ const mobileDeckStyles = `
     height: 100%; width: auto; object-fit: contain;
     filter: brightness(0) invert(1); opacity: 0.45;
   }
+  .d2-logo-item img.d2-logo-detail {
+    filter: invert(1); opacity: 0.45;
+  }
   .d2-logo-stacked {
     flex-direction: column; justify-content: center; gap: 2px; height: 24px;
   }
@@ -2622,6 +2625,10 @@ const deck2Styles = `
   .d2-logo-item img {
     height: 100%; width: auto; object-fit: contain;
     filter: brightness(0) invert(1); opacity: 0.45;
+    transition: opacity 0.3s;
+  }
+  .d2-logo-item img.d2-logo-detail {
+    filter: invert(1); opacity: 0.45;
     transition: opacity 0.3s;
   }
   .d2-logo-item:hover img { opacity: 0.8; }
