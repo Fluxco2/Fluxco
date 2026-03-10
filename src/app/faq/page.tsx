@@ -43,7 +43,7 @@ const faqCategories = [
       {
         question: "How do I request a quote?",
         answer:
-          "You can request a quote through our contact form, Spec Builder, or by calling our sales team. Provide the kVA rating, primary and secondary voltages, phase configuration, and any special requirements. We typically respond within 24 business hours.",
+          "You can request a quote through our contact form, AI Spec Builder, or by calling our sales team. Provide the kVA rating, primary and secondary voltages, phase configuration, and any special requirements. We typically respond within 24 business hours.",
       },
       {
         question: "What information do I need to provide for a quote?",
@@ -270,7 +270,7 @@ export default function FAQPage() {
               href="/specbuilder"
               className="inline-flex items-center justify-center gap-2 bg-card border border-border text-foreground px-8 py-3 rounded-lg font-medium hover:border-primary/50 transition-colors"
             >
-              Spec Builder
+              AI Spec Builder
             </Link>
           </div>
         </div>

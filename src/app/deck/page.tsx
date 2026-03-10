@@ -486,7 +486,7 @@ export default function Deck2Page() {
                   It will never make sense for a procurement office to become a transformer expert. It&apos;s one of many things they buy &mdash; but one of the most expensive.
                 </p>
                 <p className="d2-p">
-                  <strong>FluxCo becomes their CTO</strong> (Chief Transformer Officer). Our <strong>free Spec Builder</strong> automates the design, then we bid it across <strong>100+ OEMs</strong> worldwide.
+                  <strong>FluxCo becomes their CTO</strong> (Chief Transformer Officer). Our <strong>free AI Spec Builder</strong> automates the design, then we bid it across <strong>100+ OEMs</strong> worldwide.
                 </p>
                 <ul className="d2-checklist">
                   <li><strong>Full visibility:</strong> price, lead time, quality, certifications &mdash; side-by-side.</li>
@@ -498,7 +498,7 @@ export default function Deck2Page() {
                 <div className="d2-flow d2-flow-4">
                   {[
                     { icon: <Target className="w-6 h-6" />, label: "Customer Spec", active: false, href: null, sub: null },
-                    { icon: <Zap className="w-6 h-6" />, label: "FluxCo Spec Builder", active: true, href: "https://fluxco.com/specbuilder", sub: "Try it live →" },
+                    { icon: <Zap className="w-6 h-6" />, label: "AI Spec Builder", active: true, href: "https://fluxco.com/specbuilder", sub: "Try it live →" },
                     { icon: <BarChart3 className="w-6 h-6" />, label: "100+ OEM Bids", active: false, href: null, sub: null },
                     { icon: <Sparkles className="w-6 h-6" />, label: "Automated Proposal", active: true, href: "https://fluxco.com/proposal/redacted", sub: "See example →" },
                   ].map((step, i) => (

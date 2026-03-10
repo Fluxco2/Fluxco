@@ -82,7 +82,7 @@ const HeroSection = () => {
               asChild
             >
               <Link href="/specbuilder">
-                Spec Builder
+                AI Spec Builder
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>

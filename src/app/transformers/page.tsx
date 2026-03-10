@@ -159,7 +159,7 @@ export default function TransformersPage() {
               href="/specbuilder"
               className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
             >
-              Spec Builder
+              AI Spec Builder
             </Link>
             <Link
               href="/inventory"

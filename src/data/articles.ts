@@ -3069,7 +3069,7 @@ Net assessment: The distribution transformer market is stabilizing. The power tr
 
 FluxCo has access to in-stock inventory from 100+ global suppliers. Instead of calling five manufacturers and waiting for quotes, search our network in one step.
 
-[Browse inventory](/inventory) | [Request a quote](/get-quote) | [Use the Spec Builder](/specbuilder)
+[Browse inventory](/inventory) | [Request a quote](/get-quote) | [Use the AI Spec Builder](/specbuilder)
 `,
   },
 ];

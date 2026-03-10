@@ -394,7 +394,7 @@ export default function Deck2Page() {
                   It will never make sense for a procurement person to become a transformer expert. It&apos;s one of many things they buy &mdash; but one of the most expensive.
                 </p>
                 <p className="d2-p">
-                  <strong>FluxCo becomes their CTO</strong> (Chief Transformer Officer). Our <strong>free Spec Builder</strong> automates the design, then we bid it across dozens of global suppliers.
+                  <strong>FluxCo becomes their CTO</strong> (Chief Transformer Officer). Our <strong>free AI Spec Builder</strong> automates the design, then we bid it across dozens of global suppliers.
                 </p>
                 <ul className="d2-checklist">
                   <li><strong>Full visibility:</strong> price, lead time, quality, certifications &mdash; side-by-side.</li>
@@ -406,7 +406,7 @@ export default function Deck2Page() {
                 <div className="d2-flow">
                   {[
                     { icon: <Target className="w-7 h-7" />, label: "Customer Spec", active: false },
-                    { icon: <Zap className="w-7 h-7" />, label: "FluxCo Spec Builder", active: true },
+                    { icon: <Zap className="w-7 h-7" />, label: "AI Spec Builder", active: true },
                     { icon: <BarChart3 className="w-7 h-7" />, label: "100+ OEM Bids", active: false },
                   ].map((step, i) => (
                     <div key={step.label} className="d2-flow-group" style={{ animationDelay: `${0.3 + i * 0.25}s` }}>
