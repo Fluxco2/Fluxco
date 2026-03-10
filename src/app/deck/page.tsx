@@ -906,12 +906,6 @@ export default function Deck2Page() {
                     <span>World&apos;s largest private fund for clean energy transition. Grid upgrades and electrification.</span>
                     <span className="d2-capital-amount">$20B</span>
                   </a>
-                  <a href="https://www.breakthroughenergy.org/our-work/breakthrough-energy-ventures/bev-portfolio/" target="_blank" rel="noopener noreferrer" className="d2-capital-card">
-                    <div className="d2-capital-tag d2-capital-tag-private">Venture</div>
-                    <strong>Breakthrough Energy Ventures</strong>
-                    <span>Bill Gates&apos; climate fund. Fund III raised $839M. Grid modernization is a core thesis.</span>
-                    <span className="d2-capital-amount">$839M fund</span>
-                  </a>
                   <a href="https://www.usda.gov/about-usda/news/press-releases/2024/12/19/usda-announces-another-round-historic-investments-increase-access-clean-affordable-energy-across" target="_blank" rel="noopener noreferrer" className="d2-capital-card">
                     <div className="d2-capital-tag">Loan / Grant</div>
                     <strong>USDA New ERA</strong>
