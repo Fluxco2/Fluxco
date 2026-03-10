@@ -1624,5 +1624,26 @@ const deck2Styles = `
     .d2-metric-row { flex-wrap: wrap; }
     .d2-metric { min-width: calc(50% - 7px); }
     .d2-big-stat-num { font-size: 48px; }
+    .d2-slide { overflow: visible !important; }
+    .d2-content .d2-slide-label,
+    .d2-content .d2-h2,
+    .d2-content > .d2-p,
+    .d2-content .d2-grid-2,
+    .d2-content .d2-quotes-row,
+    .d2-content .d2-source,
+    .d2-content .d2-tech-grid,
+    .d2-content .d2-metric-row,
+    .d2-content .d2-compare,
+    .d2-content .d2-moats,
+    .d2-content .d2-rev-stats,
+    .d2-content .d2-rev-grid,
+    .d2-content .d2-rev-insight,
+    .d2-content .d2-team-grid,
+    .d2-content .d2-logo-strip,
+    .d2-content .d2-timeline {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
   }
 `;
