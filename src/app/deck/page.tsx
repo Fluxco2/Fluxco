@@ -212,12 +212,19 @@ function DeckScatterChart({ inView }: { inView: boolean }) {
 /* ------------------------------------------------------------------ */
 export default function Deck2Page() {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Check for deck_access cookie on mount
+  // Check for deck_access cookie on mount + detect mobile
   useEffect(() => {
     setHasAccess(document.cookie.includes("deck_access="));
+    const mobile = window.innerWidth <= 768;
+    setIsMobile(mobile);
+    if (mobile) {
+      document.documentElement.style.overflow = "auto";
+      document.body.style.overflow = "auto";
+    }
   }, []);
 
   useEffect(() => {
@@ -315,7 +322,7 @@ export default function Deck2Page() {
         </div>
       )}
 
-      <div ref={containerRef} className="d2-container">
+      <div ref={containerRef} className="d2-container" style={isMobile ? { position: "static", overflow: "visible", height: "auto" } : undefined}>
 
         {/* ========== SLIDE 1 — TITLE ========== */}
         <section className="d2-slide" ref={s1.ref}>
