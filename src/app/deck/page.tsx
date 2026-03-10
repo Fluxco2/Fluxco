@@ -491,7 +491,7 @@ export default function Deck2Page() {
                 <ul className="d2-checklist">
                   <li><strong>Full visibility:</strong> price, lead time, quality, certifications &mdash; side-by-side.</li>
                   <li><strong>Speed:</strong> What takes buyers weeks of calls, we do in hours.</li>
-                  <li><strong>Revenue:</strong> We automate the process EPCs typically take 10–20% on in a <strong>$20B+ annual US market</strong>.</li>
+                  <li><strong>Comprehensive analysis:</strong> We provide all of the data needed with our recommendation engine.</li>
                 </ul>
               </div>
               <div className="d2-flow-col">
