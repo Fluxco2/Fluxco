@@ -477,7 +477,7 @@ export default function Deck2Page() {
         <section className="d2-slide" ref={s5.ref}>
           <div className="d2-glow d2-glow-4" />
           <div className={`d2-content ${isMobile || s5.inView ? "in" : ""}`}>
-            <div className="d2-slide-label" style={{ fontSize: 16, letterSpacing: 6, marginBottom: 16 }}>THE WEDGE</div>
+            <div className="d2-slide-label">THE WEDGE</div>
             <h2 className="d2-h2">The FluxCo Marketplace</h2>
             <div className="d2-grid-2">
               <div className="d2-text-col">
@@ -1014,9 +1014,9 @@ const mobileDeckStyles = `
   }
 
   .d2-slide-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    color: var(--d2-blue); letter-spacing: 3px; text-transform: uppercase;
-    font-weight: 500; margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    color: var(--d2-blue); letter-spacing: 6px; text-transform: uppercase;
+    font-weight: 500; margin-bottom: 16px;
   }
 
   .d2-h2 {
@@ -1759,9 +1759,9 @@ const deck2Styles = `
   }
 
   .d2-slide-label {
-    font-family: 'JetBrains Mono', monospace; font-size: 11px;
-    color: var(--d2-blue); letter-spacing: 3px; text-transform: uppercase;
-    font-weight: 500; margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 16px;
+    color: var(--d2-blue); letter-spacing: 6px; text-transform: uppercase;
+    font-weight: 500; margin-bottom: 16px;
   }
 
   .d2-h2 {
