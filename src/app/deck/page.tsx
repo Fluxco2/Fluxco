@@ -434,12 +434,26 @@ export default function Deck2Page() {
 
             <div className="d2-quotes-row">
               <a href="https://x.com/oguzerkan/status/2016480187790065829" target="_blank" rel="noopener noreferrer" className="d2-quote">
-                <div className="d2-quote-who">Elon Musk</div>
-                <div className="d2-quote-text">&ldquo;The voltage transformer shortage is the main bottleneck for scaling AI right now.&rdquo;</div>
+                <div className="d2-quote-header">
+                  <div className="d2-quote-avatar">EM</div>
+                  <div className="d2-quote-meta">
+                    <div className="d2-quote-who">Elon Musk</div>
+                    <div className="d2-quote-handle">@elonmusk</div>
+                  </div>
+                  <svg className="d2-x-logo" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </div>
+                <div className="d2-quote-text">The voltage transformer shortage is the main bottleneck for scaling AI right now.</div>
               </a>
               <a href="https://x.com/MarioNawfal/status/1852185875611791550" target="_blank" rel="noopener noreferrer" className="d2-quote">
-                <div className="d2-quote-who">VP JD Vance <span style={{ opacity: 0.4 }}>on Joe Rogan</span></div>
-                <div className="d2-quote-text">&ldquo;We should have a backup power transformer for every major system in the United States.&rdquo;</div>
+                <div className="d2-quote-header">
+                  <div className="d2-quote-avatar">JV</div>
+                  <div className="d2-quote-meta">
+                    <div className="d2-quote-who">VP JD Vance <span style={{ opacity: 0.4 }}>on Joe Rogan</span></div>
+                    <div className="d2-quote-handle">@JDVance</div>
+                  </div>
+                  <svg className="d2-x-logo" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </div>
+                <div className="d2-quote-text">We should have a backup power transformer for every major system in the United States.</div>
               </a>
             </div>
             <p className="d2-source">Sources: Wood Mackenzie, EIA, Grid Strategies, S&amp;P Global, NREL</p>
@@ -1262,22 +1276,34 @@ const mobileDeckStyles = `
 
   .d2-bar-anim { transform: scaleY(1); opacity: 1; transform-origin: bottom; }
 
-  /* ---- QUOTES ---- */
+  /* ---- QUOTES (X/tweet style) ---- */
   .d2-quotes-row { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
   .d2-quote {
     flex: 1; padding: 16px 20px;
-    border: 1px solid rgba(230,57,70,0.2); border-radius: var(--d2-radius);
-    background: rgba(230,57,70,0.03);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+    background: rgba(255,255,255,0.03);
     text-decoration: none; cursor: pointer;
   }
-  .d2-quote-who {
-    font-family: 'Inter', sans-serif; font-size: 10px;
-    color: var(--d2-red); text-transform: uppercase; letter-spacing: 1.5px;
-    font-weight: 700; margin-bottom: 6px;
+  .d2-quote-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .d2-quote-avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+    color: rgba(255,255,255,0.5); flex-shrink: 0;
   }
+  .d2-quote-meta { flex: 1; min-width: 0; }
+  .d2-quote-who {
+    font-family: 'Inter', sans-serif; font-size: 13px;
+    color: rgba(255,255,255,0.9); font-weight: 700;
+  }
+  .d2-quote-handle {
+    font-family: 'Inter', sans-serif; font-size: 12px;
+    color: rgba(255,255,255,0.35);
+  }
+  .d2-x-logo { width: 16px; height: 16px; color: rgba(255,255,255,0.35); flex-shrink: 0; }
   .d2-quote-text {
     font-family: 'Inter', sans-serif; font-size: 14px;
-    color: rgba(255,255,255,0.8); font-style: italic; line-height: 1.5;
+    color: rgba(255,255,255,0.8); line-height: 1.5;
   }
 
   /* ---- BIG STATS ---- */
@@ -2139,23 +2165,35 @@ const deck2Styles = `
     to { transform: scaleY(1); opacity: 1; }
   }
 
-  /* ---- QUOTES ---- */
+  /* ---- QUOTES (X/tweet style) ---- */
   .d2-quotes-row { display: flex; gap: 16px; margin-top: 20px; }
   .d2-quote {
     flex: 1; padding: 16px 20px;
-    border: 1px solid rgba(230,57,70,0.2); border-radius: var(--d2-radius);
-    background: rgba(230,57,70,0.03);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
+    background: rgba(255,255,255,0.03);
     text-decoration: none; transition: all 0.3s; cursor: pointer;
   }
-  .d2-quote:hover { background: rgba(230,57,70,0.08); border-color: rgba(230,57,70,0.4); transform: translateY(-2px); }
-  .d2-quote-who {
-    font-family: 'Inter', sans-serif; font-size: 10px;
-    color: var(--d2-red); text-transform: uppercase; letter-spacing: 1.5px;
-    font-weight: 700; margin-bottom: 6px;
+  .d2-quote:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+  .d2-quote-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .d2-quote-avatar {
+    width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
+    color: rgba(255,255,255,0.5); flex-shrink: 0;
   }
-  .d2-quote-text {
+  .d2-quote-meta { flex: 1; min-width: 0; }
+  .d2-quote-who {
     font-family: 'Inter', sans-serif; font-size: 14px;
-    color: rgba(255,255,255,0.8); font-style: italic; line-height: 1.5;
+    color: rgba(255,255,255,0.9); font-weight: 700;
+  }
+  .d2-quote-handle {
+    font-family: 'Inter', sans-serif; font-size: 13px;
+    color: rgba(255,255,255,0.35);
+  }
+  .d2-x-logo { width: 18px; height: 18px; color: rgba(255,255,255,0.35); flex-shrink: 0; }
+  .d2-quote-text {
+    font-family: 'Inter', sans-serif; font-size: 15px;
+    color: rgba(255,255,255,0.8); line-height: 1.5;
   }
 
   /* ---- BIG STATS (slide 3) ---- */
