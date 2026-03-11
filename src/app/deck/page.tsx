@@ -478,7 +478,7 @@ export default function Deck2Page() {
                 <div className="d2-callout">
                   <DollarSign className="w-5 h-5" />
                   <div>
-                    <strong>Real example:</strong> We bid a 20 MVA unit. One supplier quoted <strong>$200K</strong>. Another quoted <strong>$1.3M</strong>. Same spec. <strong>10x price spread.</strong>
+                    <strong>Real example:</strong> We bid a 20 MVA unit. One supplier quoted <strong>$200K</strong>. Multiple OEMs quoted over <strong>$2M</strong>. Same spec. <strong>10x price spread.</strong>
                   </div>
                 </div>
               </div>
