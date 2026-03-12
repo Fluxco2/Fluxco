@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import {
-  Zap, ArrowRight, ArrowLeft, ChevronDown, Globe, Clock,
-  Factory, MapPin, Shield,
+  Zap, ArrowRight, ArrowLeft, ChevronDown, Clock,
+  MapPin, CheckCircle,
 } from "lucide-react";
 
 const TOTAL_SECTIONS = 4;
@@ -53,6 +53,17 @@ function GridBackground() {
 }
 
 /* ------------------------------------------------------------------ */
+/*  UL/NRTL check icon                                                  */
+/* ------------------------------------------------------------------ */
+function ULCheck() {
+  return (
+    <span className="ap-ul-check">
+      <CheckCircle className="w-4 h-4" />
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main component                                                      */
 /* ------------------------------------------------------------------ */
 export default function Antora2Proposal() {
@@ -92,7 +103,6 @@ export default function Antora2Proposal() {
     });
   }, []);
 
-  /* Slide in-view trackers */
   const s1 = useInView(0.3);
   const s2 = useInView(0.2);
   const s3 = useInView(0.2);
@@ -153,7 +163,7 @@ export default function Antora2Proposal() {
               <span className="ap-h1-line ap-h1-2">20 MVA eBoiler</span>
             </div>
             <p className="ap-subtitle">
-              Procurement update for a <strong>20 MVA eBoiler Transformer</strong> with
+              Top quotes for a <strong>20 MVA eBoiler Transformer</strong> with
               delivery to <strong>Pratt, KS</strong>.
               Target delivery: <strong>November 30, 2026</strong>.
             </p>
@@ -164,132 +174,338 @@ export default function Antora2Proposal() {
           </div>
         </section>
 
-        {/* ========== SLIDE 2 — PENDING QUOTES ========== */}
-        <section className="ap-slide" ref={s2.ref}>
-          <div className="ap-glow ap-glow-4" />
+        {/* ========== SLIDE 2 — TOP QUOTES SUMMARY ========== */}
+        <section className="ap-slide ap-slide-table" ref={s2.ref}>
+          <div className="ap-glow ap-glow-3" />
           <div className={`ap-content ${s2.inView ? "in" : ""}`}>
-            <div className="ap-slide-label">IN PROGRESS</div>
-            <h2 className="ap-h2">Pending Quotes</h2>
-            <p className="ap-p">Specs have been shared and are under review with the following manufacturers:</p>
-
-            <div className="ap-pending-grid">
-              {[
-                { name: "Eagle Rise", country: "China", icon: <Globe className="w-5 h-5" /> },
-                { name: "Shandong Fudao", country: "China", icon: <Factory className="w-5 h-5" /> },
-                { name: "Howard Industries", country: "US", icon: <Factory className="w-5 h-5" /> },
-                { name: "International Electric Co (IEC)", country: "South Korea", icon: <Globe className="w-5 h-5" /> },
-                { name: "LS Electric", country: "South Korea", icon: <Globe className="w-5 h-5" /> },
-                { name: "Bolt Electrical", country: "Mexico / South Korea", icon: <Globe className="w-5 h-5" /> },
-                { name: "Toshiba", country: "India", icon: <Globe className="w-5 h-5" /> },
-                { name: "Virginia Transformer", country: "US", icon: <Factory className="w-5 h-5" /> },
-                { name: "Grupo Edmar", country: "Mexico", icon: <Globe className="w-5 h-5" /> },
-                { name: "EFACEC", country: "Portugal", icon: <Globe className="w-5 h-5" /> },
-              ].map((s) => (
-                <div key={s.name} className="ap-pending-card">
-                  <div className="ap-pending-icon">{s.icon}</div>
-                  <div>
-                    <div className="ap-pending-name">{s.name}</div>
-                    <div className="ap-pending-country">{s.country}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ========== SLIDE 3 — OTHER CANDIDATES ========== */}
-        <section className="ap-slide ap-slide-table" ref={s3.ref}>
-          <div className={`ap-content ${s3.inView ? "in" : ""}`}>
-            <div className="ap-slide-label">APPENDIX</div>
-            <h2 className="ap-h2">Other Candidates</h2>
+            <div className="ap-slide-label">TOP CANDIDATES</div>
+            <h2 className="ap-h2">Top Quotes for 20 MVA Project</h2>
 
             <div className="ap-table-wrap">
-              <table className="ap-table ap-table-detail">
+              <table className="ap-table">
                 <thead>
                   <tr>
-                    <th>Company</th>
-                    <th>Overview</th>
-                    <th>Certifications</th>
-                    <th>Price / Lead Time</th>
-                    <th>Options / Comments</th>
+                    <th>Supplier</th>
+                    <th>Origin</th>
+                    <th>UL / NRTL</th>
+                    <th>Design (Weeks)</th>
+                    <th>Mfg + UL (Weeks)</th>
+                    <th>Ocean Freight (Weeks)</th>
+                    <th>Total LT (Weeks)</th>
+                    <th>ETA w/ 3/15 PO</th>
+                    <th>Total incl. Ocean Freight</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="ap-td-name">Daelim</td>
-                    <td>Based in Beijing, China. Well-established manufacturer with major OEMs white labeling their offerings. Capacity to produce 15 pcs/day of this size.</td>
-                    <td>Offers US based support.<br/>ISO 9001:2008, UL-US</td>
-                    <td>$596,730<br/><span className="ap-td-lt">36 wks</span></td>
-                    <td>UL-Witnessed Factory Acceptance Testing</td>
+                    <td className="ap-td-name">Jinpan International (JST)</td>
+                    <td><span className="ap-feoc">*</span>China HQ, Mexico</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">6-8</td>
+                    <td className="ap-td-mono">30</td>
+                    <td className="ap-td-mono">1</td>
+                    <td className="ap-td-mono ap-td-bold">38</td>
+                    <td className="ap-td-mono">12/13/2026</td>
+                    <td className="ap-td-price">$852,068</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">International Electric Co (IEC)</td>
+                    <td>S. Korea</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">2</td>
+                    <td className="ap-td-mono">16</td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono ap-td-bold">24</td>
+                    <td className="ap-td-mono">8/30/2026</td>
+                    <td className="ap-td-price">$591,000</td>
                   </tr>
                   <tr>
                     <td className="ap-td-name">Jiangsu First Power</td>
-                    <td>Based in Jiangsu, China. Established manufacturer delivering on many government contracts with stringent quality requirements. Est. annual rev. USD$1B. Capacity: 10 pcs/day.</td>
-                    <td>ISO 9001:2015, UL-US<br/>US Projects: SpaceX and Antpower</td>
-                    <td>$472,366 ($367,866)<br/><span className="ap-td-lt">12 wks after drawings</span></td>
-                    <td>UL-Witnessed Factory Acceptance Testing</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">2</td>
+                    <td className="ap-td-mono">18</td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono ap-td-bold">26</td>
+                    <td className="ap-td-mono">9/13/2026</td>
+                    <td className="ap-td-price">$670,500</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">China Electrical Equipment Group (CEEG)</td>
-                    <td>Three large facilities in China. White label option for major brands (ABB, Siemens, Schneider, Hitachi) with ~2M sq ft of manufacturing. Also does many Chinese government contracts.</td>
-                    <td>ISO 9001:2015<br/>UL/c-UL XPLH</td>
-                    <td>$195,500<br/><span className="ap-td-lt">8 wks after drawings</span></td>
-                    <td>Have not done many US-based projects and have not established US-based servicing yet</td>
+                    <td className="ap-td-name">Guangdong Keyuan Electric</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">4</td>
+                    <td className="ap-td-mono">24</td>
+                    <td className="ap-td-mono">8</td>
+                    <td className="ap-td-mono ap-td-bold">36</td>
+                    <td className="ap-td-mono">11/22/2026</td>
+                    <td className="ap-td-price">~~$519,500</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">HC Transformers (IEN Hanchang)</td>
-                    <td>Based in South Korea.</td>
-                    <td>NEMA, IEEE, KSA</td>
-                    <td>$1,197,500<br/><span className="ap-td-lt">28 wks</span></td>
-                    <td>&mdash;</td>
+                    <td className="ap-td-name">Jiangsu Yawei Transformer</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">2</td>
+                    <td className="ap-td-mono">12+UL</td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono ap-td-bold">20+UL</td>
+                    <td className="ap-td-mono">8/2/2026+UL</td>
+                    <td className="ap-td-price">$474,797</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Delta Star</td>
-                    <td>Manufacturing facilities in VA, CA, and in Canada.</td>
-                    <td>ISO 9001:2015, UL-US</td>
-                    <td>$2,700,000<br/><span className="ap-td-lt">210 wks</span></td>
-                    <td>&mdash;</td>
-                  </tr>
-                  <tr>
-                    <td className="ap-td-name">Schneider Electric</td>
-                    <td>US based in theory (USA/Mexico).</td>
-                    <td>&mdash;</td>
-                    <td>$2,000,000<br/><span className="ap-td-lt">156 wks</span></td>
-                    <td>&mdash;</td>
-                  </tr>
-                  <tr>
-                    <td className="ap-td-name">Texas Transformers</td>
-                    <td>Distributes for Telawne Transformers in India.</td>
-                    <td>ISO 9001:2015<br/>UL/c-UL XPLH, NEMA, IEEE</td>
-                    <td>$642,500<br/><span className="ap-td-lt">36 wks fab</span></td>
-                    <td>&mdash;</td>
+                    <td className="ap-td-name">PEL</td>
+                    <td>Pakistan</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono">23+UL</td>
+                    <td className="ap-td-mono">8</td>
+                    <td className="ap-td-mono ap-td-bold">37+UL</td>
+                    <td className="ap-td-mono">12/6/2026+UL</td>
+                    <td className="ap-td-price">$572,297</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+            <p className="ap-footnote"><span className="ap-feoc">*</span>Denotes FEOC</p>
           </div>
         </section>
 
-        {/* ========== SLIDE 4 — CLOSING ========== */}
-        <section className="ap-slide" ref={s4.ref}>
-          <GridBackground />
-          <div className="ap-glow ap-glow-1" />
-          <div className="ap-glow ap-glow-2" />
-          <div className={`ap-closing ${s4.inView ? "in" : ""}`}>
-            <div className="ap-closing-logo">
-              <div className="ap-logo-icon"><Zap className="w-8 h-8" /></div>
+        {/* ========== SLIDE 3 — TOP QUOTES DETAILED ========== */}
+        <section className="ap-slide ap-slide-table" ref={s3.ref}>
+          <div className={`ap-content ${s3.inView ? "in" : ""}`}>
+            <div className="ap-slide-label">DETAILED BREAKDOWN</div>
+            <h2 className="ap-h2">Top Quotes for 20 MVA Project (Detailed)</h2>
+
+            <div className="ap-table-wrap">
+              <table className="ap-table ap-table-compact">
+                <thead>
+                  <tr>
+                    <th>Supplier</th>
+                    <th>Origin</th>
+                    <th>UL / NRTL</th>
+                    <th>Design (Wks)</th>
+                    <th>Mfg (Wks)</th>
+                    <th>UL (Wks)</th>
+                    <th>Ship (Wks)</th>
+                    <th>Total LT (Wks)</th>
+                    <th>ETA w/ 3/15 PO</th>
+                    <th>Price</th>
+                    <th>+UL</th>
+                    <th>Tariff</th>
+                    <th>Tax</th>
+                    <th>Freight</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="ap-td-name">Jinpan International (JST)</td>
+                    <td><span className="ap-feoc">*</span>China HQ, Mexico</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">6-8</td>
+                    <td className="ap-td-mono">30</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">1</td>
+                    <td className="ap-td-mono ap-td-bold">38</td>
+                    <td className="ap-td-mono">12/13/2026</td>
+                    <td className="ap-td-mono">$787k</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">0%</td>
+                    <td className="ap-td-mono">8.25%</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-price">$852,068</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">International Electric Co (IEC)</td>
+                    <td>S. Korea</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">2</td>
+                    <td className="ap-td-mono">16</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono ap-td-bold">24</td>
+                    <td className="ap-td-mono">8/30/2026</td>
+                    <td className="ap-td-mono">$518k</td>
+                    <td className="ap-td-mono">$73k</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-price">$591,000</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">Jiangsu First Power</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">2</td>
+                    <td className="ap-td-mono">15</td>
+                    <td className="ap-td-mono">3</td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono ap-td-bold">26</td>
+                    <td className="ap-td-mono">9/13/2026</td>
+                    <td className="ap-td-mono">$440k</td>
+                    <td className="ap-td-mono">$25.5k</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">$205k</td>
+                    <td className="ap-td-price">$670,500</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">Guangdong Keyuan Electric</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">4</td>
+                    <td className="ap-td-mono">18</td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono">8</td>
+                    <td className="ap-td-mono ap-td-bold">36</td>
+                    <td className="ap-td-mono">11/22/2026</td>
+                    <td className="ap-td-mono">$305k</td>
+                    <td className="ap-td-mono">$60k</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">TBD (~$154k)</td>
+                    <td className="ap-td-price">~~$519,500</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">Jiangsu Yawei Transformer</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">2</td>
+                    <td className="ap-td-mono">12</td>
+                    <td className="ap-td-mono">1</td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono ap-td-bold">20+UL</td>
+                    <td className="ap-td-mono">8/2/2026+UL</td>
+                    <td className="ap-td-mono">$368k</td>
+                    <td className="ap-td-mono">$3k</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">$104.5k</td>
+                    <td className="ap-td-price">$474,797</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">PEL</td>
+                    <td>Pakistan</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">6</td>
+                    <td className="ap-td-mono">23</td>
+                    <td className="ap-td-mono">TBD</td>
+                    <td className="ap-td-mono">8</td>
+                    <td className="ap-td-mono ap-td-bold">37+UL</td>
+                    <td className="ap-td-mono">12/6/2026+UL</td>
+                    <td className="ap-td-mono">$572k</td>
+                    <td className="ap-td-mono">TBD</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-mono">Incl.</td>
+                    <td className="ap-td-price">$572,297</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <h2 className="ap-closing-h2">Next Steps</h2>
-            <p className="ap-closing-p">
-              Ready to proceed with MFG drawings, PO negotiations, and facility reviews
-              for the recommended suppliers.
-            </p>
-            <a href="mailto:brian@fluxco.com" className="ap-cta">
-              Contact FluxCo <ArrowRight className="w-4 h-4" />
-            </a>
-            <div className="ap-closing-contact">
-              <span>FluxCo</span>
+            <p className="ap-footnote"><span className="ap-feoc">*</span>Denotes FEOC</p>
+          </div>
+        </section>
+
+        {/* ========== SLIDE 4 — TOP QUOTES QUALITY ========== */}
+        <section className="ap-slide ap-slide-table" ref={s4.ref}>
+          <div className={`ap-content ${s4.inView ? "in" : ""}`}>
+            <div className="ap-slide-label">QUALITY ASSESSMENT</div>
+            <h2 className="ap-h2">Top Quotes for 20 MVA Project (Quality)</h2>
+
+            <div className="ap-table-wrap">
+              <table className="ap-table">
+                <thead>
+                  <tr>
+                    <th>Supplier</th>
+                    <th>Origin</th>
+                    <th>UL / NRTL</th>
+                    <th>Year Founded</th>
+                    <th>U.S. Service / Partner</th>
+                    <th>N.A. Past Perf. 5 yrs (pcs)</th>
+                    <th>N.A. Project Locations</th>
+                    <th>Size Range (MVA)</th>
+                    <th>Industries</th>
+                    <th>Customers</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="ap-td-name">Jinpan International (JST)</td>
+                    <td><span className="ap-feoc">*</span>China HQ &amp; supply, Mexico fab.</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">1993</td>
+                    <td>FL and VA offices, In-house</td>
+                    <td className="ap-td-mono">&gt;1,000</td>
+                    <td>US</td>
+                    <td className="ap-td-mono">Up to 100 in China</td>
+                    <td>Utility, Solar Data Center</td>
+                    <td>Florida utility, German solar dev, hyperscaler</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">International Electric Co (IEC)</td>
+                    <td>S. Korea</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">1946</td>
+                    <td>Dallas office, inventory / RESA Power</td>
+                    <td className="ap-td-mono">&gt;4700</td>
+                    <td>FL, CA, AZ, CAN</td>
+                    <td className="ap-td-mono">Up to 60</td>
+                    <td>Utility, Solar Data Center</td>
+                    <td>Transformer OEMs, Amazon, Centerpoint</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">Jiangsu First Power</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">2004</td>
+                    <td>Dallas office, inventory</td>
+                    <td className="ap-td-mono">&gt;500</td>
+                    <td>TX, PR, Other US</td>
+                    <td className="ap-td-mono">Up to 400</td>
+                    <td>BTC Mining Data Center</td>
+                    <td>SpaceX</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">Guangdong Keyuan Electric</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">2007</td>
+                    <td>NY and Dallas office / Partner in negotiations</td>
+                    <td className="ap-td-mono">&gt;10</td>
+                    <td>CAN</td>
+                    <td className="ap-td-mono">Up to 20</td>
+                    <td>Utility, Storage, Data Center</td>
+                    <td>Transformer OEMs, China Southern</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">Jiangsu Yawei Transformer</td>
+                    <td><span className="ap-feoc">*</span>China</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">1992</td>
+                    <td>Houston office, inventory</td>
+                    <td className="ap-td-mono">&gt;50</td>
+                    <td>OH, Other US</td>
+                    <td className="ap-td-mono">Up to 50</td>
+                    <td>BTC Mining Data Center</td>
+                    <td>BJIN</td>
+                  </tr>
+                  <tr>
+                    <td className="ap-td-name">PEL</td>
+                    <td>Pakistan</td>
+                    <td><ULCheck /></td>
+                    <td className="ap-td-mono">1956</td>
+                    <td>Emerald Transformers</td>
+                    <td className="ap-td-mono">&gt;800</td>
+                    <td>CA</td>
+                    <td className="ap-td-mono">Up to 100</td>
+                    <td>Data Center</td>
+                    <td>Tesla</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+            <p className="ap-footnote"><span className="ap-feoc">*</span>Denotes FEOC</p>
           </div>
         </section>
 
@@ -339,7 +555,6 @@ const apStyles = `
     padding-top: 60px;
   }
 
-  /* ---- BACKGROUNDS ---- */
   .ap-grid-bg { position: absolute; inset: 0; z-index: 0; opacity: 0.8; }
 
   .ap-glow {
@@ -348,7 +563,7 @@ const apStyles = `
   }
   .ap-glow-1 { width: 600px; height: 600px; top: -100px; right: -100px; background: rgba(45,140,255,0.08); animation: ap-float 8s ease-in-out infinite; }
   .ap-glow-2 { width: 400px; height: 400px; bottom: -50px; left: 10%; background: rgba(230,57,70,0.05); animation: ap-float 10s ease-in-out infinite reverse; }
-  .ap-glow-4 { width: 500px; height: 500px; bottom: 10%; left: -100px; background: rgba(45,140,255,0.05); animation: ap-float 11s ease-in-out infinite reverse; }
+  .ap-glow-3 { width: 500px; height: 500px; top: 20%; right: -100px; background: rgba(45,140,255,0.06); animation: ap-float 9s ease-in-out infinite; }
 
   @keyframes ap-float {
     0%, 100% { transform: translate(0, 0) scale(1); }
@@ -403,7 +618,7 @@ const apStyles = `
 
   /* ---- CONTENT WRAPPER ---- */
   .ap-content {
-    padding: 60px 80px; width: 100%; max-width: 1300px;
+    padding: 60px 80px; width: 100%; max-width: 1400px;
     margin: 0 auto; z-index: 1;
   }
 
@@ -412,14 +627,14 @@ const apStyles = `
   .ap-content.in .ap-h2,
   .ap-content.in > .ap-p,
   .ap-content.in .ap-table-wrap,
-  .ap-content.in .ap-pending-grid {
+  .ap-content.in .ap-footnote {
     animation: ap-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .ap-content .ap-slide-label { opacity: 0; animation-delay: 0s; }
   .ap-content .ap-h2 { opacity: 0; animation-delay: 0.1s; }
   .ap-content > .ap-p { opacity: 0; animation-delay: 0.2s; }
   .ap-content .ap-table-wrap { opacity: 0; animation-delay: 0.15s; }
-  .ap-content .ap-pending-grid { opacity: 0; animation-delay: 0.2s; }
+  .ap-content .ap-footnote { opacity: 0; animation-delay: 0.25s; }
 
   @keyframes ap-fade-up {
     from { opacity: 0; transform: translateY(30px); }
@@ -518,17 +733,38 @@ const apStyles = `
     margin-bottom: 12px; font-family: 'Inter', sans-serif;
   }
 
+  .ap-footnote {
+    font-family: 'Inter', sans-serif; font-size: 12px;
+    color: var(--ap-text-dim); margin-top: 12px; font-style: italic;
+  }
+
+  .ap-feoc {
+    color: var(--ap-red); font-weight: 700; margin-right: 2px;
+  }
+
+  /* ---- UL CHECK ---- */
+  .ap-ul-check {
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ap-green);
+  }
+
   /* ---- TABLE ---- */
   .ap-table-wrap {
     margin-top: 16px;
     border-radius: var(--ap-radius);
     overflow: hidden;
     border: 1px solid var(--ap-border);
+    overflow-x: auto;
   }
   .ap-table {
     width: 100%; border-collapse: collapse;
     font-family: 'Inter', sans-serif; font-size: 13px;
+    min-width: 900px;
   }
+  .ap-table-compact { font-size: 11px; min-width: 1200px; }
+  .ap-table-compact th { padding: 12px 10px; font-size: 9px; }
+  .ap-table-compact td { padding: 10px 10px; }
+
   .ap-table th {
     padding: 14px 16px; text-align: left;
     font-weight: 600; font-size: 10px;
@@ -536,6 +772,7 @@ const apStyles = `
     letter-spacing: 1.5px;
     background: rgba(45,140,255,0.06);
     border-bottom: 1px solid rgba(45,140,255,0.15);
+    white-space: nowrap;
   }
   .ap-table td {
     padding: 12px 16px; color: var(--ap-text);
@@ -545,80 +782,19 @@ const apStyles = `
   .ap-table tr:last-child td { border-bottom: none; }
   .ap-table tr:hover td { background: rgba(255,255,255,0.02); }
 
-  .ap-table-detail td { font-size: 12px; line-height: 1.5; }
   .ap-td-name { color: #fff !important; font-weight: 600; white-space: nowrap; }
-  .ap-td-lt { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ap-text-dim); }
-
-  /* ---- PENDING GRID ---- */
-  .ap-pending-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 14px; margin-top: 32px;
+  .ap-td-mono {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    text-align: center;
   }
-  .ap-pending-card {
-    display: flex; align-items: center; gap: 14px;
-    padding: 18px 20px; border-radius: var(--ap-radius);
-    background: var(--ap-surface); border: 1px solid var(--ap-border);
-    transition: all 0.3s;
+  .ap-table-compact .ap-td-mono { font-size: 10px; }
+  .ap-td-bold { font-weight: 700; color: #fff !important; }
+  .ap-td-price {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ap-blue) !important; font-weight: 700;
+    white-space: nowrap;
   }
-  .ap-pending-card:hover { border-color: rgba(45,140,255,0.3); transform: translateX(4px); }
-  .ap-pending-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: rgba(45,140,255,0.1);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--ap-blue); flex-shrink: 0;
-  }
-  .ap-pending-name {
-    font-family: 'Inter', sans-serif; font-size: 14px;
-    color: #fff; font-weight: 600;
-  }
-  .ap-pending-country {
-    font-family: 'Inter', sans-serif; font-size: 11px;
-    color: var(--ap-text-dim); margin-top: 2px;
-  }
-
-  /* ---- CLOSING ---- */
-  .ap-closing {
-    display: flex; flex-direction: column; align-items: center;
-    text-align: center; z-index: 2; padding: 80px; max-width: 800px;
-  }
-  .ap-closing .ap-logo-icon,
-  .ap-closing .ap-closing-h2,
-  .ap-closing .ap-closing-p,
-  .ap-closing .ap-cta,
-  .ap-closing .ap-closing-contact {
-    opacity: 0; transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .ap-closing.in .ap-logo-icon { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
-  .ap-closing.in .ap-closing-h2 { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
-  .ap-closing.in .ap-closing-p { opacity: 1; transform: translateY(0); transition-delay: 0.5s; }
-  .ap-closing.in .ap-cta { opacity: 1; transform: translateY(0); transition-delay: 0.7s; }
-  .ap-closing.in .ap-closing-contact { opacity: 1; transform: translateY(0); transition-delay: 0.85s; }
-
-  .ap-closing-logo { margin-bottom: 24px; }
-  .ap-closing-h2 {
-    font-family: 'Oswald', sans-serif; font-size: clamp(36px, 5vw, 56px);
-    font-weight: 700; color: #fff; text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-  .ap-closing-p {
-    font-family: 'Inter', sans-serif; font-size: 17px;
-    color: var(--ap-text); line-height: 1.6; margin-bottom: 32px;
-  }
-  .ap-cta {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
-    color: #fff; letter-spacing: 2px; text-transform: uppercase;
-    padding: 16px 32px; border-radius: 100px;
-    background: linear-gradient(135deg, var(--ap-blue), rgba(45,140,255,0.7));
-    text-decoration: none; transition: all 0.3s;
-    box-shadow: 0 0 30px rgba(45,140,255,0.2);
-  }
-  .ap-cta:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(45,140,255,0.4); }
-  .ap-closing-contact {
-    display: flex; align-items: center; gap: 16px; margin-top: 32px;
-    font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ap-text-dim);
-  }
+  .ap-table-compact .ap-td-price { font-size: 11px; }
 
   /* ---- MOBILE ---- */
   @media (max-width: 768px) {
@@ -628,15 +804,12 @@ const apStyles = `
       overflow-y: visible !important; scroll-snap-type: none !important;
     }
     .ap-slide { min-height: auto; padding: 48px 0; scroll-snap-align: none; }
-    .ap-slide:first-child, .ap-slide:last-child { min-height: 100vh; min-height: 100svh; padding: 0; }
-    .ap-content { padding: 24px 20px; }
+    .ap-slide:first-child { min-height: 100vh; min-height: 100svh; padding: 0; }
+    .ap-content { padding: 24px 16px; }
     .ap-title-content { padding: 40px 24px; }
     .ap-h2 { font-size: 28px; }
-    .ap-pending-grid { grid-template-columns: 1fr; }
     .ap-progress { display: none; }
     .ap-nav { display: none; }
     .ap-scroll-hint { display: none; }
-    .ap-closing { padding: 48px 24px; }
-    .ap-table-wrap { overflow-x: auto; }
   }
 `;
