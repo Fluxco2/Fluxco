@@ -552,7 +552,7 @@ const apStyles = `
   }
   .ap-slide-table {
     justify-content: flex-start;
-    padding-top: 60px;
+    padding-top: 40px;
   }
 
   .ap-grid-bg { position: absolute; inset: 0; z-index: 0; opacity: 0.8; }
@@ -618,7 +618,7 @@ const apStyles = `
 
   /* ---- CONTENT WRAPPER ---- */
   .ap-content {
-    padding: 60px 80px; width: 100%; max-width: 1400px;
+    padding: 40px 32px; width: 100%; max-width: 100%;
     margin: 0 auto; z-index: 1;
   }
 
@@ -754,47 +754,46 @@ const apStyles = `
     border-radius: var(--ap-radius);
     overflow: hidden;
     border: 1px solid var(--ap-border);
-    overflow-x: auto;
   }
   .ap-table {
     width: 100%; border-collapse: collapse;
-    font-family: 'Inter', sans-serif; font-size: 13px;
-    min-width: 900px;
+    font-family: 'Inter', sans-serif; font-size: 11px;
+    table-layout: auto;
   }
-  .ap-table-compact { font-size: 11px; min-width: 1200px; }
-  .ap-table-compact th { padding: 12px 10px; font-size: 9px; }
-  .ap-table-compact td { padding: 10px 10px; }
+  .ap-table-compact { font-size: 10px; }
+  .ap-table-compact th { padding: 8px 6px; font-size: 8px; letter-spacing: 0.8px; }
+  .ap-table-compact td { padding: 7px 6px; }
 
   .ap-table th {
-    padding: 14px 16px; text-align: left;
-    font-weight: 600; font-size: 10px;
+    padding: 10px 8px; text-align: left;
+    font-weight: 600; font-size: 9px;
     color: var(--ap-blue); text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.8px;
     background: rgba(45,140,255,0.06);
     border-bottom: 1px solid rgba(45,140,255,0.15);
-    white-space: nowrap;
   }
   .ap-table td {
-    padding: 12px 16px; color: var(--ap-text);
+    padding: 8px 8px; color: var(--ap-text);
     border-bottom: 1px solid var(--ap-border);
     vertical-align: top;
   }
   .ap-table tr:last-child td { border-bottom: none; }
   .ap-table tr:hover td { background: rgba(255,255,255,0.02); }
 
-  .ap-td-name { color: #fff !important; font-weight: 600; white-space: nowrap; }
+  .ap-td-name { color: #fff !important; font-weight: 600; white-space: nowrap; font-size: 11px; }
+  .ap-table-compact .ap-td-name { font-size: 10px; }
   .ap-td-mono {
-    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
     text-align: center;
   }
-  .ap-table-compact .ap-td-mono { font-size: 10px; }
+  .ap-table-compact .ap-td-mono { font-size: 9px; }
   .ap-td-bold { font-weight: 700; color: #fff !important; }
   .ap-td-price {
     font-family: 'JetBrains Mono', monospace;
     color: var(--ap-blue) !important; font-weight: 700;
-    white-space: nowrap;
+    white-space: nowrap; font-size: 11px;
   }
-  .ap-table-compact .ap-td-price { font-size: 11px; }
+  .ap-table-compact .ap-td-price { font-size: 10px; }
 
   /* ---- MOBILE ---- */
   @media (max-width: 768px) {
