@@ -689,6 +689,7 @@ export default function RedactedProposal() {
                 <div className="ap-rec-body">
                   <p>Well-established manufacturer with major OEMs white-labeling their products. Cooperative relations with <strong>multiple Fortune 500 electrical companies</strong>. Awarded national projects with stringent quality requirements. US support teams on East Coast and Southwest.</p>
                 </div>
+                <div className="ap-rec-quals-label">Certifications</div>
                 <div className="ap-rec-quals">
                   <span>IEC</span><span>UL</span><span>CSA</span><span>KEMA</span><span>ISO</span><span>UL/c-UL XPLH</span>
                 </div>
@@ -712,6 +713,7 @@ export default function RedactedProposal() {
                 <div className="ap-rec-body">
                   <p>Established manufacturer with comprehensive certifications. <strong>2.7M sq ft facility</strong>. Awarded national projects. Delivered multiple units to Canada and US including <strong>major utility</strong> projects.</p>
                 </div>
+                <div className="ap-rec-quals-label">Certifications</div>
                 <div className="ap-rec-quals">
                   <span>ISO 9001:2015</span><span>UL-Canada</span>
                 </div>
@@ -735,6 +737,7 @@ export default function RedactedProposal() {
                 <div className="ap-rec-body">
                   <p>Highly professional team. Acquired <strong>legacy European technology</strong>. Shows up with 3-6 technical reps per meeting. Past projects include <strong>major tech company data centers</strong>. ~800 transformers delivered to US recently.</p>
                 </div>
+                <div className="ap-rec-quals-label">Certifications</div>
                 <div className="ap-rec-quals">
                   <span>ISO 9001:2015</span><span>UL/c-UL XPLH</span><span>ISO 14001</span><span>ISO 45001</span>
                 </div>
@@ -1430,6 +1433,11 @@ const apStyles = `
   }
   .ap-rec-body p { margin: 0; }
   .ap-rec-body strong { color: #fff; font-weight: 600; }
+  .ap-rec-quals-label {
+    font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600;
+    color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
   .ap-rec-quals {
     display: flex; flex-wrap: wrap; gap: 6px;
   }
