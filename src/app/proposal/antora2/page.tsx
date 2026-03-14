@@ -198,7 +198,7 @@ export default function Antora2Proposal() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="ap-td-name">Jinpan International (JST)</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1-JLvkBiio64jn49djjFKNYmCPVIU1q8s?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jinpan International (JST)</a></td>
                     <td><span className="ap-feoc">*</span>China HQ, Mexico</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">6-8</td>
@@ -209,7 +209,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">$852,068</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">International Electric Co (IEC)</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1o4YWFG8FsgSbj8WKGvOlxaBAwqgh8GVU?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">International Electric Co (IEC)</a></td>
                     <td>S. Korea</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">2</td>
@@ -220,7 +220,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">$591,000</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Jiangsu First Power</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1Jpukpv-3l2L2ayOVYq4WrtJmTcK_zIGc?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jiangsu First Power</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">2</td>
@@ -231,7 +231,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">$670,500</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Guangdong Keyuan Electric</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1taCrIiwbA2xGxGI9EdXdh5W9Rq2p8jZ2?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Guangdong Keyuan Electric</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">4</td>
@@ -242,7 +242,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">~~$519,500</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Jiangsu Yawei Transformer</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1vJkvMePM_OZXHZgnLyUDkwoKgF4NqNiX?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jiangsu Yawei Transformer</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">2</td>
@@ -253,7 +253,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">$474,797</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">PEL</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1oCus9sgMOUOlY0Nf7kGNH15gGbQEwZIB?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">PEL</a></td>
                     <td>Pakistan</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">6</td>
@@ -299,7 +299,7 @@ export default function Antora2Proposal() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="ap-td-name">Jinpan International (JST)</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1-JLvkBiio64jn49djjFKNYmCPVIU1q8s?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jinpan International (JST)</a></td>
                     <td><span className="ap-feoc">*</span>China HQ, Mexico</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">6-8</td>
@@ -316,7 +316,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">$852,068</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">International Electric Co (IEC)</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1o4YWFG8FsgSbj8WKGvOlxaBAwqgh8GVU?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">International Electric Co (IEC)</a></td>
                     <td>S. Korea</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">2</td>
@@ -333,7 +333,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">$591,000</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Jiangsu First Power</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1Jpukpv-3l2L2ayOVYq4WrtJmTcK_zIGc?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jiangsu First Power</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">2</td>
@@ -350,7 +350,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">$670,500</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Guangdong Keyuan Electric</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1taCrIiwbA2xGxGI9EdXdh5W9Rq2p8jZ2?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Guangdong Keyuan Electric</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">4</td>
@@ -367,7 +367,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">~~$519,500</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Jiangsu Yawei Transformer</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1vJkvMePM_OZXHZgnLyUDkwoKgF4NqNiX?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jiangsu Yawei Transformer</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">2</td>
@@ -384,7 +384,7 @@ export default function Antora2Proposal() {
                     <td className="ap-td-price">$474,797</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">PEL</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1oCus9sgMOUOlY0Nf7kGNH15gGbQEwZIB?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">PEL</a></td>
                     <td>Pakistan</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">6</td>
@@ -431,7 +431,7 @@ export default function Antora2Proposal() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="ap-td-name">Jinpan International (JST)</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1-JLvkBiio64jn49djjFKNYmCPVIU1q8s?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jinpan International (JST)</a></td>
                     <td><span className="ap-feoc">*</span>China HQ &amp; supply, Mexico fab.</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">1993</td>
@@ -443,7 +443,7 @@ export default function Antora2Proposal() {
                     <td>Florida utility, German solar dev, hyperscaler</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">International Electric Co (IEC)</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1o4YWFG8FsgSbj8WKGvOlxaBAwqgh8GVU?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">International Electric Co (IEC)</a></td>
                     <td>S. Korea</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">1946</td>
@@ -455,7 +455,7 @@ export default function Antora2Proposal() {
                     <td>Transformer OEMs, Amazon, Centerpoint</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Jiangsu First Power</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1Jpukpv-3l2L2ayOVYq4WrtJmTcK_zIGc?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jiangsu First Power</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">2004</td>
@@ -467,7 +467,7 @@ export default function Antora2Proposal() {
                     <td>SpaceX</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Guangdong Keyuan Electric</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1taCrIiwbA2xGxGI9EdXdh5W9Rq2p8jZ2?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Guangdong Keyuan Electric</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">2007</td>
@@ -479,7 +479,7 @@ export default function Antora2Proposal() {
                     <td>Transformer OEMs, China Southern</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">Jiangsu Yawei Transformer</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1vJkvMePM_OZXHZgnLyUDkwoKgF4NqNiX?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">Jiangsu Yawei Transformer</a></td>
                     <td><span className="ap-feoc">*</span>China</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">1992</td>
@@ -491,7 +491,7 @@ export default function Antora2Proposal() {
                     <td>BJIN</td>
                   </tr>
                   <tr>
-                    <td className="ap-td-name">PEL</td>
+                    <td className="ap-td-name"><a href="https://drive.google.com/drive/folders/1oCus9sgMOUOlY0Nf7kGNH15gGbQEwZIB?usp=drive_link" target="_blank" rel="noopener noreferrer" className="ap-td-link">PEL</a></td>
                     <td>Pakistan</td>
                     <td><ULCheck /></td>
                     <td className="ap-td-mono">1956</td>
@@ -781,6 +781,8 @@ const apStyles = `
   .ap-table tr:hover td { background: rgba(255,255,255,0.02); }
 
   .ap-td-name { color: #fff !important; font-weight: 600; white-space: nowrap; font-size: 11px; }
+  .ap-td-link { color: inherit; text-decoration: none; border-bottom: 1px solid rgba(45,140,255,0.4); transition: border-color 0.2s, color 0.2s; }
+  .ap-td-link:hover { color: var(--ap-blue) !important; border-bottom-color: var(--ap-blue); }
   .ap-table-compact .ap-td-name { font-size: 10px; }
   .ap-td-mono {
     font-family: 'JetBrains Mono', monospace; font-size: 10px;
