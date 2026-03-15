@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Supplier File Browser — Option Comparison</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #f5f4f0; color: #1a1a18; padding: 2rem; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+  .tab { padding: 8px 18px; border: 0.5px solid #ccc; border-radius: 8px; font-size: 13px; background: #fff; color: #666; cursor: pointer; }
+  .tab.active { background: #ebebeb; color: #111; border-color: #aaa; font-weight: 500; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .label { font-size: 11px; font-weight: 500; color: #888; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.75rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 500; color: #888; border-bottom: 0.5px solid #e0e0d8; }
+  td { padding: 10px 12px; border-bottom: 0.5px solid #e0e0d8; color: #1a1a18; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr.supplier-row { cursor: pointer; }
+  tr.supplier-row:hover td { background: #f0efe9; }
+
+  .origin-badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #f0efe9; color: #666; border: 0.5px solid #ddd; white-space: nowrap; }
+  .feoc { background: #FAEEDA; color: #854F0B; border-color: #EF9F27; }
+
+  .files-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 10px; border: 0.5px solid #ccc; border-radius: 8px; background: #fff; color: #666; cursor: pointer; white-space: nowrap; }
+  .files-btn:hover { background: #f0efe9; }
+  .files-btn svg { width: 12px; height: 12px; flex-shrink: 0; transition: transform 0.2s; }
+  .files-btn.open svg { transform: rotate(180deg); }
+
+  .dropdown-row td { padding: 0; }
+  .file-dropdown { display: none; padding: 10px 12px 14px 12px; background: #f5f4f0; border-bottom: 0.5px solid #e0e0d8; }
+  .file-dropdown.open { display: block; }
+  .file-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .file-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: #fff; border: 0.5px solid #e0e0d8; font-size: 12px; color: #1a1a18; cursor: pointer; text-decoration: none; }
+  .file-item:hover { border-color: #bbb; }
+  .file-icon { font-size: 14px; }
+  .file-meta { font-size: 11px; color: #999; margin-left: auto; }
+  .dropdown-label { font-size: 11px; color: #888; font-weight: 500; }
+  .open-folder { font-size: 11px; color: #185FA5; text-decoration: none; margin-left: auto; }
+  .open-folder:hover { text-decoration: underline; }
+
+  .price { font-variant-numeric: tabular-nums; }
+  .eta-good { color: #0F6E56; }
+  .eta-late { color: #854F0B; }
+
+  .drawer-demo { position: relative; min-height: 380px; border: 0.5px solid #ddd; border-radius: 12px; overflow: hidden; background: #fff; }
+  .drawer-table-wrap { transition: margin-right 0.25s ease; }
+  .drawer-table-wrap.shifted { margin-right: 280px; }
+  .drawer { position: absolute; top: 0; right: -280px; width: 280px; height: 100%; border-left: 0.5px solid #ddd; background: #fff; transition: right 0.25s ease; display: flex; flex-direction: column; }
+  .drawer.open { right: 0; }
+  .drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 0.5px solid #e0e0d8; }
+  .drawer-title { font-size: 13px; font-weight: 500; }
+  .drawer-sub { font-size: 11px; color: #888; margin-top: 2px; }
+  .close-btn { width: 24px; height: 24px; border: 0.5px solid #ddd; border-radius: 8px; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #888; font-size: 14px; flex-shrink: 0; }
+  .close-btn:hover { background: #f0efe9; }
+  .drawer-files { flex: 1; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .drawer-file { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; border: 0.5px solid #e0e0d8; font-size: 12px; color: #1a1a18; cursor: pointer; text-decoration: none; }
+  .drawer-file:hover { background: #f5f4f0; }
+  .drawer-footer { padding: 10px 12px; border-top: 0.5px solid #e0e0d8; }
+  .open-drive { display: block; text-align: center; font-size: 12px; color: #185FA5; text-decoration: none; padding: 7px; border: 0.5px solid #ddd; border-radius: 8px; }
+  .open-drive:hover { background: #f5f4f0; }
+  .active-row td { background: #f5f4f0; }
+  .note { font-size: 12px; color: #888; margin-top: 1rem; padding: 10px 12px; border: 0.5px solid #e0e0d8; border-radius: 8px; background: #f5f4f0; }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('inline')">Option 1 — inline dropdown</button>
+  <button class="tab" onclick="showTab('drawer')">Option 2 — side drawer</button>
+</div>
+
+<div id="panel-inline" class="panel active">
+  <div class="label">Click "Files" on any row to expand</div>
+  <table>
+    <thead>
+      <tr><th>Supplier</th><th>Origin</th><th>ETA</th><th>Total</th><th>Files</th></tr>
+    </thead>
+    <tbody id="inline-tbody"></tbody>
+  </table>
+</div>
+
+<div id="panel-drawer" class="panel">
+  <div class="label">Click any supplier row to open the side panel</div>
+  <div class="drawer-demo">
+    <div class="drawer-table-wrap" id="drawer-table-wrap">
+      <table>
+        <thead>
+          <tr><th>Supplier</th><th>Origin</th><th>ETA</th><th>Total</th></tr>
+        </thead>
+        <tbody id="drawer-tbody"></tbody>
+      </table>
+    </div>
+    <div class="drawer" id="drawer">
+      <div class="drawer-header">
+        <div>
+          <div class="drawer-title" id="drawer-name">—</div>
+          <div class="drawer-sub" id="drawer-origin">—</div>
+        </div>
+        <button class="close-btn" onclick="closeDrawer()">✕</button>
+      </div>
+      <div class="drawer-files" id="drawer-files"></div>
+      <div class="drawer-footer">
+        <a href="#" class="open-drive" id="drawer-drive-link">Open in Google Drive ↗</a>
+      </div>
+    </div>
+  </div>
+  <p class="note">In production the drawer fetches real file names from Google Drive API using the folder ID from each supplier's link.</p>
+</div>
+
+<script>
+const suppliers = [
+  { name: "International Electric Co (IEC)", origin: "S. Korea", feoc: false, eta: "Aug 30", etaClass: "eta-good", price: "$591,000", drive: "https://drive.google.com/drive/folders/1o4YWFG8FsgSbj8WKGvOlxaBAwqgh8GVU" },
+  { name: "Jiangsu Yawei Transformer", origin: "China *FEOC", feoc: true, eta: "Aug 2 +UL", etaClass: "eta-good", price: "$474,797", drive: "https://drive.google.com/drive/folders/1vJkvMePM_OZXHZgnLyUDkwoKgF4NqNiX" },
+  { name: "PEL", origin: "Pakistan", feoc: false, eta: "Dec 6 +UL", etaClass: "eta-late", price: "$572,297", drive: "https://drive.google.com/drive/folders/1oCus9sgMOUOlY0Nf7kGNH15gGbQEwZIB" },
+  { name: "Jinpan International (JST)", origin: "China/Mexico *FEOC", feoc: true, eta: "Dec 13", etaClass: "eta-late", price: "$852,068", drive: "https://drive.google.com/drive/folders/1-JLvkBiio64jn49djjFKNYmCPVIU1q8s" },
+];
+
+const mockFiles = [
+  { name: "Technical Datasheet.pdf", type: "pdf", size: "2.1 MB" },
+  { name: "Quote Rev2.pdf", type: "pdf", size: "340 KB" },
+  { name: "UL Certificate.pdf", type: "pdf", size: "180 KB" },
+  { name: "References_NA.docx", type: "doc", size: "95 KB" },
+];
+
+const fileIcon = t => t === "pdf" ? "📄" : t === "doc" ? "📝" : "📁";
+
+function buildInline() {
+  const tb = document.getElementById("inline-tbody");
+  suppliers.forEach((s, i) => {
+    const row = document.createElement("tr");
+    row.className = "supplier-row";
+    row.innerHTML = `
+      <td style="font-weight:500">${s.name}</td>
+      <td><span class="origin-badge${s.feoc?' feoc':''}">${s.origin}</span></td>
+      <td class="price ${s.etaClass}">${s.eta}</td>
+      <td class="price">${s.price}</td>
+      <td>
+        <button class="files-btn" id="btn-${i}" onclick="toggleDropdown(${i}, event)">
+          <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+          Files
+        </button>
+      </td>`;
+    tb.appendChild(row);
+    const dr = document.createElement("tr");
+    dr.className = "dropdown-row";
+    dr.innerHTML = `<td colspan="5"><div class="file-dropdown" id="drop-${i}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span class="dropdown-label">Supplier documents</span>
+        <a href="${s.drive}" target="_blank" class="open-folder">Open folder ↗</a>
+      </div>
+      <div class="file-list">${mockFiles.map(f=>`<a href="${s.drive}" target="_blank" class="file-item"><span class="file-icon">${fileIcon(f.type)}</span>${f.name}<span class="file-meta">${f.size}</span></a>`).join('')}</div>
+    </div></td>`;
+    tb.appendChild(dr);
+  });
+}
+
+function toggleDropdown(i, e) {
+  e.stopPropagation();
+  const drop = document.getElementById(`drop-${i}`);
+  const btn = document.getElementById(`btn-${i}`);
+  const isOpen = drop.classList.contains("open");
+  document.querySelectorAll(".file-dropdown.open").forEach(d=>d.classList.remove("open"));
+  document.querySelectorAll(".files-btn.open").forEach(b=>b.classList.remove("open"));
+  if (!isOpen) { drop.classList.add("open"); btn.classList.add("open"); }
+}
+
+function buildDrawer() {
+  const tb = document.getElementById("drawer-tbody");
+  suppliers.forEach((s, i) => {
+    const row = document.createElement("tr");
+    row.className = "supplier-row";
+    row.id = `drow-${i}`;
+    row.onclick = () => openDrawer(i);
+    row.innerHTML = `
+      <td style="font-weight:500">${s.name}</td>
+      <td><span class="origin-badge${s.feoc?' feoc':''}">${s.origin}</span></td>
+      <td class="price ${s.etaClass}">${s.eta}</td>
+      <td class="price">${s.price}</td>`;
+    tb.appendChild(row);
+  });
+}
+
+function openDrawer(i) {
+  const s = suppliers[i];
+  document.querySelectorAll("#drawer-tbody tr").forEach(r=>r.classList.remove("active-row"));
+  document.getElementById(`drow-${i}`).classList.add("active-row");
+  document.getElementById("drawer-name").textContent = s.name;
+  document.getElementById("drawer-origin").textContent = s.origin + " · " + s.price;
+  document.getElementById("drawer-drive-link").href = s.drive;
+  const df = document.getElementById("drawer-files");
+  df.innerHTML = `<div class="dropdown-label" style="margin-bottom:4px">Supplier documents</div>` +
+    mockFiles.map(f=>`<a href="${s.drive}" target="_blank" class="drawer-file">${fileIcon(f.type)} ${f.name}<span class="file-meta">${f.size}</span></a>`).join('');
+  document.getElementById("drawer").classList.add("open");
+  document.getElementById("drawer-table-wrap").classList.add("shifted");
+}
+
+function closeDrawer() {
+  document.getElementById("drawer").classList.remove("open");
+  document.getElementById("drawer-table-wrap").classList.remove("shifted");
+  document.querySelectorAll("#drawer-tbody tr").forEach(r=>r.classList.remove("active-row"));
+}
+
+function showTab(tab) {
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  document.querySelector(`.tab:nth-child(${tab==='inline'?1:2})`).classList.add("active");
+  document.getElementById(`panel-${tab}`).classList.add("active");
+}
+
+buildInline();
+buildDrawer();
+</script>
+</body>
+</html>
