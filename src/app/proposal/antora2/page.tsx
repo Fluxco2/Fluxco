@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Zap, ArrowRight, ArrowLeft, ChevronDown, Clock,
-  MapPin, CheckCircle,
+  MapPin, CheckCircle, ExternalLink,
 } from "lucide-react";
 
 const TOTAL_SECTIONS = 4;
@@ -170,6 +170,9 @@ export default function Antora2Proposal() {
             <div className="ap-title-meta">
               <span><MapPin className="w-3.5 h-3.5" /> Pratt, KS</span>
               <span><Clock className="w-3.5 h-3.5" /> Updated March 2026</span>
+              <a href="https://drive.google.com/drive/folders/1uCUXCKtVMdXZWoMr2oeNxQXqZHaNtuX3" target="_blank" rel="noopener noreferrer" className="ap-dataroom-link">
+                <ExternalLink className="w-3.5 h-3.5" /> Dataroom: Certifications and References
+              </a>
             </div>
           </div>
         </section>
@@ -715,6 +718,14 @@ const apStyles = `
     display: flex; align-items: center; gap: 6px;
   }
   .ap-title-meta svg { color: var(--ap-blue); }
+  .ap-dataroom-link {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--ap-text-dim); text-decoration: none;
+    border-bottom: 1px solid rgba(45,140,255,0.3);
+    padding-bottom: 1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .ap-dataroom-link:hover { color: var(--ap-blue); border-bottom-color: var(--ap-blue); }
 
   .ap-slide-label {
     font-family: 'JetBrains Mono', monospace; font-size: 11px;
