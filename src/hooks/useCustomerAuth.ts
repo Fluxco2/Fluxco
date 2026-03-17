@@ -44,13 +44,31 @@ export function useCustomerAuth(): UseCustomerAuthReturn {
   const [customer, setCustomer] = useState<CustomerProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchCustomerProfile = useCallback(async (userId: string) => {
+  const fetchCustomerProfile = useCallback(async (userId: string, email?: string) => {
     try {
       const { data, error } = await supabase
         .from("customers")
         .select("*")
         .eq("user_id", userId)
         .single();
+
+      if (error && error.code === "PGRST116" && email) {
+        // No profile exists — auto-create one via API
+        try {
+          const res = await fetch("/api/customer/ensure-profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, email }),
+          });
+          if (res.ok) {
+            const { customer } = await res.json();
+            return customer as CustomerProfile;
+          }
+        } catch (err) {
+          console.error("Error auto-creating customer profile:", err);
+        }
+        return null;
+      }
 
       if (error) {
         console.error("Error fetching customer profile:", error);
@@ -88,7 +106,7 @@ export function useCustomerAuth(): UseCustomerAuthReturn {
           setUser(currentSession?.user ?? null);
 
           if (currentSession?.user) {
-            const profile = await fetchCustomerProfile(currentSession.user.id);
+            const profile = await fetchCustomerProfile(currentSession.user.id, currentSession.user.email);
             if (isMounted) {
               setCustomer(profile);
             }
@@ -115,7 +133,7 @@ export function useCustomerAuth(): UseCustomerAuthReturn {
 
       // Only re-fetch profile on sign-in or token refresh, not every event
       if (event === 'SIGNED_IN' && newSession?.user) {
-        const profile = await fetchCustomerProfile(newSession.user.id);
+        const profile = await fetchCustomerProfile(newSession.user.id, newSession.user.email);
         if (isMounted) {
           setCustomer(profile);
         }
