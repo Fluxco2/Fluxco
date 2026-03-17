@@ -8,11 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle } from "lucide-react";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { supabase } from "@/lib/supabase";
 
 export function LoginForm() {
   const router = useRouter();
-  const { signIn } = useCustomerAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,10 +22,13 @@ export function LoginForm() {
     setError(null);
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (error) {
-      setError(error.message);
+    if (signInError) {
+      setError(signInError.message);
       setLoading(false);
       return;
     }
