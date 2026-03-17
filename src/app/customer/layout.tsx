@@ -101,14 +101,9 @@ export default function CustomerLayout({
             </nav>
 
             <div className="flex items-center gap-4">
-              {customer && (
-                <span className="text-sm text-muted-foreground hidden sm:inline">
-                  {customer.company_name}
-                </span>
-              )}
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
+                {customer?.contact_name || user?.email || "Sign Out"}
               </Button>
             </div>
           </div>
