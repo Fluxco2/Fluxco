@@ -5,6 +5,7 @@ import {
   getFreddyProjectSpec,
   findMatchingOEMs,
   buildOutreachEmail,
+  updateOEMStatus,
 } from "@/lib/freddy";
 
 export async function POST(request: NextRequest) {
@@ -169,6 +170,13 @@ export async function POST(request: NextRequest) {
               status: "sent",
             });
             results.push({ oem: oem.companyName, email: emailAddr, status: "sent", messageId: messageId || undefined });
+
+            // Update OEM status in Notion to "Sent email"
+            try {
+              await updateOEMStatus(oem.id, "Status for 20MVA", "Sent email");
+            } catch (notionErr) {
+              console.error(`Failed to update Notion status for ${oem.companyName}:`, notionErr);
+            }
           } catch (err: any) {
             await supabase.from("freddy_outreach").insert({
               notion_project_id: projectId,

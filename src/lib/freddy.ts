@@ -231,6 +231,204 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/* ------------------------------------------------------------------ */
+/*  Update OEM status in Notion                                        */
+/* ------------------------------------------------------------------ */
+
+type StatusField = "Status for 20MVA" | "Status for 3 MVA";
+
+const STATUS_20MVA_OPTIONS = [
+  "Sent email",
+  "Sent email. Called number",
+  "Distributor form",
+  "Info form",
+  "Preparing Proposal",
+  "Responded. Coordinating",
+  "Proposal Received",
+  "Established Relationship",
+  "Responded",
+  "Declined",
+] as const;
+
+export async function updateOEMStatus(
+  oemPageId: string,
+  field: StatusField,
+  statusName: string
+): Promise<void> {
+  const notion = getNotionClient();
+  await notion.pages.update({
+    page_id: oemPageId,
+    properties: {
+      [field]: { status: { name: statusName } },
+    },
+  });
+}
+
+export async function updateOEMNotes(
+  oemPageId: string,
+  notes: string
+): Promise<void> {
+  const notion = getNotionClient();
+  // Get existing notes first
+  const page = (await notion.pages.retrieve({ page_id: oemPageId })) as any;
+  const existingNotes = getText(page.properties["Notes"]);
+  const timestamp = new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const updatedNotes = existingNotes
+    ? `${existingNotes}\n[${timestamp}] ${notes}`
+    : `[${timestamp}] ${notes}`;
+
+  await notion.pages.update({
+    page_id: oemPageId,
+    properties: {
+      Notes: { rich_text: [{ text: { content: updatedNotes.slice(0, 2000) } }] },
+    },
+  });
+}
+
+export async function updateOEMContact(
+  oemPageId: string,
+  updates: {
+    contact?: string;
+    email?: string;
+    additionalEmail?: string;
+    phone?: string;
+  }
+): Promise<void> {
+  const notion = getNotionClient();
+  const properties: Record<string, any> = {};
+
+  if (updates.contact) {
+    properties["Contact"] = {
+      rich_text: [{ text: { content: updates.contact } }],
+    };
+  }
+  if (updates.email) {
+    properties["Email Address"] = { email: updates.email };
+  }
+  if (updates.additionalEmail) {
+    properties["Additional Email"] = { email: updates.additionalEmail };
+  }
+  if (updates.phone) {
+    properties["Phone Number"] = { phone_number: updates.phone };
+  }
+
+  if (Object.keys(properties).length > 0) {
+    await notion.pages.update({ page_id: oemPageId, properties });
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Create OEM record in Notion from email data                        */
+/* ------------------------------------------------------------------ */
+
+export async function createOEMRecord(data: {
+  name: string;
+  supplierType?: string[];
+  country?: string[];
+  contact?: string;
+  email?: string;
+  additionalEmail?: string;
+  phone?: string;
+  website?: string;
+  notes?: string;
+}): Promise<string> {
+  const notion = getNotionClient();
+  const oemDbId = process.env.NOTION_OEM_DB_ID;
+  if (!oemDbId) throw new Error("NOTION_OEM_DB_ID is not set");
+
+  const properties: Record<string, any> = {
+    Company: { title: [{ text: { content: data.name } }] },
+  };
+
+  if (data.supplierType?.length) {
+    properties["OEM / Supplier Type"] = {
+      multi_select: data.supplierType.map((name) => ({ name })),
+    };
+  }
+  if (data.country?.length) {
+    properties["Country"] = {
+      multi_select: data.country.map((name) => ({ name })),
+    };
+  }
+  if (data.contact) {
+    properties["Contact"] = {
+      rich_text: [{ text: { content: data.contact } }],
+    };
+  }
+  if (data.email) {
+    properties["Email Address"] = { email: data.email };
+  }
+  if (data.additionalEmail) {
+    properties["Additional Email"] = { email: data.additionalEmail };
+  }
+  if (data.phone) {
+    properties["Phone Number"] = { phone_number: data.phone };
+  }
+  if (data.website) {
+    properties["Website"] = { url: data.website.startsWith("http") ? data.website : `https://${data.website}` };
+  }
+  if (data.notes) {
+    properties["Notes"] = {
+      rich_text: [{ text: { content: data.notes.slice(0, 2000) } }],
+    };
+  }
+
+  const page = await notion.pages.create({
+    parent: { database_id: oemDbId },
+    properties,
+  });
+
+  return page.id;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Find OEM by email in Notion                                        */
+/* ------------------------------------------------------------------ */
+
+export async function findOEMByEmail(email: string): Promise<{ id: string; name: string } | null> {
+  const notion = getNotionClient();
+  const oemDbId = process.env.NOTION_OEM_DB_ID;
+  if (!oemDbId) return null;
+
+  const emailLower = email.toLowerCase().trim();
+  const domain = emailLower.split("@")[1];
+
+  // Query all OEMs and check email fields (Notion doesn't support email "contains" filter)
+  const allPages: any[] = [];
+  let cursor: string | undefined;
+  do {
+    const response: any = await notion.databases.query({
+      database_id: oemDbId,
+      page_size: 100,
+      ...(cursor ? { start_cursor: cursor } : {}),
+    });
+    allPages.push(...response.results);
+    cursor = response.has_more ? response.next_cursor : undefined;
+  } while (cursor);
+
+  for (const page of allPages) {
+    const p = page.properties;
+    const emails = extractEmails(p);
+    // Check exact email match or domain match
+    if (emails.some((e) => e === emailLower || e.split("@")[1] === domain)) {
+      return {
+        id: page.id,
+        name: getText(p["Company"]),
+      };
+    }
+  }
+
+  return null;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Build outreach email                                                */
+/* ------------------------------------------------------------------ */
+
 export function buildOutreachEmail(
   spec: FreddyProjectSpec,
   oem: FreddyOEM
