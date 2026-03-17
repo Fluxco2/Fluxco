@@ -113,16 +113,15 @@ export function useCustomerAuth(): UseCustomerAuthReturn {
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
-      if (newSession?.user) {
+      // Only re-fetch profile on sign-in or token refresh, not every event
+      if (event === 'SIGNED_IN' && newSession?.user) {
         const profile = await fetchCustomerProfile(newSession.user.id);
         if (isMounted) {
           setCustomer(profile);
         }
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         setCustomer(null);
       }
-
-      setLoading(false);
     });
 
     return () => {

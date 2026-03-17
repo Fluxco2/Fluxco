@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { useCustomerProjects } from "@/hooks/useCustomerProjects";
 import { ProjectCard } from "@/components/customer/ProjectCard";
@@ -15,19 +13,12 @@ import {
 import Link from "next/link";
 
 export default function CustomerDashboardPage() {
-  const router = useRouter();
-  const { customer, loading } = useCustomerAuth();
+  const { customer, user, loading } = useCustomerAuth();
   const { current, past, isLoading: projectsLoading } = useCustomerProjects(
     customer?.notion_customer_id
   );
 
-  useEffect(() => {
-    if (!loading && !customer) {
-      router.replace("/customer/login");
-    }
-  }, [loading, customer, router]);
-
-  if (loading || !customer) {
+  if (loading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-10 w-64" />
@@ -37,6 +28,22 @@ export default function CustomerDashboardPage() {
           ))}
         </div>
         <Skeleton className="h-[300px] rounded-lg" />
+      </div>
+    );
+  }
+
+  if (!customer) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Welcome</h1>
+        <div className="bg-card border border-border rounded-lg p-8 text-center">
+          <Settings className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <h3 className="font-semibold text-lg mb-2">Account Setup In Progress</h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Your login is working, but your customer profile hasn&apos;t been set up yet.
+            Please contact your FluxCo representative to complete your account setup.
+          </p>
+        </div>
       </div>
     );
   }

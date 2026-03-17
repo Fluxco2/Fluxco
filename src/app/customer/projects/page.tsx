@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useCustomerAuth } from "@/hooks/useCustomerAuth";
 import { useCustomerProjects } from "@/hooks/useCustomerProjects";
 import { ProjectCard } from "@/components/customer/ProjectCard";
@@ -10,24 +8,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FolderOpen, CheckCircle } from "lucide-react";
 
 export default function CustomerProjectsPage() {
-  const router = useRouter();
   const { customer, loading } = useCustomerAuth();
   const { current, past, isLoading: projectsLoading } = useCustomerProjects(
     customer?.notion_customer_id
   );
 
-  useEffect(() => {
-    if (!loading && !customer) {
-      router.replace("/customer/login");
-    }
-  }, [loading, customer, router]);
-
-  if (loading || !customer) {
+  if (loading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64" />
         <Skeleton className="h-[400px] w-full rounded-lg" />
+      </div>
+    );
+  }
+
+  if (!customer) {
+    return (
+      <div className="bg-card border border-border rounded-lg p-8 text-center">
+        <FolderOpen className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+        <h3 className="font-semibold text-lg mb-2">Account Setup In Progress</h3>
+        <p className="text-muted-foreground max-w-md mx-auto">
+          Your customer profile hasn&apos;t been set up yet. Please contact your FluxCo representative.
+        </p>
       </div>
     );
   }
