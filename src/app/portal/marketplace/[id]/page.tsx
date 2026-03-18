@@ -5,8 +5,6 @@ import { useSupplierAuthContext } from "@/context/SupplierAuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   Download,
@@ -17,20 +15,12 @@ import {
 import Link from "next/link";
 import { MarketplaceListing } from "@/lib/supabase";
 import { QASection } from "@/components/marketplace/QASection";
+import { ReadOnlySpecSheet } from "@/components/marketplace/ReadOnlySpecSheet";
 import { BidDialog } from "@/components/supplier/BidDialog";
 
-// Design engine + output components
-import { designTransformer } from "@/engine/TransformerDesignEngine";
+// For deserializing stored requirements
 import { STEEL_GRADES, CONDUCTOR_TYPES, COOLING_CLASSES, VECTOR_GROUPS } from "@/engine/constants/materials";
-import { DesignSummary } from "@/components/transformer/output/DesignSummary";
-import { CalculationSteps } from "@/components/transformer/calculations/CalculationSteps";
-import { CostEstimate } from "@/components/transformer/output/CostEstimate";
-import { BillOfMaterials } from "@/components/transformer/output/BillOfMaterials";
-import { SpecificationSheet } from "@/components/transformer/output/SpecificationSheet";
-import { AssemblyDrawing } from "@/components/transformer/drawings/AssemblyDrawing";
-import { SideViewDrawing } from "@/components/transformer/drawings/SideViewDrawing";
-import { TopViewDrawing } from "@/components/transformer/drawings/TopViewDrawing";
-import type { DesignRequirements, TransformerDesign } from "@/engine/types/transformer.types";
+import type { DesignRequirements } from "@/engine/types/transformer.types";
 import type { ProSpecData } from "@/engine/types/proSpec.types";
 
 function deserializeRequirements(data: any): DesignRequirements {
@@ -66,12 +56,6 @@ export default function ListingDetailPage({
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [bidOpen, setBidOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("summary");
-  const [activeDrawingTab, setActiveDrawingTab] = useState("assembly-front");
-
-
-  // Computed from listing's stored requirements
-  const [design, setDesign] = useState<TransformerDesign | null>(null);
   const [requirements, setRequirements] = useState<DesignRequirements | null>(null);
   const [proSpec, setProSpec] = useState<ProSpecData | null>(null);
 
@@ -82,21 +66,10 @@ export default function ListingDetailPage({
         const { listing: l } = await res.json();
         setListing(l);
 
-        // Re-run design engine from stored requirements
         const specs = l.design_specs as any;
         if (specs?.requirements) {
-          const reqs = deserializeRequirements(specs.requirements);
-          setRequirements(reqs);
+          setRequirements(deserializeRequirements(specs.requirements));
           if (specs.proSpec) setProSpec(specs.proSpec);
-
-          const result = designTransformer(reqs, {
-            steelGrade: reqs.steelGrade.id,
-            hvConductorMaterial: reqs.conductorType.id === "copper" ? "copper" : "aluminum",
-            lvConductorMaterial: reqs.conductorType.id === "copper" ? "copper" : "aluminum",
-          });
-          if (result.success && result.design) {
-            setDesign(result.design);
-          }
         }
       }
       setLoading(false);
@@ -126,143 +99,127 @@ export default function ListingDetailPage({
     y += 3;
     pdf.setDrawColor(200); pdf.line(15, y, pw - 15, y); y += 8;
 
-    const addSection = (title: string, rows: [string, string][]) => {
+    const addSection = (title: string, rows: [string, string | undefined][]) => {
+      const validRows = rows.filter(([, v]) => v !== undefined && v !== null && v !== "") as [string, string][];
+      if (validRows.length === 0) return;
       if (y > 255) { pdf.addPage(); y = 15; }
-      pdf.setFontSize(12);
+      pdf.setFontSize(11);
       pdf.setFont("helvetica", "bold");
       pdf.text(title, 15, y);
-      y += 7;
-      pdf.setFontSize(10);
+      y += 6;
+      pdf.setFontSize(9);
       pdf.setFont("helvetica", "normal");
-      for (const [label, value] of rows) {
+      for (const [label, value] of validRows) {
         if (y > 275) { pdf.addPage(); y = 15; }
         pdf.text(label, 20, y);
         pdf.text(value, pw - 15, y, { align: "right" });
-        y += 5.5;
+        y += 5;
       }
-      y += 5;
+      y += 4;
     };
 
-    // 1. Electrical Specifications
-    const electricalRows: [string, string][] = [
-      ["Power Rating", `${listing.rated_power_kva.toLocaleString()} kVA`],
-      ["Primary Voltage", formatV(listing.primary_voltage)],
-      ["Secondary Voltage", formatV(listing.secondary_voltage)],
-      ["Frequency", `${listing.frequency} Hz`],
-      ["Phases", `${listing.phases}-Phase`],
-    ];
-    if (listing.impedance_percent) electricalRows.push(["Impedance", `${listing.impedance_percent}%`]);
-    if (listing.vector_group) electricalRows.push(["Vector Group", listing.vector_group]);
-    if (listing.cooling_class) electricalRows.push(["Cooling Class", listing.cooling_class]);
-    if (listing.conductor_type) electricalRows.push(["Conductor", listing.conductor_type]);
-    if (listing.steel_grade) electricalRows.push(["Core Steel", listing.steel_grade]);
-    if (design) {
-      electricalRows.push(["X/R Ratio", design.impedance.xrRatio.toFixed(1)]);
-    }
-    addSection("Electrical Specifications", electricalRows);
+    const r = requirements;
+    const boolStr = (v?: boolean) => v === true ? "Yes" : v === false ? "No" : undefined;
+    const reqStr = (v?: string) => v === "required" ? "Required" : v === "not_required" ? "Not Required" : v;
 
-    // 2. Loss & Efficiency
-    if (design) {
-      addSection("Loss & Efficiency", [
-        ["No-Load Loss", `${design.losses.noLoadLoss.toFixed(0)} W`],
-        ["Load Loss (100%)", `${design.losses.loadLoss.toFixed(0)} W`],
-        ["Total Loss", `${design.losses.totalLoss.toFixed(0)} W`],
-        ["Efficiency at 100%", `${design.losses.efficiency.find(e => e.loadPercent === 100)?.efficiency.toFixed(2)}%`],
-        ["Max Efficiency", `${design.losses.maxEfficiency.toFixed(2)}% at ${design.losses.maxEfficiencyLoad}% load`],
+    // Rating & System
+    addSection("Rating & System Parameters", [
+      ["Base Rating", `${r.ratedPower.toLocaleString()} kVA`],
+      ["Primary Voltage", formatV(r.primaryVoltage)],
+      ["Secondary Voltage", formatV(r.secondaryVoltage)],
+      ["Frequency", `${r.frequency} Hz`],
+      ["Phases", `${r.phases}-Phase`],
+      ["Vector Group", r.vectorGroup.name],
+      ["Cooling Class", r.coolingClass.name],
+      ["Target Impedance", `${r.targetImpedance}%`],
+      ["Conductor", r.conductorType.name],
+      ["Core Steel", r.steelGrade.name],
+      ["Tap Changer", r.tapChangerType === "onLoad" ? "On-Load (OLTC)" : "No-Load (NLTC)"],
+      ["Oil Type", r.oilType],
+      ["Oil Preservation", r.oilPreservation],
+      ["Includes TAC", boolStr(r.includeTAC)],
+      ["Manufacturing Regions", r.manufacturingRegions?.map((rg: string) => rg === "usa" ? "USA" : rg === "north_america" ? "N. America" : rg === "global" ? "Global" : rg).join(", ")],
+      ["FEOC Required", boolStr(r.requireFEOC)],
+      ["Altitude", r.altitude ? `${r.altitude} m` : undefined],
+      ["Ambient Temperature", r.ambientTemperature ? `${r.ambientTemperature}°C` : undefined],
+    ]);
+
+    // Pro sections
+    if (proSpec) {
+      const p = proSpec;
+      addSection("Site Conditions", [
+        ["Altitude", p.siteConditions.altitude ? `${p.siteConditions.altitude} ${p.siteConditions.altitudeUnit || "ft"}` : undefined],
+        ["Max Ambient Temp", p.siteConditions.ambientTempMax ? `${p.siteConditions.ambientTempMax}°C` : undefined],
+        ["Min Ambient Temp", p.siteConditions.ambientTempMin ? `${p.siteConditions.ambientTempMin}°C` : undefined],
+        ["Seismic Qualification", reqStr(p.siteConditions.seismicQualification)],
+        ["Moist/Corrosive Environment", boolStr(p.siteConditions.moistCorrosiveEnvironment)],
       ]);
-    }
-
-    // 3. Thermal Data
-    if (design) {
-      addSection("Thermal Data", [
-        ["Cooling Class", requirements.coolingClass.name],
-        ["Oil Volume", `${design.thermal.oilVolume.toFixed(0)} L`],
-        ["Top Oil Rise", `${design.thermal.topOilRise.toFixed(0)}°C`],
-        ["Avg Winding Rise", `${design.thermal.averageWindingRise.toFixed(0)}°C`],
-        ["Hot Spot Rise", `${design.thermal.hotSpotRise.toFixed(0)}°C`],
+      addSection("Certifications", [
+        ["NRTL Listing", reqStr(p.nrtlListing)],
+        ["FM Approved", reqStr(p.fmApproved)],
       ]);
-    }
-
-    // 4. Physical Data (no weight)
-    if (design) {
-      addSection("Physical Data", [
-        ["Tank Dimensions (L×W×H)", `${design.tank.length} × ${design.tank.width} × ${design.tank.height} mm`],
-        ["Overall Height", `${design.tank.overallHeight} mm`],
+      addSection("Windings & Temperature Rise", [
+        ["Avg Temperature Rise", p.windingsAndTempRise.averageTempRise ? `${p.windingsAndTempRise.averageTempRise}°C` : undefined],
+        ["Primary Connection", p.windingsAndTempRise.primaryConnection],
+        ["Primary Material", p.windingsAndTempRise.primaryMaterial],
+        ["Secondary Connection", p.windingsAndTempRise.secondaryConnection],
+        ["Secondary Material", p.windingsAndTempRise.secondaryMaterial],
       ]);
-    }
-
-    // 5. Design Requirements
-    const reqs = (listing.design_specs as any)?.requirements || {};
-    const designRows: [string, string][] = [];
-    if (reqs.tapChangerType) designRows.push(["Tap Changer", reqs.tapChangerType === "onLoad" ? "OLTC" : "NLTC"]);
-    if (reqs.oilType) designRows.push(["Oil Type", reqs.oilType]);
-    if (reqs.oilPreservation) designRows.push(["Oil Preservation", reqs.oilPreservation]);
-    if (reqs.altitude) designRows.push(["Altitude", `${reqs.altitude} m`]);
-    if (reqs.ambientTemperature) designRows.push(["Ambient Temperature", `${reqs.ambientTemperature}°C`]);
-    designRows.push(["Includes TAC", reqs.includeTAC ? "Yes" : "No"]);
-    if (reqs.manufacturingRegions) {
-      const regionMap: Record<string, string> = { usa: "USA", north_america: "N. America", global: "Global" };
-      designRows.push(["Manufacturing Region", reqs.manufacturingRegions.map((r: string) => regionMap[r] || r).join(", ")]);
-    }
-    designRows.push(["FEOC Required", reqs.requireFEOC ? "Yes" : "No"]);
-    if (designRows.length > 0) addSection("Design Requirements", designRows);
-
-    // 6. Core Design
-    if (design) {
-      addSection("Core Design", [
-        ["Core Type", `3-Limb, ${requirements.phases}-Phase`],
-        ["Steel Grade", requirements.steelGrade.name],
-        ["Core Weight", `${design.core.coreWeight} kg`],
-        ["Flux Density", `${design.core.fluxDensity.toFixed(3)} T`],
-        ["Core Diameter", `${design.core.coreDiameter} mm`],
-        ["Window Height", `${design.core.windowHeight} mm`],
+      addSection("Losses & Efficiency", [
+        ["Loss Evaluation Required", boolStr(p.losses.lossEvaluationRequired)],
+        ["$/kW Offset", p.losses.dollarPerKwOffset ? `$${p.losses.dollarPerKwOffset}` : undefined],
       ]);
-    }
-
-    // 7. Winding Design
-    if (design) {
-      addSection("Winding Design — HV", [
-        ["Conductor", requirements.conductorType.name],
-        ["Turns", `${design.hvWinding.turns}`],
-        ["Current Density", `${design.hvWinding.currentDensity.toFixed(2)} A/mm²`],
-        ["Rated Current", `${design.hvWinding.ratedCurrent.toFixed(1)} A`],
-        ["Layers", `${design.hvWinding.layers}`],
-        ["Winding Height", `${design.hvWinding.windingHeight} mm`],
-        ["Inner Radius", `${design.hvWinding.innerRadius} mm`],
-        ["Outer Radius", `${design.hvWinding.outerRadius} mm`],
+      addSection("Air Terminal Chamber", [
+        ["Required", reqStr(p.airTerminalChamber.required)],
+        ["Front Cover", p.airTerminalChamber.frontCover],
+        ["Cable Entry", p.airTerminalChamber.cableEntry],
       ]);
-      addSection("Winding Design — LV", [
-        ["Conductor", requirements.conductorType.name],
-        ["Turns", `${design.lvWinding.turns}`],
-        ["Current Density", `${design.lvWinding.currentDensity.toFixed(2)} A/mm²`],
-        ["Rated Current", `${design.lvWinding.ratedCurrent.toFixed(1)} A`],
-        ["Layers", `${design.lvWinding.layers}`],
-        ["Winding Height", `${design.lvWinding.windingHeight} mm`],
-        ["Inner Radius", `${design.lvWinding.innerRadius} mm`],
-        ["Outer Radius", `${design.lvWinding.outerRadius} mm`],
+      addSection("Tank", [
+        ["Cover Type", p.tank.coverType],
+        ["Jacking Pads", reqStr(p.tank.jackingPads)],
+        ["Vacuum Rated", reqStr(p.tank.tankVacuumRated)],
       ]);
-    }
-
-    // 8. Bill of Materials Summary
-    if (design) {
-      const bomRows: [string, string][] = [
-        ["Core Steel", `${requirements.steelGrade.name} — ${design.core.coreWeight} kg`],
-        ["HV Winding", `${requirements.conductorType.name} — ${design.hvWinding.turns} turns`],
-        ["LV Winding", `${requirements.conductorType.name} — ${design.lvWinding.turns} turns`],
-        ["Tank", `${design.tank.length} × ${design.tank.width} × ${design.tank.height} mm`],
-        ["Oil Volume", `${design.thermal.oilVolume.toFixed(0)} L`],
-      ];
-      addSection("Bill of Materials", bomRows);
+      addSection("Cooling", [
+        ["Radiator Type", p.cooling.radiatorType],
+        ["Radiator Material", p.cooling.radiatorMaterial],
+        ["Removable Radiators", boolStr(p.cooling.removableRadiators)],
+        ["Fans", p.fans.status === "required" ? `Required (${p.fans.mounting || ""} mount)` : reqStr(p.fans.status)],
+      ]);
+      addSection("Tap Changer", [
+        ["No-Load", reqStr(p.tapChanger.noLoad.required)],
+        ["No-Load Description", p.tapChanger.noLoad.description],
+        ["On-Load", reqStr(p.tapChanger.onLoad.required)],
+        ["Regulation Range", p.tapChanger.onLoad.regulationRange],
+      ]);
+      addSection("BIL", [
+        ["Primary BIL", p.bil.primaryBilKv ? `${p.bil.primaryBilKv} kV` : undefined],
+        ["Secondary BIL", p.bil.secondaryBilKv ? `${p.bil.secondaryBilKv} kV` : undefined],
+      ]);
+      addSection("Insulating Liquid", [
+        ["Type", p.insulatingLiquid.type?.replace(/_/g, " ")],
+        ["Preservation", p.liquidPreservation.type?.replace(/_/g, " ")],
+      ]);
+      addSection("Tests", [
+        ["No-Load & Load Loss", boolStr(p.tests.noLoadAndLoadLoss)],
+        ["Temperature Rise", boolStr(p.tests.tempRise)],
+        ["Lightning Impulse", boolStr(p.tests.lightningImpulse)],
+        ["Switching Impulse", boolStr(p.tests.switchingImpulse)],
+        ["Audible Sound Level", boolStr(p.tests.audibleSoundLevel)],
+        ["Witnessed", p.tests.witnessed === "witnessed" ? "Yes" : "No"],
+      ]);
+      if (p.otherRequirements) {
+        addSection("Other Requirements", [["Notes", p.otherRequirements]]);
+      }
     }
 
     // Footer
     if (y > 270) { pdf.addPage(); y = 15; }
-    y += 5;
+    y += 3;
     pdf.setDrawColor(200); pdf.line(15, y, pw - 15, y); y += 5;
     pdf.setFontSize(8);
     pdf.setTextColor(128, 128, 128);
     pdf.text("Generated by FluxCo — fluxco.com", 15, y);
-    pdf.text(`${new Date().toLocaleDateString()}`, pw - 15, y, { align: "right" });
+    pdf.text(new Date().toLocaleDateString(), pw - 15, y, { align: "right" });
 
     pdf.save(`${listing.serial_number || "spec"}-specification.pdf`);
   };
@@ -287,8 +244,7 @@ export default function ListingDetailPage({
     );
   }
 
-  const specMode = listing.spec_mode || "lite";
-  const hasDesign = !!design && !!requirements;
+  const specMode = (listing.spec_mode || "lite") as "lite" | "pro";
 
   return (
     <div className="space-y-6">
@@ -322,7 +278,7 @@ export default function ListingDetailPage({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleDownloadPDF}>
+          <Button variant="outline" onClick={handleDownloadPDF} disabled={!requirements}>
             <Download className="w-4 h-4 mr-2" />
             Download PDF
           </Button>
@@ -335,118 +291,26 @@ export default function ListingDetailPage({
         </div>
       </div>
 
-      {/* Full Spec Builder Output (read-only) */}
-      <div>
-        {hasDesign ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full ${specMode === "pro" ? "grid-cols-6" : "grid-cols-5"}`}>
-              <TabsTrigger value="summary">Summary</TabsTrigger>
-              {specMode === "pro" && <TabsTrigger value="specifications">Specifications</TabsTrigger>}
-              <TabsTrigger value="calculations">Calculations</TabsTrigger>
-              <TabsTrigger value="drawings">Drawings</TabsTrigger>
-              <TabsTrigger value="bom">BOM</TabsTrigger>
-              <TabsTrigger value="cost">Cost Estimate</TabsTrigger>
-            </TabsList>
+      {/* Read-Only Spec Sheet */}
+      {requirements ? (
+        <ReadOnlySpecSheet
+          requirements={requirements}
+          proSpec={proSpec}
+          specMode={specMode}
+        />
+      ) : (
+        <div className="text-center py-12 text-muted-foreground">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 opacity-50" />
+          <p>Specification data not available.</p>
+        </div>
+      )}
 
-            <TabsContent value="summary">
-              <DesignSummary design={design!} requirements={requirements!} />
-            </TabsContent>
-
-            {specMode === "pro" && proSpec && (
-              <TabsContent value="specifications">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">PIP ELSTR01 Specification Sheet</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <SpecificationSheet proSpec={proSpec} requirements={requirements!} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            )}
-
-            <TabsContent value="calculations">
-              <CalculationSteps design={design!} requirements={requirements!} />
-            </TabsContent>
-
-            <TabsContent value="drawings">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Engineering Drawing Set</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Tabs value={activeDrawingTab} onValueChange={setActiveDrawingTab}>
-                    <TabsList className="grid w-full grid-cols-3 mb-4">
-                      <TabsTrigger value="assembly-front" className="text-xs">Front View</TabsTrigger>
-                      <TabsTrigger value="assembly-side" className="text-xs">Side View</TabsTrigger>
-                      <TabsTrigger value="assembly-top" className="text-xs">Top View</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="assembly-front" className="mt-0">
-                      <AssemblyDrawing
-                        core={design!.core}
-                        hvWinding={design!.hvWinding}
-                        lvWinding={design!.lvWinding}
-                        tank={design!.tank}
-                        thermal={design!.thermal}
-                        primaryVoltage={requirements!.primaryVoltage}
-                        secondaryVoltage={requirements!.secondaryVoltage}
-                        vectorGroup={requirements!.vectorGroup.name}
-                        requirements={requirements!}
-                        bom={design!.bom}
-                      />
-                    </TabsContent>
-                    <TabsContent value="assembly-side" className="mt-0">
-                      <SideViewDrawing
-                        core={design!.core}
-                        hvWinding={design!.hvWinding}
-                        lvWinding={design!.lvWinding}
-                        tank={design!.tank}
-                        thermal={design!.thermal}
-                      />
-                    </TabsContent>
-                    <TabsContent value="assembly-top" className="mt-0">
-                      <TopViewDrawing
-                        core={design!.core}
-                        hvWinding={design!.hvWinding}
-                        lvWinding={design!.lvWinding}
-                        tank={design!.tank}
-                        thermal={design!.thermal}
-                        phases={requirements!.phases}
-                      />
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="bom">
-              <BillOfMaterials design={design!} />
-            </TabsContent>
-
-            <TabsContent value="cost">
-              <CostEstimate design={design!} requirements={requirements!} />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 opacity-50" />
-              <p>Design data not available for this listing.</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Q&A Section */}
-      <Card>
-        <CardContent className="pt-6">
-          <QASection
-            listingId={listing.id}
-            canAsk={!!supplier}
-            accessToken={session?.access_token}
-          />
-        </CardContent>
-      </Card>
+      {/* Q&A */}
+      <QASection
+        listingId={listing.id}
+        canAsk={!!supplier}
+        accessToken={session?.access_token}
+      />
 
       {/* Bid Dialog */}
       <BidDialog
