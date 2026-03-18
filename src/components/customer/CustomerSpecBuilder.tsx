@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Loader2, Send, Check, History, ChevronDown, ChevronUp } from "lucide-react";
+import { QASection } from "@/components/marketplace/QASection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -168,6 +169,7 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
   const [versions, setVersions] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [loadingVersions, setLoadingVersions] = useState(false);
+  const [marketplaceListingId, setMarketplaceListingId] = useState<string | null>(null);
 
   // Load existing project
   useEffect(() => {
@@ -188,6 +190,7 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
         setProjectNumber(project.project_number);
         setProjectStatus(project.status || "draft");
         setProjectVersion(project.version || 1);
+        setMarketplaceListingId(project.marketplace_listing_id || null);
         setSpecMode(project.spec_mode || "lite");
 
         if (project.design_requirements) {
@@ -328,7 +331,9 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
         },
       });
       if (res.ok) {
+        const data = await res.json();
         setProjectStatus("submitted");
+        if (data.listing?.id) setMarketplaceListingId(data.listing.id);
       } else {
         const data = await res.json();
         console.error("Submit error:", data.error);
@@ -496,6 +501,18 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Q&A Section — visible after project is submitted */}
+      {marketplaceListingId && projectStatus !== "draft" && (
+        <Card>
+          <CardContent className="pt-6">
+            <QASection
+              listingId={marketplaceListingId}
+              canAnswer={true}
+            />
           </CardContent>
         </Card>
       )}

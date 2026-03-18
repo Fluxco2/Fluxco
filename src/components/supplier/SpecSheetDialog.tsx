@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Zap, Thermometer, Weight, DollarSign, FileText, Send } from "lucide-react";
 import { MarketplaceListing } from "@/lib/supabase";
+import { QASection } from "@/components/marketplace/QASection";
 
 interface SpecSheetDialogProps {
   listing: MarketplaceListing | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPlaceBid?: (listing: MarketplaceListing) => void;
+  isSupplier?: boolean;
 }
 
 const formatVoltage = (voltage: number): string => {
@@ -30,7 +32,7 @@ const formatNumber = (n: number | null | undefined): string => {
   return n.toLocaleString();
 };
 
-export function SpecSheetDialog({ listing, open, onOpenChange, onPlaceBid }: SpecSheetDialogProps) {
+export function SpecSheetDialog({ listing, open, onOpenChange, onPlaceBid, isSupplier = false }: SpecSheetDialogProps) {
   if (!listing) return null;
 
   const specs = listing.design_specs as any;
@@ -250,6 +252,14 @@ export function SpecSheetDialog({ listing, open, onOpenChange, onPlaceBid }: Spe
             <p className="text-sm text-muted-foreground">{listing.notes}</p>
           </div>
         )}
+
+        {/* Q&A Section */}
+        <div className="border-t border-border pt-4">
+          <QASection
+            listingId={listing.id}
+            canAsk={isSupplier}
+          />
+        </div>
 
         {onPlaceBid && (
           <Button
