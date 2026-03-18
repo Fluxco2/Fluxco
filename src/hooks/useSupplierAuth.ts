@@ -51,22 +51,17 @@ export function useSupplierAuth(): UseSupplierAuthReturn {
   const [supplier, setSupplier] = useState<SupplierProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchSupplierProfile = useCallback(async (userId: string) => {
+  const fetchSupplierProfile = useCallback(async (accessToken: string) => {
     try {
-      console.log("Fetching supplier profile for user:", userId);
-      const { data, error } = await supabase
-        .from("suppliers")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (error) {
-        console.error("Error fetching supplier profile:", error);
-        return null;
+      const res = await fetch("/api/supplier/profile", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const { supplier } = await res.json();
+        return supplier as SupplierProfile | null;
       }
-
-      console.log("Supplier profile fetched:", data);
-      return data as SupplierProfile;
+      console.error("Failed to fetch supplier profile:", res.status);
+      return null;
     } catch (err) {
       console.error("Exception fetching supplier profile:", err);
       return null;
@@ -87,7 +82,7 @@ export function useSupplierAuth(): UseSupplierAuthReturn {
         // getSession can hang if token refresh fails — add timeout
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("getSession timeout")), 2000)
+          setTimeout(() => reject(new Error("getSession timeout")), 8000)
         );
 
         let currentSession: any = null;
@@ -112,8 +107,8 @@ export function useSupplierAuth(): UseSupplierAuthReturn {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
 
-          if (currentSession?.user) {
-            const profile = await fetchSupplierProfile(currentSession.user.id);
+          if (currentSession?.access_token) {
+            const profile = await fetchSupplierProfile(currentSession.access_token);
             if (isMounted) {
               setSupplier(profile);
             }
@@ -140,8 +135,8 @@ export function useSupplierAuth(): UseSupplierAuthReturn {
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
-      if (newSession?.user) {
-        const profile = await fetchSupplierProfile(newSession.user.id);
+      if (newSession?.access_token) {
+        const profile = await fetchSupplierProfile(newSession.access_token);
         if (isMounted) {
           setSupplier(profile);
         }
