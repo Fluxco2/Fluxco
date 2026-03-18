@@ -35,7 +35,19 @@ export default function PortalLayout({
     }
   }, [user, loading, isAuthPage, router]);
 
-  // Show loading spinner
+  // Auth pages (login/register) render immediately — no loading gate
+  if (isAuthPage) {
+    if (!loading && user) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+    return <>{children}</>;
+  }
+
+  // Protected pages: show spinner while auth initializes
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -44,17 +56,8 @@ export default function PortalLayout({
     );
   }
 
-  // Waiting for redirect
-  if ((user && isAuthPage) || (!user && !isAuthPage)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  // Auth pages (login/register) get no nav
-  if (isAuthPage) {
+  // Not logged in on a protected page — waiting for redirect
+  if (!user) {
     return <>{children}</>;
   }
 

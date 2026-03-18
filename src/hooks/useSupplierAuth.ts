@@ -84,7 +84,23 @@ export function useSupplierAuth(): UseSupplierAuthReturn {
 
     const initAuth = async () => {
       try {
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        // getSession can hang if token refresh fails — add timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("getSession timeout")), 2000)
+        );
+
+        let currentSession: any = null;
+        let error: any = null;
+        try {
+          const result = await Promise.race([sessionPromise, timeoutPromise]);
+          currentSession = (result as any).data?.session ?? null;
+          error = (result as any).error ?? null;
+        } catch {
+          console.warn("[SupplierAuth] getSession timed out — treating as no session");
+          if (isMounted) setLoading(false);
+          return;
+        }
 
         if (error) {
           console.error("Error getting session:", error);
