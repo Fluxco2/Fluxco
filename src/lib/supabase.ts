@@ -243,6 +243,26 @@ export interface Customer {
   last_login: string | null;
 }
 
+export interface CustomerProject {
+  id: string;
+  project_number: string;
+  customer_id: string;
+  name: string;
+  spec_mode: 'lite' | 'pro';
+  rated_power_kva: number | null;
+  primary_voltage: number | null;
+  secondary_voltage: number | null;
+  frequency: number;
+  phases: number;
+  design_requirements: Record<string, unknown> | null;
+  pro_spec: Record<string, unknown> | null;
+  design_result: Record<string, unknown> | null;
+  estimated_cost: number | null;
+  status: 'draft' | 'submitted' | 'quoted' | 'ordered' | 'completed';
+  created_at: string;
+  updated_at: string;
+}
+
 export interface InventoryItem {
   id: string;
   sku: string | null;
