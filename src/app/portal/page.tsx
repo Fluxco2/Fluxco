@@ -27,8 +27,8 @@ const formatVoltage = (voltage: number): string => {
 
 export default function PortalPage() {
   const router = useRouter();
-  const { supplier, loading } = useSupplierAuthContext();
-  const dashboard = useSupplierDashboard(supplier?.id);
+  const { supplier, session, loading } = useSupplierAuthContext();
+  const dashboard = useSupplierDashboard(supplier?.id, session?.access_token);
 
   useEffect(() => {
     if (!loading && !supplier) {

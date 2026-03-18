@@ -26,30 +26,26 @@ export function useMarketplace() {
   });
 }
 
-export function useSupplierBids(supplierId: string | undefined) {
+export function useSupplierBids(supplierId: string | undefined, accessToken?: string | null) {
   return useQuery<SupplierBid[], Error>({
     queryKey: ["supplier-bids", supplierId],
     queryFn: async () => {
-      if (!supplierId) return [];
+      if (!accessToken) return [];
 
-      const { data, error } = await supabase
-        .from("supplier_bids")
-        .select("*")
-        .eq("supplier_id", supplierId);
-
-      if (error) {
-        throw error;
-      }
-
-      return data as SupplierBid[];
+      const res = await fetch("/api/supplier/bids", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) return [];
+      const { bids } = await res.json();
+      return bids as SupplierBid[];
     },
-    enabled: !!supplierId,
+    enabled: !!supplierId && !!accessToken,
   });
 }
 
-export function useSupplierDashboard(supplierId: string | undefined) {
+export function useSupplierDashboard(supplierId: string | undefined, accessToken?: string | null) {
   const marketplace = useMarketplace();
-  const bids = useSupplierBids(supplierId);
+  const bids = useSupplierBids(supplierId, accessToken);
 
   const activeOpportunities = marketplace.data?.active?.length || 0;
   const myBids = bids.data?.length || 0;
