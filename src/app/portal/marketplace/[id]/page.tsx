@@ -158,15 +158,14 @@ export default function ListingDetailPage({
           <Badge variant="default" className="bg-blue-600">Pro</Badge>
         </CardHeader>
         <CardContent>
-          <div className="pointer-events-none">
-            <ProDesignForm
-              requirements={requirements}
-              proSpec={proSpec}
-              onChange={() => {}}
-              onProSpecChange={() => {}}
-              onCalculate={() => {}}
-            />
-          </div>
+          <ProDesignForm
+            requirements={requirements}
+            proSpec={proSpec}
+            onChange={() => {}}
+            onProSpecChange={() => {}}
+            onCalculate={() => {}}
+            readOnly
+          />
         </CardContent>
       </Card>
 

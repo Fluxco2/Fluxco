@@ -28,6 +28,7 @@ interface ProDesignFormProps {
   onChange: (requirements: DesignRequirements) => void;
   onProSpecChange: (proSpec: ProSpecData) => void;
   onCalculate: () => void;
+  readOnly?: boolean;
 }
 
 function HelpText({ children }: { children: React.ReactNode }) {
@@ -77,6 +78,7 @@ export function ProDesignForm({
   onChange,
   onProSpecChange,
   onCalculate,
+  readOnly = false,
 }: ProDesignFormProps) {
   const updateReq = <K extends keyof DesignRequirements>(key: K, value: DesignRequirements[K]) => {
     onChange({ ...requirements, [key]: value });
@@ -97,10 +99,12 @@ export function ProDesignForm({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-300">
-        <strong>Pro Mode</strong> — PIP ELSTR01 data sheet format. All sections are optional — fill what applies to your project.
-      </div>
+    <div className={`space-y-4 ${readOnly ? '[&_input]:pointer-events-none [&_input]:opacity-80 [&_select]:pointer-events-none [&_textarea]:pointer-events-none [&_textarea]:opacity-80 [&_button[role=combobox]]:pointer-events-none [&_button[role=checkbox]]:pointer-events-none [&_.cursor-pointer:not([data-state])]:pointer-events-none' : ''}`}>
+      {!readOnly && (
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm text-blue-700 dark:text-blue-300">
+          <strong>Pro Mode</strong> — PIP ELSTR01 data sheet format. All sections are optional — fill what applies to your project.
+        </div>
+      )}
 
       <Accordion type="multiple" defaultValue={["rating"]} className="w-full">
 
@@ -1361,15 +1365,17 @@ export function ProDesignForm({
       </div>
 
       {/* Calculate Button */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p className="text-sm text-muted-foreground">
-          Calculate to see design, cost estimate, drawings, and full specification sheet.
-        </p>
-        <Button onClick={onCalculate} size="lg" className="w-full sm:w-auto">
-          <Calculator className="w-5 h-5 mr-2" />
-          Calculate Design & Cost
-        </Button>
-      </div>
+      {!readOnly && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-muted-foreground">
+            Calculate to see design, cost estimate, drawings, and full specification sheet.
+          </p>
+          <Button onClick={onCalculate} size="lg" className="w-full sm:w-auto">
+            <Calculator className="w-5 h-5 mr-2" />
+            Calculate Design & Cost
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
