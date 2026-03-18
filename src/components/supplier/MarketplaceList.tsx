@@ -232,10 +232,12 @@ export function MarketplaceList() {
                           size="sm"
                           variant="ghost"
                           className="text-muted-foreground hover:text-primary"
-                          onClick={(e) => { e.stopPropagation(); handleViewSpecs(listing); }}
+                          asChild
                         >
-                          <FileText className="w-3 h-3 mr-1" />
-                          Specs
+                          <Link href={`/portal/marketplace/${listing.id}`}>
+                            <FileText className="w-3 h-3 mr-1" />
+                            View
+                          </Link>
                         </Button>
                         {isCompleted ? (
                           <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">

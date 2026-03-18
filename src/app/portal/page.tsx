@@ -123,12 +123,15 @@ export default function PortalPage() {
               dashboard.recentListings.map((listing) => (
                 <Link
                   key={listing.id}
-                  href="/portal/marketplace"
+                  href={`/portal/marketplace/${listing.id}`}
                   className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <Zap className="w-4 h-4 text-primary" />
                     <div>
+                      <span className="font-mono text-xs text-muted-foreground mr-2">
+                        {listing.serial_number}
+                      </span>
                       <span className="font-semibold text-primary">
                         {listing.rated_power_kva.toLocaleString()} kVA
                       </span>
@@ -138,12 +141,9 @@ export default function PortalPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {listing.zipcode && (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin className="w-3 h-3" />
-                        {listing.zipcode}
-                      </span>
-                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(listing.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </span>
                     <Badge variant="secondary" className="text-xs">
                       {listing.phases}-Ph
                     </Badge>
