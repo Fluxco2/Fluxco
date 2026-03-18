@@ -50,20 +50,6 @@ export default function PortalPage() {
     );
   }
 
-  // Calculate profile completion
-  const profileFields = [
-    supplier.company_name,
-    supplier.contact_name,
-    supplier.phone,
-    supplier.address,
-    supplier.city,
-    supplier.state,
-    supplier.certifications?.length > 0,
-    supplier.specialties?.length > 0,
-  ];
-  const filledFields = profileFields.filter(Boolean).length;
-  const profileCompletion = Math.round((filledFields / profileFields.length) * 100);
-
   return (
     <div className="space-y-8">
       {/* Welcome */}
@@ -77,7 +63,7 @@ export default function PortalPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <Link
           href="/portal/marketplace"
           className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
@@ -104,17 +90,6 @@ export default function PortalPage() {
           </div>
           <div className="text-sm text-muted-foreground mt-1">Won Bids</div>
         </div>
-
-        <Link
-          href="/portal/profile"
-          className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
-        >
-          <div className="flex items-center gap-2 text-2xl font-bold text-foreground">
-            <UserCircle className="w-6 h-6 text-primary" />
-            {profileCompletion}%
-          </div>
-          <div className="text-sm text-muted-foreground mt-1">Profile Complete</div>
-        </Link>
       </div>
 
       {/* Two Column Layout */}
@@ -249,7 +224,7 @@ export default function PortalPage() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Profile Summary + Browse Marketplace */}
       <div className="grid md:grid-cols-2 gap-4">
         <Link
           href="/portal/marketplace"
@@ -269,18 +244,39 @@ export default function PortalPage() {
 
         <Link
           href="/portal/profile"
-          className="flex items-center gap-4 bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
+          className="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
         >
-          <UserCircle className="w-8 h-8 text-primary" />
-          <div>
-            <h3 className="font-semibold group-hover:text-primary transition-colors">
-              Complete Your Profile
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold flex items-center gap-2 group-hover:text-primary transition-colors">
+              <UserCircle className="w-5 h-5 text-primary" />
+              Company Profile
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Add factory capabilities, certifications, and specialties
-            </p>
+            <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
-          <ArrowRight className="w-5 h-5 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
+          <div className="space-y-1.5 text-sm text-muted-foreground">
+            {supplier.kva_range_min || supplier.kva_range_max ? (
+              <p>
+                <span className="text-foreground font-medium">kVA:</span>{" "}
+                {supplier.kva_range_min?.toLocaleString() || "—"} – {supplier.kva_range_max?.toLocaleString() || "—"}
+              </p>
+            ) : null}
+            {supplier.certifications?.length > 0 ? (
+              <p>
+                <span className="text-foreground font-medium">Certs:</span>{" "}
+                {supplier.certifications.slice(0, 3).join(", ")}
+                {supplier.certifications.length > 3 && ` +${supplier.certifications.length - 3}`}
+              </p>
+            ) : null}
+            {supplier.city || supplier.state ? (
+              <p>
+                <span className="text-foreground font-medium">Location:</span>{" "}
+                {[supplier.city, supplier.state].filter(Boolean).join(", ")}
+              </p>
+            ) : null}
+            {!supplier.kva_range_min && !supplier.certifications?.length && !supplier.city ? (
+              <p className="text-primary">Set up your factory capabilities to get matched with opportunities</p>
+            ) : null}
+          </div>
         </Link>
       </div>
     </div>

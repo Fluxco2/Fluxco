@@ -22,6 +22,10 @@ interface SupplierProfile {
   website: string | null;
   kva_range_min: number | null;
   kva_range_max: number | null;
+  voltage_min?: number | null;
+  voltage_max?: number | null;
+  cooling_types?: string[];
+  transformer_types?: string[];
 }
 
 interface ProfileFormProps {
@@ -41,6 +45,20 @@ const CERTIFICATION_OPTIONS = [
   "IEC",
 ];
 
+const COOLING_OPTIONS = [
+  "ONAN",
+  "ONAF",
+  "OFAF",
+  "ODAF",
+  "AN (Dry)",
+  "AF (Dry)",
+];
+
+const TRANSFORMER_TYPE_OPTIONS = [
+  "Oil-Filled",
+  "Dry Type",
+];
+
 export function ProfileForm({ supplier, onSaved }: ProfileFormProps) {
   const [formData, setFormData] = useState({
     company_name: supplier.company_name || "",
@@ -53,6 +71,10 @@ export function ProfileForm({ supplier, onSaved }: ProfileFormProps) {
     website: supplier.website || "",
     kva_range_min: supplier.kva_range_min || "",
     kva_range_max: supplier.kva_range_max || "",
+    voltage_min: supplier.voltage_min || "",
+    voltage_max: supplier.voltage_max || "",
+    cooling_types: supplier.cooling_types || [],
+    transformer_types: supplier.transformer_types || [],
     certifications: supplier.certifications || [],
   });
   const [saving, setSaving] = useState(false);
@@ -64,12 +86,12 @@ export function ProfileForm({ supplier, onSaved }: ProfileFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const toggleCertification = (cert: string) => {
+  const toggleArrayField = (field: "certifications" | "cooling_types" | "transformer_types", value: string) => {
     setFormData((prev) => ({
       ...prev,
-      certifications: prev.certifications.includes(cert)
-        ? prev.certifications.filter((c) => c !== cert)
-        : [...prev.certifications, cert],
+      [field]: (prev[field] as string[]).includes(value)
+        ? (prev[field] as string[]).filter((v) => v !== value)
+        : [...(prev[field] as string[]), value],
     }));
   };
 
@@ -91,6 +113,12 @@ export function ProfileForm({ supplier, onSaved }: ProfileFormProps) {
             : null,
           kva_range_max: formData.kva_range_max
             ? parseInt(String(formData.kva_range_max), 10)
+            : null,
+          voltage_min: formData.voltage_min
+            ? parseInt(String(formData.voltage_min), 10)
+            : null,
+          voltage_max: formData.voltage_max
+            ? parseInt(String(formData.voltage_max), 10)
             : null,
         }),
       });
@@ -227,7 +255,7 @@ export function ProfileForm({ supplier, onSaved }: ProfileFormProps) {
         <h3 className="text-lg font-semibold mb-4">Manufacturing Capacity</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="kva_range_min">Min kVA Rating</Label>
+            <Label htmlFor="kva_range_min">Min Power Rating (kVA)</Label>
             <Input
               id="kva_range_min"
               name="kva_range_min"
@@ -238,7 +266,7 @@ export function ProfileForm({ supplier, onSaved }: ProfileFormProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="kva_range_max">Max kVA Rating</Label>
+            <Label htmlFor="kva_range_max">Max Power Rating (kVA)</Label>
             <Input
               id="kva_range_max"
               name="kva_range_max"
@@ -248,6 +276,72 @@ export function ProfileForm({ supplier, onSaved }: ProfileFormProps) {
               placeholder="e.g., 100000"
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="voltage_min">Min Voltage (V)</Label>
+            <Input
+              id="voltage_min"
+              name="voltage_min"
+              type="number"
+              value={formData.voltage_min}
+              onChange={handleChange}
+              placeholder="e.g., 480"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="voltage_max">Max Voltage (V)</Label>
+            <Input
+              id="voltage_max"
+              name="voltage_max"
+              type="number"
+              value={formData.voltage_max}
+              onChange={handleChange}
+              placeholder="e.g., 138000"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Transformer Types */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Transformer Types</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {TRANSFORMER_TYPE_OPTIONS.map((type) => (
+            <div key={type} className="flex items-center space-x-2">
+              <Checkbox
+                id={`type-${type}`}
+                checked={formData.transformer_types.includes(type)}
+                onCheckedChange={() => toggleArrayField("transformer_types", type)}
+              />
+              <Label
+                htmlFor={`type-${type}`}
+                className="text-sm font-normal cursor-pointer"
+              >
+                {type}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Cooling Types */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Cooling Types</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {COOLING_OPTIONS.map((cooling) => (
+            <div key={cooling} className="flex items-center space-x-2">
+              <Checkbox
+                id={`cooling-${cooling}`}
+                checked={formData.cooling_types.includes(cooling)}
+                onCheckedChange={() => toggleArrayField("cooling_types", cooling)}
+              />
+              <Label
+                htmlFor={`cooling-${cooling}`}
+                className="text-sm font-normal cursor-pointer"
+              >
+                {cooling}
+              </Label>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -260,7 +354,7 @@ export function ProfileForm({ supplier, onSaved }: ProfileFormProps) {
               <Checkbox
                 id={`cert-${cert}`}
                 checked={formData.certifications.includes(cert)}
-                onCheckedChange={() => toggleCertification(cert)}
+                onCheckedChange={() => toggleArrayField("certifications", cert)}
               />
               <Label
                 htmlFor={`cert-${cert}`}

@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
       "website",
       "kva_range_min",
       "kva_range_max",
-      "voltage_classes",
+      "voltage_min",
+      "voltage_max",
+      "cooling_types",
+      "transformer_types",
     ];
 
     for (const field of allowedFields) {
