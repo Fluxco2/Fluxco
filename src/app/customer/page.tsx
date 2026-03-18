@@ -12,7 +12,9 @@ import {
   Zap,
   Calendar,
   Pencil,
+  Plus,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { CustomerProject } from "@/lib/supabase";
 
@@ -122,10 +124,18 @@ export default function CustomerDashboardPage() {
       {/* Projects */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <FolderOpen className="w-5 h-5 text-primary" />
-            Your Projects
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-semibold flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-primary" />
+              Your Projects
+            </h2>
+            <Link href="/customer/projects/new">
+              <Button size="sm" variant="outline" className="h-7 px-2 text-xs">
+                <Plus className="w-3 h-3 mr-1" />
+                New Project
+              </Button>
+            </Link>
+          </div>
           <Link
             href="/customer/projects"
             className="text-sm text-primary hover:underline flex items-center gap-1"

@@ -31,6 +31,7 @@ interface BidDialogProps {
   supplier: SupplierInfo | null;
   userEmail?: string | null;
   onViewSpecs?: () => void;
+  hasExistingBid?: boolean;
 }
 
 const formatVoltage = (voltage: number): string => {
@@ -40,7 +41,7 @@ const formatVoltage = (voltage: number): string => {
   return `${voltage} V`;
 };
 
-export function BidDialog({ listing, open, onOpenChange, supplier, userEmail, onViewSpecs }: BidDialogProps) {
+export function BidDialog({ listing, open, onOpenChange, supplier, userEmail, onViewSpecs, hasExistingBid = false }: BidDialogProps) {
   const [bidPrice, setBidPrice] = useState("");
   const [leadTimeWeeks, setLeadTimeWeeks] = useState("");
   const [notes, setNotes] = useState("");
@@ -297,6 +298,14 @@ export function BidDialog({ listing, open, onOpenChange, supplier, userEmail, on
             </div>
           )}
         </div>
+
+        {hasExistingBid && (
+          <Alert>
+            <AlertDescription>
+              You already submitted a bid on this listing. Submitting again will replace your previous bid.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {error && (
           <Alert variant="destructive">

@@ -16,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AlertCircle, PackageSearch, Zap, MapPin, CheckCircle, Clock, LogIn, FileText, ShieldCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { AlertCircle, PackageSearch, Zap, MapPin, CheckCircle, Clock, LogIn, FileText, ShieldCheck, Search } from "lucide-react";
 import Link from "next/link";
 import { MarketplaceListing } from "@/lib/supabase";
 import { BidDialog } from "./BidDialog";
@@ -45,6 +46,7 @@ export function MarketplaceList() {
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [specSheetListing, setSpecSheetListing] = useState<MarketplaceListing | null>(null);
   const [specSheetOpen, setSpecSheetOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleBidClick = (listing: MarketplaceListing) => {
     setSelectedListing(listing);
@@ -76,8 +78,21 @@ export function MarketplaceList() {
     );
   }
 
-  const activeListings = data?.active || [];
-  const completedListings = data?.completed || [];
+  const filterListings = (listings: MarketplaceListing[]) => {
+    if (!searchQuery.trim()) return listings;
+    const q = searchQuery.toLowerCase();
+    return listings.filter((l) =>
+      (l.serial_number?.toLowerCase().includes(q)) ||
+      (l.rated_power_kva.toString().includes(q)) ||
+      (l.vector_group?.toLowerCase().includes(q)) ||
+      (l.cooling_class?.toLowerCase().includes(q)) ||
+      (l.conductor_type?.toLowerCase().includes(q)) ||
+      (l.zipcode?.toLowerCase().includes(q))
+    );
+  };
+
+  const activeListings = filterListings(data?.active || []);
+  const completedListings = filterListings(data?.completed || []);
 
   const renderTable = (listings: MarketplaceListing[], isCompleted: boolean) => {
     if (listings.length === 0) {
@@ -102,7 +117,7 @@ export function MarketplaceList() {
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="text-muted-foreground font-semibold">FLUX#</TableHead>
+                <TableHead className="text-muted-foreground font-semibold">FX#</TableHead>
                 <TableHead className="text-muted-foreground font-semibold">Power</TableHead>
                 <TableHead className="text-muted-foreground font-semibold">Primary</TableHead>
                 <TableHead className="text-muted-foreground font-semibold">Secondary</TableHead>
@@ -301,6 +316,17 @@ export function MarketplaceList() {
           </div>
           <div className="text-sm text-muted-foreground">Completed</div>
         </div>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Search by project #, kVA, vector group, location..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       {/* Tabs */}

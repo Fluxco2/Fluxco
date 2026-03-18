@@ -143,6 +143,7 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">{q.asked_by_company || q.asked_by_name}</span>
                     <span className="text-xs text-muted-foreground">{formatDate(q.created_at)}</span>
                     {q.answer ? (
                       <Badge variant="outline" className="text-xs text-green-500 border-green-500/30">
@@ -197,7 +198,7 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
           ))}
 
           {questions.length === 0 && !canAsk && (
-            <p className="text-sm text-muted-foreground py-2">No questions yet.</p>
+            <p className="text-sm text-muted-foreground py-2">No questions yet. OEMs will be able to ask questions about this spec once it&apos;s published to the marketplace.</p>
           )}
 
           {/* Ask form */}

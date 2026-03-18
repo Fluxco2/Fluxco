@@ -161,7 +161,7 @@ export default function ListingDetailPage({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle>Design Requirements</CardTitle>
-          <Badge variant="default" className="bg-blue-600">Pro</Badge>
+          <Badge variant="default" className="bg-blue-600">{listing.spec_mode === 'lite' ? 'Lite' : 'Pro'}</Badge>
         </CardHeader>
         <CardContent>
           <ProDesignForm

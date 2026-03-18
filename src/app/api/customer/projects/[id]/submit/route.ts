@@ -51,11 +51,13 @@ export async function POST(
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
-    if (project.status !== "draft") {
-      return NextResponse.json({ error: "Project already submitted" }, { status: 400 });
+    const isUpdate = (project.status === "submitted" || project.status === "quoted") && project.marketplace_listing_id;
+
+    if (project.status !== "draft" && !isUpdate) {
+      return NextResponse.json({ error: "Project cannot be submitted in its current state" }, { status: 400 });
     }
 
-    // 1. Create marketplace listing from the project
+    // 1. Build marketplace listing data from the project
     const designReqs = project.design_requirements || {};
     const listingData: Record<string, any> = {
       customer_project_id: id,
@@ -82,15 +84,33 @@ export async function POST(
       status: "listed",
     };
 
-    const { data: listing, error: listingError } = await supabase
-      .from("marketplace_listings")
-      .insert(listingData)
-      .select()
-      .single();
+    let listing;
+    let listingError;
+
+    if (isUpdate) {
+      // Update existing marketplace listing
+      const { data, error } = await supabase
+        .from("marketplace_listings")
+        .update(listingData)
+        .eq("id", project.marketplace_listing_id)
+        .select()
+        .single();
+      listing = data;
+      listingError = error;
+    } else {
+      // Create new marketplace listing
+      const { data, error } = await supabase
+        .from("marketplace_listings")
+        .insert(listingData)
+        .select()
+        .single();
+      listing = data;
+      listingError = error;
+    }
 
     if (listingError) {
-      console.error("Error creating marketplace listing:", listingError);
-      return NextResponse.json({ error: "Failed to publish to marketplace" }, { status: 500 });
+      console.error(`Error ${isUpdate ? "updating" : "creating"} marketplace listing:`, listingError);
+      return NextResponse.json({ error: `Failed to ${isUpdate ? "update" : "publish to"} marketplace` }, { status: 500 });
     }
 
     // 2. Update project status + link to listing
@@ -113,9 +133,11 @@ export async function POST(
         await resend.emails.send({
           from: "FluxCo <noreply@fluxco.com>",
           to: ["brian@fluxco.com", "eric@fluxco.com", "casey@fluxco.com"],
-          subject: `New Project Submitted: ${project.name} (${project.project_number})`,
+          subject: isUpdate
+            ? `Project Updated: ${project.name} (${project.project_number})`
+            : `New Project Submitted: ${project.name} (${project.project_number})`,
           html: `
-            <h2>New Customer Project Submitted for Quoting</h2>
+            <h2>${isUpdate ? "Customer Project Spec Updated" : "New Customer Project Submitted for Quoting"}</h2>
             <p><strong>Customer:</strong> ${customer.company_name} (${customer.contact_name})</p>
             <p><strong>Project:</strong> ${project.name} — ${project.project_number}</p>
 
@@ -129,7 +151,7 @@ export async function POST(
               <li><strong>Spec Mode:</strong> ${project.spec_mode}</li>
             </ul>
 
-            <p>This project has been published to the marketplace. OEMs can now view and bid.</p>
+            <p>${isUpdate ? "This project's specs have been updated on the marketplace." : "This project has been published to the marketplace. OEMs can now view and bid."}</p>
             <p><a href="https://fluxco.com/portal/marketplace">View on Marketplace</a></p>
           `,
         });
@@ -142,8 +164,15 @@ export async function POST(
         await resend.emails.send({
           from: "FluxCo <noreply@fluxco.com>",
           to: customer.email,
-          subject: `Your Project "${project.name}" Has Been Submitted`,
-          html: `
+          subject: isUpdate
+            ? `Your Project "${project.name}" Has Been Updated`
+            : `Your Project "${project.name}" Has Been Submitted`,
+          html: isUpdate ? `
+            <h2>Project Specs Updated</h2>
+            <p>Hi ${customer.contact_name?.split(" ")[0]},</p>
+            <p>Your updated specs for <strong>${project.name}</strong> (${project.project_number}) have been pushed to the marketplace.</p>
+            <p>Suppliers who have already viewed or bid on this project will see the updated requirements.</p>
+          ` : `
             <h2>Project Submitted for Quoting</h2>
             <p>Hi ${customer.contact_name?.split(" ")[0]},</p>
             <p>Your project <strong>${project.name}</strong> (${project.project_number}) has been submitted and published to our supplier network.</p>
@@ -177,6 +206,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
+      updated: !!isUpdate,
       project: { ...project, status: "submitted", marketplace_listing_id: listing.id },
       listing,
     });

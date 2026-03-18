@@ -16,6 +16,8 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +71,26 @@ export function LoginForm() {
           required
           disabled={loading}
         />
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          className="text-xs text-muted-foreground hover:text-primary transition-colors"
+          disabled={resetting}
+          onClick={async () => {
+            if (!email) { setError("Enter your email first"); return; }
+            setResetting(true);
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/customer/login`,
+            });
+            setResetting(false);
+            if (resetError) { setError(resetError.message); return; }
+            setResetSent(true);
+          }}
+        >
+          {resetting ? "Sending..." : resetSent ? "Reset email sent!" : "Forgot password?"}
+        </button>
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>

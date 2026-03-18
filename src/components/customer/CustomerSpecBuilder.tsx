@@ -164,6 +164,7 @@ export function CustomerSpecBuilder({ customerId, projectId, accessToken }: Cust
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [updated, setUpdated] = useState(false);
   const [loadingProject, setLoadingProject] = useState(!!projectId);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
   const [projectStatus, setProjectStatus] = useState("draft");
@@ -316,6 +317,7 @@ export function CustomerSpecBuilder({ customerId, projectId, accessToken }: Cust
   const handleSubmit = async () => {
     if (!currentProjectId) return;
     setSubmitting(true);
+    setUpdated(false);
 
     // Save first to capture any unsaved changes
     await handleSave();
@@ -334,6 +336,10 @@ export function CustomerSpecBuilder({ customerId, projectId, accessToken }: Cust
         const data = await res.json();
         setProjectStatus("submitted");
         if (data.listing?.id) setMarketplaceListingId(data.listing.id);
+        if (data.updated) {
+          setUpdated(true);
+          setTimeout(() => setUpdated(false), 3000);
+        }
       } else {
         const data = await res.json();
         console.error("Submit error:", data.error);
@@ -441,11 +447,17 @@ export function CustomerSpecBuilder({ customerId, projectId, accessToken }: Cust
               {submitting ? "Submitting..." : "Submit for Quoting"}
             </Button>
           )}
-          {projectStatus === "submitted" && (
-            <div className="flex items-center gap-2 text-sm text-blue-500 font-medium px-3">
-              <Check className="h-4 w-4" />
-              Submitted
-            </div>
+          {(projectStatus === "submitted" || projectStatus === "quoted") && currentProjectId && (
+            <Button onClick={handleSubmit} disabled={submitting} variant="outline">
+              {submitting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : updated ? (
+                <Check className="h-4 w-4 mr-2" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              {submitting ? "Updating..." : updated ? "Updated!" : "Update Marketplace"}
+            </Button>
           )}
         </div>
       </div>

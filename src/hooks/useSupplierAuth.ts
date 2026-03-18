@@ -135,13 +135,15 @@ export function useSupplierAuth(): UseSupplierAuthReturn {
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
-      if (newSession?.access_token) {
+      if (event === 'SIGNED_IN' && newSession?.access_token) {
         const profile = await fetchSupplierProfile(newSession.access_token);
         if (isMounted) {
           setSupplier(profile);
         }
-      } else {
+      } else if (event === 'SIGNED_OUT') {
         setSupplier(null);
+        setUser(null);
+        setSession(null);
       }
 
       setLoading(false);
