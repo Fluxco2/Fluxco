@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect, useRef } from "react";
+import { use, useState, useEffect } from "react";
 import { useSupplierAuthContext } from "@/context/SupplierAuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ import { BidDialog } from "@/components/supplier/BidDialog";
 import { designTransformer } from "@/engine/TransformerDesignEngine";
 import { STEEL_GRADES, CONDUCTOR_TYPES, COOLING_CLASSES, VECTOR_GROUPS } from "@/engine/constants/materials";
 import { DesignSummary } from "@/components/transformer/output/DesignSummary";
-import { CalculationSteps } from "@/components/transformer/calculations/CalculationSteps";
 import { BillOfMaterials } from "@/components/transformer/output/BillOfMaterials";
 import { SpecificationSheet } from "@/components/transformer/output/SpecificationSheet";
 import { AssemblyDrawing } from "@/components/transformer/drawings/AssemblyDrawing";
@@ -67,7 +66,7 @@ export default function ListingDetailPage({
   const [bidOpen, setBidOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("summary");
   const [activeDrawingTab, setActiveDrawingTab] = useState("assembly-front");
-  const specRef = useRef<HTMLDivElement>(null);
+
 
   // Computed from listing's stored requirements
   const [design, setDesign] = useState<TransformerDesign | null>(null);
@@ -104,35 +103,94 @@ export default function ListingDetailPage({
   }, [id]);
 
   const handleDownloadPDF = async () => {
-    if (!specRef.current || !listing) return;
-    const html2canvas = (await import("html2canvas")).default;
+    if (!listing || !requirements) return;
     const { jsPDF } = await import("jspdf");
-
-    const canvas = await html2canvas(specRef.current, {
-      scale: 2,
-      backgroundColor: "#0a0a0a",
-      useCORS: true,
-    });
-
-    const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth - 20;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const pw = pdf.internal.pageSize.getWidth();
+    let y = 15;
 
-    let heightLeft = imgHeight;
-    let position = 10;
+    const formatV = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)} kV` : `${v} V`);
 
-    pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight - 20;
+    // Header
+    pdf.setFontSize(18);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("FLUXCO — Transformer Specification Sheet", 15, y);
+    y += 10;
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`${listing.serial_number || ""} — ${listing.rated_power_kva.toLocaleString()} kVA, ${listing.phases}-Phase`, 15, y);
+    y += 6;
+    pdf.text(`Posted: ${new Date(listing.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`, 15, y);
+    y += 10;
 
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight + 10;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight - 20;
+    // Helper to add a section
+    const addSection = (title: string, rows: [string, string][]) => {
+      if (y > 260) { pdf.addPage(); y = 15; }
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(title, 15, y);
+      y += 7;
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      for (const [label, value] of rows) {
+        if (y > 275) { pdf.addPage(); y = 15; }
+        pdf.text(label, 20, y);
+        pdf.text(value, pw - 15, y, { align: "right" });
+        y += 5.5;
+      }
+      y += 4;
+    };
+
+    // Electrical
+    const electricalRows: [string, string][] = [
+      ["Power Rating", `${listing.rated_power_kva.toLocaleString()} kVA`],
+      ["Primary Voltage", formatV(listing.primary_voltage)],
+      ["Secondary Voltage", formatV(listing.secondary_voltage)],
+      ["Frequency", `${listing.frequency} Hz`],
+      ["Phases", `${listing.phases}-Phase`],
+    ];
+    if (listing.impedance_percent) electricalRows.push(["Impedance", `${listing.impedance_percent}%`]);
+    if (listing.vector_group) electricalRows.push(["Vector Group", listing.vector_group]);
+    if (listing.cooling_class) electricalRows.push(["Cooling Class", listing.cooling_class]);
+    if (listing.conductor_type) electricalRows.push(["Conductor", listing.conductor_type]);
+    if (listing.steel_grade) electricalRows.push(["Core Steel", listing.steel_grade]);
+    addSection("Electrical Specifications", electricalRows);
+
+    // Design requirements from stored data
+    const reqs = (listing.design_specs as any)?.requirements || {};
+    const designRows: [string, string][] = [];
+    if (reqs.tapChangerType) designRows.push(["Tap Changer", reqs.tapChangerType === "onLoad" ? "OLTC" : "NLTC"]);
+    if (reqs.oilType) designRows.push(["Oil Type", reqs.oilType]);
+    if (reqs.oilPreservation) designRows.push(["Oil Preservation", reqs.oilPreservation]);
+    if (reqs.altitude) designRows.push(["Altitude", `${reqs.altitude} m`]);
+    if (reqs.ambientTemperature) designRows.push(["Ambient Temperature", `${reqs.ambientTemperature}°C`]);
+    designRows.push(["Includes TAC", reqs.includeTAC ? "Yes" : "No"]);
+    if (reqs.manufacturingRegions) {
+      const regionMap: Record<string, string> = { usa: "USA", north_america: "N. America", global: "Global" };
+      designRows.push(["Manufacturing Region", reqs.manufacturingRegions.map((r: string) => regionMap[r] || r).join(", ")]);
     }
+    designRows.push(["FEOC Required", reqs.requireFEOC ? "Yes" : "No"]);
+    if (designRows.length > 0) addSection("Design Requirements", designRows);
+
+    // BOM summary if design available
+    if (design) {
+      const bomRows: [string, string][] = [
+        ["Core Steel", `${requirements.steelGrade.name} — ${design.core.coreWeight} kg`],
+        ["HV Winding", `${requirements.conductorType.name} — ${design.hvWinding.turns} turns`],
+        ["LV Winding", `${requirements.conductorType.name} — ${design.lvWinding.turns} turns`],
+        ["Tank", `${design.tank.length} × ${design.tank.width} × ${design.tank.height} mm`],
+        ["Oil Volume", `${design.thermal.oilVolume.toFixed(0)} L`],
+      ];
+      addSection("Bill of Materials (Summary)", bomRows);
+    }
+
+    // Footer
+    if (y > 270) { pdf.addPage(); y = 15; }
+    y += 5;
+    pdf.setFontSize(8);
+    pdf.setTextColor(128, 128, 128);
+    pdf.text("Generated by FluxCo — fluxco.com", 15, y);
+    pdf.text(`${new Date().toLocaleDateString()}`, pw - 15, y, { align: "right" });
 
     pdf.save(`${listing.serial_number || "spec"}-specification.pdf`);
   };
@@ -206,13 +264,12 @@ export default function ListingDetailPage({
       </div>
 
       {/* Full Spec Builder Output (read-only) */}
-      <div ref={specRef}>
+      <div>
         {hasDesign ? (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full ${specMode === "pro" ? "grid-cols-5" : "grid-cols-4"}`}>
+            <TabsList className={`grid w-full ${specMode === "pro" ? "grid-cols-4" : "grid-cols-3"}`}>
               <TabsTrigger value="summary">Summary</TabsTrigger>
               {specMode === "pro" && <TabsTrigger value="specifications">Specifications</TabsTrigger>}
-              <TabsTrigger value="calculations">Calculations</TabsTrigger>
               <TabsTrigger value="drawings">Drawings</TabsTrigger>
               <TabsTrigger value="bom">BOM</TabsTrigger>
             </TabsList>
@@ -233,10 +290,6 @@ export default function ListingDetailPage({
                 </Card>
               </TabsContent>
             )}
-
-            <TabsContent value="calculations">
-              <CalculationSteps design={design!} requirements={requirements!} />
-            </TabsContent>
 
             <TabsContent value="drawings">
               <Card>
