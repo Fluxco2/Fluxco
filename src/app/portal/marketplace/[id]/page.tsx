@@ -23,6 +23,7 @@ import { BidDialog } from "@/components/supplier/BidDialog";
 import { designTransformer } from "@/engine/TransformerDesignEngine";
 import { STEEL_GRADES, CONDUCTOR_TYPES, COOLING_CLASSES, VECTOR_GROUPS } from "@/engine/constants/materials";
 import { DesignSummary } from "@/components/transformer/output/DesignSummary";
+import { CalculationSteps } from "@/components/transformer/calculations/CalculationSteps";
 import { BillOfMaterials } from "@/components/transformer/output/BillOfMaterials";
 import { SpecificationSheet } from "@/components/transformer/output/SpecificationSheet";
 import { AssemblyDrawing } from "@/components/transformer/drawings/AssemblyDrawing";
@@ -121,11 +122,11 @@ export default function ListingDetailPage({
     pdf.text(`${listing.serial_number || ""} — ${listing.rated_power_kva.toLocaleString()} kVA, ${listing.phases}-Phase`, 15, y);
     y += 6;
     pdf.text(`Posted: ${new Date(listing.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`, 15, y);
-    y += 10;
+    y += 3;
+    pdf.setDrawColor(200); pdf.line(15, y, pw - 15, y); y += 8;
 
-    // Helper to add a section
     const addSection = (title: string, rows: [string, string][]) => {
-      if (y > 260) { pdf.addPage(); y = 15; }
+      if (y > 255) { pdf.addPage(); y = 15; }
       pdf.setFontSize(12);
       pdf.setFont("helvetica", "bold");
       pdf.text(title, 15, y);
@@ -138,10 +139,10 @@ export default function ListingDetailPage({
         pdf.text(value, pw - 15, y, { align: "right" });
         y += 5.5;
       }
-      y += 4;
+      y += 5;
     };
 
-    // Electrical
+    // 1. Electrical Specifications
     const electricalRows: [string, string][] = [
       ["Power Rating", `${listing.rated_power_kva.toLocaleString()} kVA`],
       ["Primary Voltage", formatV(listing.primary_voltage)],
@@ -154,9 +155,42 @@ export default function ListingDetailPage({
     if (listing.cooling_class) electricalRows.push(["Cooling Class", listing.cooling_class]);
     if (listing.conductor_type) electricalRows.push(["Conductor", listing.conductor_type]);
     if (listing.steel_grade) electricalRows.push(["Core Steel", listing.steel_grade]);
+    if (design) {
+      electricalRows.push(["X/R Ratio", design.impedance.xrRatio.toFixed(1)]);
+    }
     addSection("Electrical Specifications", electricalRows);
 
-    // Design requirements from stored data
+    // 2. Loss & Efficiency
+    if (design) {
+      addSection("Loss & Efficiency", [
+        ["No-Load Loss", `${design.losses.noLoadLoss.toFixed(0)} W`],
+        ["Load Loss (100%)", `${design.losses.loadLoss.toFixed(0)} W`],
+        ["Total Loss", `${design.losses.totalLoss.toFixed(0)} W`],
+        ["Efficiency at 100%", `${design.losses.efficiency.find(e => e.loadPercent === 100)?.efficiency.toFixed(2)}%`],
+        ["Max Efficiency", `${design.losses.maxEfficiency.toFixed(2)}% at ${design.losses.maxEfficiencyLoad}% load`],
+      ]);
+    }
+
+    // 3. Thermal Data
+    if (design) {
+      addSection("Thermal Data", [
+        ["Cooling Class", requirements.coolingClass.name],
+        ["Oil Volume", `${design.thermal.oilVolume.toFixed(0)} L`],
+        ["Top Oil Rise", `${design.thermal.topOilRise.toFixed(0)}°C`],
+        ["Avg Winding Rise", `${design.thermal.averageWindingRise.toFixed(0)}°C`],
+        ["Hot Spot Rise", `${design.thermal.hotSpotRise.toFixed(0)}°C`],
+      ]);
+    }
+
+    // 4. Physical Data (no weight)
+    if (design) {
+      addSection("Physical Data", [
+        ["Tank Dimensions (L×W×H)", `${design.tank.length} × ${design.tank.width} × ${design.tank.height} mm`],
+        ["Overall Height", `${design.tank.overallHeight} mm`],
+      ]);
+    }
+
+    // 5. Design Requirements
     const reqs = (listing.design_specs as any)?.requirements || {};
     const designRows: [string, string][] = [];
     if (reqs.tapChangerType) designRows.push(["Tap Changer", reqs.tapChangerType === "onLoad" ? "OLTC" : "NLTC"]);
@@ -172,7 +206,43 @@ export default function ListingDetailPage({
     designRows.push(["FEOC Required", reqs.requireFEOC ? "Yes" : "No"]);
     if (designRows.length > 0) addSection("Design Requirements", designRows);
 
-    // BOM summary if design available
+    // 6. Core Design
+    if (design) {
+      addSection("Core Design", [
+        ["Core Type", `3-Limb, ${requirements.phases}-Phase`],
+        ["Steel Grade", requirements.steelGrade.name],
+        ["Core Weight", `${design.core.coreWeight} kg`],
+        ["Flux Density", `${design.core.fluxDensity.toFixed(3)} T`],
+        ["Core Diameter", `${design.core.coreDiameter} mm`],
+        ["Window Height", `${design.core.windowHeight} mm`],
+      ]);
+    }
+
+    // 7. Winding Design
+    if (design) {
+      addSection("Winding Design — HV", [
+        ["Conductor", requirements.conductorType.name],
+        ["Turns", `${design.hvWinding.turns}`],
+        ["Current Density", `${design.hvWinding.currentDensity.toFixed(2)} A/mm²`],
+        ["Rated Current", `${design.hvWinding.ratedCurrent.toFixed(1)} A`],
+        ["Layers", `${design.hvWinding.layers}`],
+        ["Winding Height", `${design.hvWinding.windingHeight} mm`],
+        ["Inner Radius", `${design.hvWinding.innerRadius} mm`],
+        ["Outer Radius", `${design.hvWinding.outerRadius} mm`],
+      ]);
+      addSection("Winding Design — LV", [
+        ["Conductor", requirements.conductorType.name],
+        ["Turns", `${design.lvWinding.turns}`],
+        ["Current Density", `${design.lvWinding.currentDensity.toFixed(2)} A/mm²`],
+        ["Rated Current", `${design.lvWinding.ratedCurrent.toFixed(1)} A`],
+        ["Layers", `${design.lvWinding.layers}`],
+        ["Winding Height", `${design.lvWinding.windingHeight} mm`],
+        ["Inner Radius", `${design.lvWinding.innerRadius} mm`],
+        ["Outer Radius", `${design.lvWinding.outerRadius} mm`],
+      ]);
+    }
+
+    // 8. Bill of Materials Summary
     if (design) {
       const bomRows: [string, string][] = [
         ["Core Steel", `${requirements.steelGrade.name} — ${design.core.coreWeight} kg`],
@@ -181,12 +251,13 @@ export default function ListingDetailPage({
         ["Tank", `${design.tank.length} × ${design.tank.width} × ${design.tank.height} mm`],
         ["Oil Volume", `${design.thermal.oilVolume.toFixed(0)} L`],
       ];
-      addSection("Bill of Materials (Summary)", bomRows);
+      addSection("Bill of Materials", bomRows);
     }
 
     // Footer
     if (y > 270) { pdf.addPage(); y = 15; }
     y += 5;
+    pdf.setDrawColor(200); pdf.line(15, y, pw - 15, y); y += 5;
     pdf.setFontSize(8);
     pdf.setTextColor(128, 128, 128);
     pdf.text("Generated by FluxCo — fluxco.com", 15, y);
@@ -267,9 +338,10 @@ export default function ListingDetailPage({
       <div>
         {hasDesign ? (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full ${specMode === "pro" ? "grid-cols-4" : "grid-cols-3"}`}>
+            <TabsList className={`grid w-full ${specMode === "pro" ? "grid-cols-5" : "grid-cols-4"}`}>
               <TabsTrigger value="summary">Summary</TabsTrigger>
               {specMode === "pro" && <TabsTrigger value="specifications">Specifications</TabsTrigger>}
+              <TabsTrigger value="calculations">Calculations</TabsTrigger>
               <TabsTrigger value="drawings">Drawings</TabsTrigger>
               <TabsTrigger value="bom">BOM</TabsTrigger>
             </TabsList>
@@ -290,6 +362,10 @@ export default function ListingDetailPage({
                 </Card>
               </TabsContent>
             )}
+
+            <TabsContent value="calculations">
+              <CalculationSteps design={design!} requirements={requirements!} />
+            </TabsContent>
 
             <TabsContent value="drawings">
               <Card>
