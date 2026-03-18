@@ -194,40 +194,6 @@ export default function CustomerDashboardPage() {
         )}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <Link
-          href="/customer/projects"
-          className="flex items-center gap-4 bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
-        >
-          <FolderOpen className="w-8 h-8 text-primary" />
-          <div>
-            <h3 className="font-semibold group-hover:text-primary transition-colors">
-              View All Projects
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Browse current and past projects with proposal links
-            </p>
-          </div>
-          <ArrowRight className="w-5 h-5 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
-        </Link>
-
-        <Link
-          href="/customer/settings"
-          className="flex items-center gap-4 bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors group"
-        >
-          <Settings className="w-8 h-8 text-primary" />
-          <div>
-            <h3 className="font-semibold group-hover:text-primary transition-colors">
-              Account Settings
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Update your profile and manage account security
-            </p>
-          </div>
-          <ArrowRight className="w-5 h-5 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
-        </Link>
-      </div>
     </div>
   );
 }
