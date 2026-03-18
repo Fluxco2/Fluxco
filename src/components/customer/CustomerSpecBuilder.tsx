@@ -310,9 +310,7 @@ export function CustomerSpecBuilder({ customerId, projectId, accessToken }: Cust
     }
 
     setSaving(false);
-    if (saved) {
-      setTimeout(() => setSaved(false), 2000);
-    }
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const handleSubmit = async () => {

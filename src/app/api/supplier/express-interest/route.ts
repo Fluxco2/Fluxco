@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
       type
     } = body;
 
-    // Get listing details
+    // Get listing details + linked customer
     const { data: listing, error: listingError } = await supabase
       .from("marketplace_listings")
-      .select("*")
+      .select("*, customer_project_id")
       .eq("id", listingId)
       .single();
 
@@ -39,6 +39,24 @@ export async function POST(request: NextRequest) {
     }
 
     const projectId = serialNumber || listing.serial_number;
+
+    // Look up customer email if linked to a customer project
+    let customerEmail: string | null = null;
+    if (listing.customer_project_id) {
+      const { data: proj } = await supabase
+        .from("customer_projects")
+        .select("customer_id")
+        .eq("id", listing.customer_project_id)
+        .single();
+      if (proj) {
+        const { data: cust } = await supabase
+          .from("customers")
+          .select("email")
+          .eq("id", proj.customer_id)
+          .single();
+        customerEmail = cust?.email || null;
+      }
+    }
 
     // Validate supplier ID (must be a valid UUID format)
     const isValidSupplierId = supplierId && supplierId !== "unknown" &&
@@ -108,6 +126,25 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Notify customer of info request
+      if (resend && customerEmail) {
+        try {
+          await resend.emails.send({
+            from: "FluxCo <noreply@fluxco.com>",
+            to: customerEmail,
+            subject: `OEM Interest in ${projectId}`,
+            html: `
+              <h2>An OEM Is Interested in Your Project</h2>
+              <p><strong>${supplierCompany}</strong> has requested more information about your project <strong>${projectId}</strong>.</p>
+              <p>FluxCo is handling the response. We'll keep you updated.</p>
+              <p><a href="https://fluxco.com/customer/projects">View Your Projects</a></p>
+            `,
+          });
+        } catch (emailError) {
+          console.error("Failed to send customer info notification:", emailError);
+        }
+      }
+
       return NextResponse.json({
         success: true,
         message: "Info request sent. FluxCo will contact you soon."
@@ -132,7 +169,7 @@ export async function POST(request: NextRequest) {
           });
       }
 
-      // Send email notification
+      // Notify FluxCo team
       if (resend) {
         try {
           await resend.emails.send({
@@ -143,7 +180,6 @@ export async function POST(request: NextRequest) {
             html: `
               <h2>New Bid Received</h2>
               <p>An OEM has submitted a bid for a transformer listing.</p>
-
               <h3>Bid Details</h3>
               <ul>
                 <li><strong>Bid Price:</strong> $${bidPrice?.toLocaleString()}</li>
@@ -151,14 +187,12 @@ export async function POST(request: NextRequest) {
                 ${notes ? `<li><strong>Notes:</strong> ${notes}</li>` : ''}
                 ${proposalUrl ? `<li><strong>Proposal:</strong> <a href="${proposalUrl}">View Proposal PDF</a></li>` : ''}
               </ul>
-
               <h3>OEM Details</h3>
               <ul>
                 <li><strong>Company:</strong> ${supplierCompany}</li>
                 <li><strong>Contact:</strong> ${contactName}</li>
                 <li><strong>Email:</strong> ${supplierEmail}</li>
               </ul>
-
               <h3>Project Details</h3>
               <ul>
                 <li><strong>Project ID:</strong> ${projectId}</li>
@@ -172,11 +206,34 @@ export async function POST(request: NextRequest) {
         } catch (emailError) {
           console.error("Failed to send email:", emailError);
         }
+
+        // Notify customer
+        if (customerEmail) {
+          try {
+            await resend.emails.send({
+              from: "FluxCo <noreply@fluxco.com>",
+              to: customerEmail,
+              subject: `New Bid on ${projectId} — $${bidPrice?.toLocaleString()}, ${leadTimeWeeks} weeks`,
+              html: `
+                <h2>You Received a New Bid</h2>
+                <p>An OEM has submitted a bid on your project <strong>${projectId}</strong>.</p>
+                <ul>
+                  <li><strong>Bid Price:</strong> $${bidPrice?.toLocaleString()}</li>
+                  <li><strong>Lead Time:</strong> ${leadTimeWeeks} weeks</li>
+                  <li><strong>OEM:</strong> ${supplierCompany}</li>
+                </ul>
+                <p><a href="https://fluxco.com/customer/projects">View Your Projects</a></p>
+              `,
+            });
+          } catch (emailError) {
+            console.error("Failed to send customer bid notification:", emailError);
+          }
+        }
       }
 
       return NextResponse.json({
         success: true,
-        message: "Bid submitted successfully. FluxCo has been notified."
+        message: "Bid submitted successfully."
       });
     }
 

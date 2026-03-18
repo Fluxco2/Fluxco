@@ -12,16 +12,15 @@ export async function POST(request: NextRequest) {
     const {
       customerId,
       name,
-      specMode,
-      ratedPowerKva,
-      primaryVoltage,
-      secondaryVoltage,
+      spec_mode,
+      rated_power_kva,
+      primary_voltage,
+      secondary_voltage,
       frequency,
       phases,
-      designRequirements,
-      proSpec,
-      designResult,
-      estimatedCost,
+      design_requirements,
+      pro_spec,
+      estimated_cost,
     } = body;
 
     if (!customerId) {
@@ -32,17 +31,16 @@ export async function POST(request: NextRequest) {
       .from("customer_projects")
       .insert({
         customer_id: customerId,
-        name: name || `${ratedPowerKva || ''} kVA Transformer`.trim(),
-        spec_mode: specMode || "lite",
-        rated_power_kva: ratedPowerKva || null,
-        primary_voltage: primaryVoltage || null,
-        secondary_voltage: secondaryVoltage || null,
+        name: name || `${rated_power_kva || ''} kVA Transformer`.trim(),
+        spec_mode: spec_mode || "lite",
+        rated_power_kva: rated_power_kva || null,
+        primary_voltage: primary_voltage || null,
+        secondary_voltage: secondary_voltage || null,
         frequency: frequency || 60,
         phases: phases || 3,
-        design_requirements: designRequirements || null,
-        pro_spec: proSpec || null,
-        design_result: designResult || null,
-        estimated_cost: estimatedCost || null,
+        design_requirements: design_requirements || null,
+        pro_spec: pro_spec || null,
+        estimated_cost: estimated_cost || null,
         status: "draft",
       })
       .select()

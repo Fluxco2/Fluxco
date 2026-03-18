@@ -36,6 +36,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export function ProjectBids({ projectId, accessToken }: ProjectBidsProps) {
   const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingBid, setUpdatingBid] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBids = async () => {
@@ -54,6 +55,26 @@ export function ProjectBids({ projectId, accessToken }: ProjectBidsProps) {
     };
     fetchBids();
   }, [projectId, accessToken]);
+
+  const updateBidStatus = async (bidId: string, status: string) => {
+    setUpdatingBid(bidId);
+    try {
+      const res = await fetch(`/api/customer/projects/${projectId}/bids/${bidId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setBids((prev) => prev.map((b) => b.id === bidId ? { ...b, status } : b));
+      }
+    } catch (err) {
+      console.error("Error updating bid:", err);
+    }
+    setUpdatingBid(null);
+  };
 
   if (loading) {
     return (
@@ -155,11 +176,45 @@ export function ProjectBids({ projectId, accessToken }: ProjectBidsProps) {
                     </div>
                   )}
 
-                  <p className="text-xs text-muted-foreground pl-[52px]">
-                    {new Date(bid.created_at).toLocaleDateString("en-US", {
-                      month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
-                    })}
-                  </p>
+                  <div className="flex items-center justify-between pl-[52px]">
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(bid.created_at).toLocaleDateString("en-US", {
+                        month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit",
+                      })}
+                    </p>
+                    {(bid.status === "submitted" || bid.status === "under_review") && (
+                      <div className="flex items-center gap-2">
+                        {bid.status === "submitted" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateBidStatus(bid.id, "under_review")}
+                            disabled={updatingBid === bid.id}
+                          >
+                            Review
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-green-600 border-green-500/30 hover:bg-green-500/10"
+                          onClick={() => updateBidStatus(bid.id, "accepted")}
+                          disabled={updatingBid === bid.id}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-500/30 hover:bg-red-500/10"
+                          onClick={() => updateBidStatus(bid.id, "rejected")}
+                          disabled={updatingBid === bid.id}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}

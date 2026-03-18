@@ -145,6 +145,35 @@ export async function PUT(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Sync spec changes to linked marketplace listing
+    if (hasSpecChanges && data.marketplace_listing_id) {
+      const designReqs = data.design_requirements || {};
+      const VECTOR_GROUP_NAMES: Record<string, string> = {
+        dyn11: "Dyn11", dyn1: "Dyn1", ynd11: "YNd11", dd0: "Dd0", yy0: "Yy0",
+      };
+      await supabase
+        .from("marketplace_listings")
+        .update({
+          rated_power_kva: data.rated_power_kva,
+          primary_voltage: data.primary_voltage,
+          secondary_voltage: data.secondary_voltage,
+          frequency: data.frequency,
+          phases: data.phases,
+          impedance_percent: designReqs.targetImpedance || null,
+          vector_group: VECTOR_GROUP_NAMES[designReqs.vectorGroupId] || designReqs.vectorGroupId || null,
+          cooling_class: designReqs.coolingClassId?.toUpperCase() || null,
+          conductor_type: designReqs.conductorTypeId || null,
+          steel_grade: designReqs.steelGradeId || null,
+          estimated_cost: data.estimated_cost,
+          spec_mode: data.spec_mode,
+          design_specs: {
+            requirements: designReqs,
+            proSpec: data.pro_spec,
+          },
+        })
+        .eq("id", data.marketplace_listing_id);
+    }
+
     return NextResponse.json({ project: data });
   } catch (error: any) {
     console.error("Update project error:", error);

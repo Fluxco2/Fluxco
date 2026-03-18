@@ -180,14 +180,20 @@ export default function PortalPage() {
                 </Link>
               </div>
             ) : (
-              dashboard.recentBids.map((bid) => (
-                <div
+              dashboard.recentBids.map((bid: any) => (
+                <Link
                   key={bid.id}
-                  className="flex items-center justify-between p-4"
+                  href={`/portal/marketplace/${bid.listing_id}`}
+                  className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div>
+                    {bid.listing_serial && (
+                      <span className="font-mono text-xs text-muted-foreground mr-2">
+                        {bid.listing_serial}
+                      </span>
+                    )}
                     <span className="font-medium">
-                      ${bid.bid_price.toLocaleString()}
+                      ${bid.bid_price?.toLocaleString()}
                     </span>
                     <span className="text-muted-foreground text-sm ml-2">
                       {bid.lead_time_weeks} weeks
@@ -217,7 +223,7 @@ export default function PortalPage() {
                       ? "Not Selected"
                       : bid.status}
                   </Badge>
-                </div>
+                </Link>
               ))
             )}
           </div>

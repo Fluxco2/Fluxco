@@ -39,7 +39,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ bids: bids || [] });
+    // Enrich with listing info
+    const enriched = await Promise.all(
+      (bids || []).map(async (bid) => {
+        const { data: listing } = await supabase
+          .from("marketplace_listings")
+          .select("id, serial_number, rated_power_kva, primary_voltage, secondary_voltage")
+          .eq("id", bid.listing_id)
+          .single();
+        return {
+          ...bid,
+          listing_serial: listing?.serial_number || null,
+          listing_kva: listing?.rated_power_kva || null,
+          listing_id: bid.listing_id,
+        };
+      })
+    );
+
+    return NextResponse.json({ bids: enriched });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
