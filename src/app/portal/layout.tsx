@@ -92,6 +92,9 @@ function PortalLayoutInner({
               <span className="font-display text-2xl tracking-wide text-foreground">
                 FLUXCO
               </span>
+              <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                OEM Portal
+              </span>
             </Link>
 
             {/* Nav Links */}
