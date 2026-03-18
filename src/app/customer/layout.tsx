@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { CustomerAuthProvider, useCustomerAuthContext } from "@/context/CustomerAuthContext";
 import { Loader2, Zap, LayoutDashboard, FolderOpen, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,19 @@ export default function CustomerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, customer, loading, signOut } = useCustomerAuth();
+  return (
+    <CustomerAuthProvider>
+      <CustomerLayoutInner>{children}</CustomerLayoutInner>
+    </CustomerAuthProvider>
+  );
+}
+
+function CustomerLayoutInner({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, customer, loading, signOut } = useCustomerAuthContext();
   const router = useRouter();
   const pathname = usePathname();
 

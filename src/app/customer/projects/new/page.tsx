@@ -1,11 +1,11 @@
 "use client";
 
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { useCustomerAuthContext } from "@/context/CustomerAuthContext";
 import { CustomerSpecBuilder } from "@/components/customer/CustomerSpecBuilder";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function NewProjectPage() {
-  const { customer, loading } = useCustomerAuth();
+  const { customer, loading } = useCustomerAuthContext();
 
   if (loading) {
     return (

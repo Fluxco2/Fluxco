@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { useCustomerAuthContext } from "@/context/CustomerAuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function CustomerProjectsPage() {
-  const { customer, loading } = useCustomerAuth();
+  const { customer, loading } = useCustomerAuthContext();
   const [projects, setProjects] = useState<CustomerProject[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { useCustomerAuthContext } from "@/context/CustomerAuthContext";
 import { CustomerSpecBuilder } from "@/components/customer/CustomerSpecBuilder";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -11,7 +11,7 @@ export default function EditProjectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { customer, loading } = useCustomerAuth();
+  const { customer, loading } = useCustomerAuthContext();
 
   if (loading) {
     return (

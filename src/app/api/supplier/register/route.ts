@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
 
 export async function POST(request: NextRequest) {
   // Create client inside function to avoid build-time env var issues
@@ -70,6 +71,30 @@ export async function POST(request: NextRequest) {
         { error: "Failed to create supplier profile: " + profileError.message },
         { status: 500 }
       );
+    }
+
+    // Notify Brian about new OEM/supplier signup
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      try {
+        const resend = new Resend(apiKey);
+        await resend.emails.send({
+          from: "FluxCo <noreply@fluxco.com>",
+          to: "brian@fluxco.com",
+          subject: `New OEM Signup: ${company_name}`,
+          html: `
+            <h2>New OEM/Supplier Account Created</h2>
+            <p><strong>Company:</strong> ${company_name}</p>
+            <p><strong>Contact:</strong> ${contact_name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone || "Not provided"}</p>
+            <p><strong>Marketplace notifications:</strong> ${notify_new_listings ? "Yes" : "No"}</p>
+            <p style="color:#666;font-size:12px;">View all suppliers in the <a href="https://fluxco.com/admin">admin dashboard</a>.</p>
+          `,
+        });
+      } catch (emailErr) {
+        console.error("Failed to send new supplier alert email:", emailErr);
+      }
     }
 
     return NextResponse.json({

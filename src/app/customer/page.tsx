@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { useCustomerAuthContext } from "@/context/CustomerAuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,7 +34,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function CustomerDashboardPage() {
-  const { customer, user, loading } = useCustomerAuth();
+  const { customer, user, loading } = useCustomerAuthContext();
   const [supabaseProjects, setSupabaseProjects] = useState<CustomerProject[]>([]);
   const [sbLoading, setSbLoading] = useState(true);
 

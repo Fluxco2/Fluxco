@@ -1,13 +1,13 @@
 "use client";
 
-import { useCustomerAuth } from "@/hooks/useCustomerAuth";
+import { useCustomerAuthContext } from "@/context/CustomerAuthContext";
 import { ProfileForm } from "@/components/customer/ProfileForm";
 import { PasswordChangeForm } from "@/components/customer/PasswordChangeForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Settings } from "lucide-react";
 
 export default function CustomerSettingsPage() {
-  const { customer, loading } = useCustomerAuth();
+  const { customer, loading } = useCustomerAuthContext();
 
   if (loading) {
     return (
