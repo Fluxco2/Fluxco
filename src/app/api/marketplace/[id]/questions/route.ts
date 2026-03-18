@@ -110,7 +110,7 @@ export async function POST(
     const apiKey = process.env.RESEND_API_KEY;
     if (apiKey) {
       const resend = new Resend(apiKey);
-      const recipients = new Set(["brian@fluxco.com"]);
+      const recipients = new Set<string>();
 
       // If linked to customer project, notify the customer
       if (listing.customer_project_id) {
