@@ -405,7 +405,6 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
             onChange={(e) => setProjectName(e.target.value)}
             placeholder="Project Name (e.g. 'Dallas Data Center')"
             className="max-w-md text-lg font-semibold"
-            disabled={projectStatus !== "draft"}
           />
           {projectNumber && (
             <span className="text-sm text-muted-foreground font-mono bg-muted px-3 py-1 rounded">
@@ -424,13 +423,13 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={handleSave} disabled={saving || projectStatus !== "draft"} variant="outline">
+          <Button onClick={handleSave} disabled={saving} variant="outline">
             {saving ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            {saved ? "Saved!" : saving ? "Saving..." : "Save"}
+            {saved ? "Saved!" : saving ? "Saving..." : projectStatus !== "draft" ? "Save New Version" : "Save"}
           </Button>
           {projectStatus === "draft" && currentProjectId && (
             <Button onClick={handleSubmit} disabled={submitting}>
