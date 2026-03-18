@@ -1,31 +1,60 @@
 "use client";
 
 import { use, useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useSupplierAuthContext } from "@/context/SupplierAuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
-  Zap,
-  Thermometer,
-  Weight,
-  DollarSign,
-  FileText,
   Download,
   Send,
   MapPin,
-  MessageCircle,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { MarketplaceListing } from "@/lib/supabase";
 import { QASection } from "@/components/marketplace/QASection";
 import { BidDialog } from "@/components/supplier/BidDialog";
 
-const formatVoltage = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)} kV` : `${v} V`);
-const formatNum = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
+// Design engine + output components
+import { designTransformer } from "@/engine/TransformerDesignEngine";
+import { STEEL_GRADES, CONDUCTOR_TYPES, COOLING_CLASSES, VECTOR_GROUPS } from "@/engine/constants/materials";
+import { DesignSummary } from "@/components/transformer/output/DesignSummary";
+import { CalculationSteps } from "@/components/transformer/calculations/CalculationSteps";
+import { BillOfMaterials } from "@/components/transformer/output/BillOfMaterials";
+import { CostEstimate } from "@/components/transformer/output/CostEstimate";
+import { SpecificationSheet } from "@/components/transformer/output/SpecificationSheet";
+import { AssemblyDrawing } from "@/components/transformer/drawings/AssemblyDrawing";
+import { SideViewDrawing } from "@/components/transformer/drawings/SideViewDrawing";
+import { TopViewDrawing } from "@/components/transformer/drawings/TopViewDrawing";
+import type { DesignRequirements, TransformerDesign } from "@/engine/types/transformer.types";
+import type { ProSpecData } from "@/engine/types/proSpec.types";
+
+function deserializeRequirements(data: any): DesignRequirements {
+  return {
+    ratedPower: data.ratedPower ?? 1500,
+    primaryVoltage: data.primaryVoltage ?? 13800,
+    secondaryVoltage: data.secondaryVoltage ?? 480,
+    frequency: data.frequency ?? 60,
+    phases: data.phases ?? 3,
+    targetImpedance: data.targetImpedance ?? 5.75,
+    steelGrade: STEEL_GRADES.find((s) => s.id === data.steelGradeId) ?? STEEL_GRADES.find((s) => s.id === "hi-b")!,
+    conductorType: CONDUCTOR_TYPES.find((c) => c.id === data.conductorTypeId) ?? CONDUCTOR_TYPES.find((c) => c.id === "copper")!,
+    coolingClass: COOLING_CLASSES.find((c) => c.id === data.coolingClassId) ?? COOLING_CLASSES.find((c) => c.id === "onan")!,
+    vectorGroup: VECTOR_GROUPS.find((v) => v.id === data.vectorGroupId) ?? VECTOR_GROUPS.find((v) => v.id === "dyn11")!,
+    tapChangerType: data.tapChangerType ?? "noLoad",
+    oilType: data.oilType ?? "mineral",
+    oilPreservation: data.oilPreservation ?? "conservator",
+    includeTAC: data.includeTAC ?? false,
+    manufacturingRegions: data.manufacturingRegions ?? ["usa"],
+    requireFEOC: data.requireFEOC ?? true,
+    altitude: data.altitude,
+    ambientTemperature: data.ambientTemperature,
+  };
+}
 
 export default function ListingDetailPage({
   params,
@@ -33,12 +62,18 @@ export default function ListingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const router = useRouter();
   const { supplier, user, session, loading: authLoading } = useSupplierAuthContext();
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [bidOpen, setBidOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("summary");
+  const [activeDrawingTab, setActiveDrawingTab] = useState("assembly-front");
   const specRef = useRef<HTMLDivElement>(null);
+
+  // Computed from listing's stored requirements
+  const [design, setDesign] = useState<TransformerDesign | null>(null);
+  const [requirements, setRequirements] = useState<DesignRequirements | null>(null);
+  const [proSpec, setProSpec] = useState<ProSpecData | null>(null);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -46,6 +81,23 @@ export default function ListingDetailPage({
       if (res.ok) {
         const { listing: l } = await res.json();
         setListing(l);
+
+        // Re-run design engine from stored requirements
+        const specs = l.design_specs as any;
+        if (specs?.requirements) {
+          const reqs = deserializeRequirements(specs.requirements);
+          setRequirements(reqs);
+          if (specs.proSpec) setProSpec(specs.proSpec);
+
+          const result = designTransformer(reqs, {
+            steelGrade: reqs.steelGrade.id,
+            hvConductorMaterial: reqs.conductorType.id === "copper" ? "copper" : "aluminum",
+            lvConductorMaterial: reqs.conductorType.id === "copper" ? "copper" : "aluminum",
+          });
+          if (result.success && result.design) {
+            setDesign(result.design);
+          }
+        }
       }
       setLoading(false);
     };
@@ -54,8 +106,6 @@ export default function ListingDetailPage({
 
   const handleDownloadPDF = async () => {
     if (!specRef.current || !listing) return;
-
-    // Dynamic import to avoid SSR issues
     const html2canvas = (await import("html2canvas")).default;
     const { jsPDF } = await import("jspdf");
 
@@ -108,13 +158,13 @@ export default function ListingDetailPage({
     );
   }
 
-  const specs = listing.design_specs as any;
-  const reqs = specs?.requirements || {};
+  const specMode = listing.spec_mode || "lite";
+  const hasDesign = !!design && !!requirements;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <Link
             href="/portal/marketplace"
@@ -123,7 +173,7 @@ export default function ListingDetailPage({
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-bold text-primary">
                 {listing.rated_power_kva.toLocaleString()} kVA
               </h1>
@@ -156,223 +206,103 @@ export default function ListingDetailPage({
         </div>
       </div>
 
-      {/* Spec Sheet (printable area) */}
+      {/* Full Spec Builder Output (read-only) */}
       <div ref={specRef}>
-        <div className="grid md:grid-cols-2 gap-4">
-          {/* Electrical Specifications */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Zap className="w-4 h-4 text-primary" />
-                Electrical Specifications
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Power Rating</span>
-                  <span className="font-medium">{listing.rated_power_kva.toLocaleString()} kVA</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Primary Voltage</span>
-                  <span className="font-medium">{formatVoltage(listing.primary_voltage)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Secondary Voltage</span>
-                  <span className="font-medium">{formatVoltage(listing.secondary_voltage)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Frequency</span>
-                  <span className="font-medium">{listing.frequency} Hz</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Phases</span>
-                  <span className="font-medium">{listing.phases}-Phase</span>
-                </div>
-                {listing.impedance_percent && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Impedance</span>
-                    <span className="font-medium">{listing.impedance_percent}%</span>
-                  </div>
-                )}
-                {listing.vector_group && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Vector Group</span>
-                    <span className="font-medium">{listing.vector_group}</span>
-                  </div>
-                )}
-                {listing.cooling_class && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Cooling Class</span>
-                    <span className="font-medium">{listing.cooling_class}</span>
-                  </div>
-                )}
-                {listing.conductor_type && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Conductor</span>
-                    <span className="font-medium capitalize">{listing.conductor_type}</span>
-                  </div>
-                )}
-                {listing.steel_grade && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Core Steel</span>
-                    <span className="font-medium">{listing.steel_grade}</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+        {hasDesign ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className={`grid w-full ${specMode === "pro" ? "grid-cols-6" : "grid-cols-5"}`}>
+              <TabsTrigger value="summary">Summary</TabsTrigger>
+              {specMode === "pro" && <TabsTrigger value="specifications">Specifications</TabsTrigger>}
+              <TabsTrigger value="calculations">Calculations</TabsTrigger>
+              <TabsTrigger value="drawings">Drawings</TabsTrigger>
+              <TabsTrigger value="bom">BOM</TabsTrigger>
+              <TabsTrigger value="cost">Cost Estimate</TabsTrigger>
+            </TabsList>
 
-          {/* Design Requirements */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" />
-                Design Requirements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                {reqs.tapChangerType && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tap Changer</span>
-                    <span className="font-medium">
-                      {reqs.tapChangerType === "onLoad" ? "OLTC" : reqs.tapChangerType === "noLoad" ? "NLTC" : reqs.tapChangerType}
-                    </span>
-                  </div>
-                )}
-                {reqs.oilType && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Oil Type</span>
-                    <span className="font-medium capitalize">{reqs.oilType}</span>
-                  </div>
-                )}
-                {reqs.oilPreservation && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Oil Preservation</span>
-                    <span className="font-medium capitalize">{reqs.oilPreservation}</span>
-                  </div>
-                )}
-                {reqs.altitude && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Altitude</span>
-                    <span className="font-medium">{formatNum(reqs.altitude)} m</span>
-                  </div>
-                )}
-                {reqs.ambientTemperature && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Ambient Temp</span>
-                    <span className="font-medium">{reqs.ambientTemperature}°C</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Includes TAC</span>
-                  <span className="font-medium">{reqs.includeTAC ? "Yes" : "No"}</span>
-                </div>
-                {reqs.manufacturingRegions && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Region</span>
-                    <span className="font-medium">
-                      {reqs.manufacturingRegions.map((r: string) =>
-                        r === "usa" ? "USA" : r === "north_america" ? "N. America" : r === "global" ? "Global" : r
-                      ).join(", ")}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">FEOC Required</span>
-                  <span className="font-medium">{reqs.requireFEOC ? "Yes" : "No"}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <TabsContent value="summary">
+              <DesignSummary design={design!} requirements={requirements!} />
+            </TabsContent>
 
-          {/* Performance Data */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Thermometer className="w-4 h-4 text-primary" />
-                Performance Data
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                {listing.no_load_loss_w && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">No-Load Loss</span>
-                    <span className="font-medium">{formatNum(listing.no_load_loss_w)} W</span>
-                  </div>
-                )}
-                {listing.load_loss_w && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Load Loss</span>
-                    <span className="font-medium">{formatNum(listing.load_loss_w)} W</span>
-                  </div>
-                )}
-                {listing.efficiency_percent && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Efficiency</span>
-                    <span className="font-medium">{listing.efficiency_percent}%</span>
-                  </div>
-                )}
-                {listing.total_weight_kg && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Weight</span>
-                    <span className="font-medium">
-                      {formatNum(listing.total_weight_kg)} kg ({formatNum(Math.round(listing.total_weight_kg * 2.205))} lbs)
-                    </span>
-                  </div>
-                )}
-                {!listing.no_load_loss_w && !listing.load_loss_w && !listing.efficiency_percent && !listing.total_weight_kg && (
-                  <p className="text-muted-foreground col-span-2">Performance data will be available after design review.</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+            {specMode === "pro" && proSpec && (
+              <TabsContent value="specifications">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">PIP ELSTR01 Specification Sheet</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SpecificationSheet proSpec={proSpec} requirements={requirements!} />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )}
 
-          {/* Budget Estimate */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-primary" />
-                Budget Estimate
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                {listing.estimated_cost ? (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Estimated Cost</span>
-                      <span className="font-medium">${formatNum(listing.estimated_cost)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Cost per kVA</span>
-                      <span className="font-medium">
-                        ${formatNum(Math.round(listing.estimated_cost / listing.rated_power_kva))}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-muted-foreground col-span-2">Budget estimate not available.</p>
-                )}
-              </div>
-              {listing.estimated_cost && (
-                <p className="text-xs text-muted-foreground mt-3">
-                  Budget estimate for planning purposes. Actual pricing may vary.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+            <TabsContent value="calculations">
+              <CalculationSteps design={design!} requirements={requirements!} />
+            </TabsContent>
 
-        {listing.notes && (
-          <Card className="mt-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Notes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">{listing.notes}</p>
+            <TabsContent value="drawings">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Engineering Drawing Set</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Tabs value={activeDrawingTab} onValueChange={setActiveDrawingTab}>
+                    <TabsList className="grid w-full grid-cols-3 mb-4">
+                      <TabsTrigger value="assembly-front" className="text-xs">Front View</TabsTrigger>
+                      <TabsTrigger value="assembly-side" className="text-xs">Side View</TabsTrigger>
+                      <TabsTrigger value="assembly-top" className="text-xs">Top View</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="assembly-front" className="mt-0">
+                      <AssemblyDrawing
+                        core={design!.core}
+                        hvWinding={design!.hvWinding}
+                        lvWinding={design!.lvWinding}
+                        tank={design!.tank}
+                        thermal={design!.thermal}
+                        primaryVoltage={requirements!.primaryVoltage}
+                        secondaryVoltage={requirements!.secondaryVoltage}
+                        vectorGroup={requirements!.vectorGroup.name}
+                        requirements={requirements!}
+                        bom={design!.bom}
+                      />
+                    </TabsContent>
+                    <TabsContent value="assembly-side" className="mt-0">
+                      <SideViewDrawing
+                        core={design!.core}
+                        hvWinding={design!.hvWinding}
+                        lvWinding={design!.lvWinding}
+                        tank={design!.tank}
+                        thermal={design!.thermal}
+                      />
+                    </TabsContent>
+                    <TabsContent value="assembly-top" className="mt-0">
+                      <TopViewDrawing
+                        core={design!.core}
+                        hvWinding={design!.hvWinding}
+                        lvWinding={design!.lvWinding}
+                        tank={design!.tank}
+                        thermal={design!.thermal}
+                        phases={requirements!.phases}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="bom">
+              <BillOfMaterials design={design!} />
+            </TabsContent>
+
+            <TabsContent value="cost">
+              <CostEstimate design={design!} requirements={requirements!} />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 opacity-50" />
+              <p>Design data not available for this listing.</p>
             </CardContent>
           </Card>
         )}
