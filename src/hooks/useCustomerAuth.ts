@@ -44,38 +44,17 @@ export function useCustomerAuth(): UseCustomerAuthReturn {
   const [customer, setCustomer] = useState<CustomerProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchCustomerProfile = useCallback(async (userId: string, email?: string) => {
+  const fetchCustomerProfile = useCallback(async (accessToken: string) => {
     try {
-      const { data, error } = await supabase
-        .from("customers")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (error && error.code === "PGRST116" && email) {
-        // No profile exists — auto-create one via API
-        try {
-          const res = await fetch("/api/customer/ensure-profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, email }),
-          });
-          if (res.ok) {
-            const { customer } = await res.json();
-            return customer as CustomerProfile;
-          }
-        } catch (err) {
-          console.error("Error auto-creating customer profile:", err);
-        }
-        return null;
+      const res = await fetch("/api/customer/profile", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const { customer } = await res.json();
+        return customer as CustomerProfile;
       }
-
-      if (error) {
-        console.error("Error fetching customer profile:", error);
-        return null;
-      }
-
-      return data as CustomerProfile;
+      console.error("Failed to fetch customer profile:", res.status);
+      return null;
     } catch (err) {
       console.error("Exception fetching customer profile:", err);
       return null;
@@ -123,8 +102,8 @@ export function useCustomerAuth(): UseCustomerAuthReturn {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
 
-          if (currentSession?.user) {
-            const profile = await fetchCustomerProfile(currentSession.user.id, currentSession.user.email);
+          if (currentSession?.access_token) {
+            const profile = await fetchCustomerProfile(currentSession.access_token);
             if (isMounted) {
               setCustomer(profile);
             }
@@ -150,8 +129,8 @@ export function useCustomerAuth(): UseCustomerAuthReturn {
       setUser(newSession?.user ?? null);
 
       // Only re-fetch profile on sign-in or token refresh, not every event
-      if (event === 'SIGNED_IN' && newSession?.user) {
-        const profile = await fetchCustomerProfile(newSession.user.id, newSession.user.email);
+      if (event === 'SIGNED_IN' && newSession?.access_token) {
+        const profile = await fetchCustomerProfile(newSession.access_token);
         if (isMounted) {
           setCustomer(profile);
         }
