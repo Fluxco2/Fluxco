@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FolderOpen, Plus, Zap, Calendar, DollarSign, Pencil } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 import type { CustomerProject } from "@/lib/supabase";
 
 const statusColors: Record<string, string> = {
@@ -36,20 +35,16 @@ function formatDate(dateStr: string) {
 }
 
 export default function CustomerProjectsPage() {
-  const { customer, loading } = useCustomerAuthContext();
+  const { customer, session, loading } = useCustomerAuthContext();
   const [projects, setProjects] = useState<CustomerProject[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
 
   useEffect(() => {
-    if (!customer) return;
+    if (!customer || !session?.access_token) return;
 
     const fetchProjects = async () => {
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-      if (!token) return;
-
       const res = await fetch("/api/customer/projects/list", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
       if (res.ok) {
@@ -60,7 +55,7 @@ export default function CustomerProjectsPage() {
     };
 
     fetchProjects();
-  }, [customer]);
+  }, [customer, session]);
 
   if (loading) {
     return (
