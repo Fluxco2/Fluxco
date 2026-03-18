@@ -14,7 +14,6 @@ import {
   Pencil,
 } from "lucide-react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import type { CustomerProject } from "@/lib/supabase";
 
 const statusColors: Record<string, string> = {
@@ -34,19 +33,15 @@ function formatDate(dateStr: string) {
 }
 
 export default function CustomerDashboardPage() {
-  const { customer, user, loading } = useCustomerAuthContext();
+  const { customer, user, session, loading } = useCustomerAuthContext();
   const [supabaseProjects, setSupabaseProjects] = useState<CustomerProject[]>([]);
   const [sbLoading, setSbLoading] = useState(true);
 
   useEffect(() => {
-    if (!customer) return;
+    if (!customer || !session?.access_token) return;
     const fetchProjects = async () => {
-      const session = await supabase.auth.getSession();
-      const token = session.data.session?.access_token;
-      if (!token) { setSbLoading(false); return; }
-
       const res = await fetch("/api/customer/projects/list", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) {
         const { projects } = await res.json();
@@ -55,7 +50,7 @@ export default function CustomerDashboardPage() {
       setSbLoading(false);
     };
     fetchProjects();
-  }, [customer]);
+  }, [customer, session]);
 
   if (loading) {
     return (
