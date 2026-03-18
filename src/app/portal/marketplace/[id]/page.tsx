@@ -12,7 +12,6 @@ import { MarketplaceListing } from "@/lib/supabase";
 import { QASection } from "@/components/marketplace/QASection";
 import { BidDialog } from "@/components/supplier/BidDialog";
 import { ProDesignForm } from "@/components/transformer/inputs/ProDesignForm";
-import { DesignRequirementsForm } from "@/components/transformer/inputs/DesignRequirementsForm";
 import { STEEL_GRADES, CONDUCTOR_TYPES, COOLING_CLASSES, VECTOR_GROUPS } from "@/engine/constants/materials";
 import { getDefaultProSpec } from "@/engine/constants/proDefaults";
 import type { DesignRequirements } from "@/engine/types/transformer.types";
@@ -97,8 +96,6 @@ export default function ListingDetailPage({
     );
   }
 
-  const specMode = (listing.spec_mode || "lite") as "lite" | "pro";
-
   return (
     <div className="space-y-6">
       {/* Header — hidden in print */}
@@ -158,27 +155,17 @@ export default function ListingDetailPage({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle>Design Requirements</CardTitle>
-          <Badge variant={specMode === "pro" ? "default" : "secondary"} className={specMode === "pro" ? "bg-blue-600" : ""}>
-            {specMode === "pro" ? "Pro" : "Lite"}
-          </Badge>
+          <Badge variant="default" className="bg-blue-600">Pro</Badge>
         </CardHeader>
         <CardContent>
           <div className="pointer-events-none">
-            {specMode === "pro" ? (
-              <ProDesignForm
-                requirements={requirements}
-                proSpec={proSpec}
-                onChange={() => {}}
-                onProSpecChange={() => {}}
-                onCalculate={() => {}}
-              />
-            ) : (
-              <DesignRequirementsForm
-                requirements={requirements}
-                onChange={() => {}}
-                onCalculate={() => {}}
-              />
-            )}
+            <ProDesignForm
+              requirements={requirements}
+              proSpec={proSpec}
+              onChange={() => {}}
+              onProSpecChange={() => {}}
+              onCalculate={() => {}}
+            />
           </div>
         </CardContent>
       </Card>
