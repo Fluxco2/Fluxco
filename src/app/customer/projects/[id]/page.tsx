@@ -11,7 +11,7 @@ export default function EditProjectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { customer, loading } = useCustomerAuthContext();
+  const { customer, session, loading } = useCustomerAuthContext();
 
   if (loading) {
     return (
@@ -30,5 +30,5 @@ export default function EditProjectPage({
     );
   }
 
-  return <CustomerSpecBuilder customerId={customer.id} projectId={id} />;
+  return <CustomerSpecBuilder customerId={customer.id} projectId={id} accessToken={session?.access_token} />;
 }

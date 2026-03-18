@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Loader2, Send, Check, History, ChevronDown, ChevronUp } from "lucide-react";
 import { QASection } from "@/components/marketplace/QASection";
+import { ProjectBids } from "@/components/customer/ProjectBids";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -145,10 +146,11 @@ function ProjectStatusTracker({ status }: { status: string }) {
 
 interface CustomerSpecBuilderProps {
   customerId: string;
-  projectId?: string; // If provided, load existing project
+  projectId?: string;
+  accessToken?: string | null;
 }
 
-export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuilderProps) {
+export function CustomerSpecBuilder({ customerId, projectId, accessToken }: CustomerSpecBuilderProps) {
   const router = useRouter();
   const [requirements, setRequirements] = useState<DesignRequirements>(defaultRequirements);
   const [design, setDesign] = useState<TransformerDesign | null>(null);
@@ -504,6 +506,11 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
         </Card>
       )}
 
+      {/* Bids — visible after project is submitted */}
+      {currentProjectId && accessToken && projectStatus !== "draft" && (
+        <ProjectBids projectId={currentProjectId} accessToken={accessToken} />
+      )}
+
       {/* Q&A Section — visible after project is submitted */}
       {marketplaceListingId && projectStatus !== "draft" && (
         <Card>
@@ -511,6 +518,7 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
             <QASection
               listingId={marketplaceListingId}
               canAnswer={true}
+              accessToken={accessToken}
             />
           </CardContent>
         </Card>
