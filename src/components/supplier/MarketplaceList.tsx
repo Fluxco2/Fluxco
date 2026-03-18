@@ -40,7 +40,7 @@ const formatCurrency = (value: number | null): string => {
 
 export function MarketplaceList() {
   const { data, isLoading, error } = useMarketplace();
-  const { supplier, user } = useSupplierAuth();
+  const { supplier, user, session } = useSupplierAuth();
   const [selectedListing, setSelectedListing] = useState<MarketplaceListing | null>(null);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
   const [specSheetListing, setSpecSheetListing] = useState<MarketplaceListing | null>(null);
@@ -341,6 +341,7 @@ export function MarketplaceList() {
         onOpenChange={setSpecSheetOpen}
         onPlaceBid={supplier ? handleBidClick : undefined}
         isSupplier={!!supplier}
+        accessToken={session?.access_token}
       />
     </>
   );

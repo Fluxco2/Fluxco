@@ -34,7 +34,7 @@ export default function ListingDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { supplier, user, loading: authLoading } = useSupplierAuthContext();
+  const { supplier, user, session, loading: authLoading } = useSupplierAuthContext();
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [bidOpen, setBidOpen] = useState(false);
@@ -384,6 +384,7 @@ export default function ListingDetailPage({
           <QASection
             listingId={listing.id}
             canAsk={!!supplier}
+            accessToken={session?.access_token}
           />
         </CardContent>
       </Card>

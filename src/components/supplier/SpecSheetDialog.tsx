@@ -18,6 +18,7 @@ interface SpecSheetDialogProps {
   onOpenChange: (open: boolean) => void;
   onPlaceBid?: (listing: MarketplaceListing) => void;
   isSupplier?: boolean;
+  accessToken?: string | null;
 }
 
 const formatVoltage = (voltage: number): string => {
@@ -32,7 +33,7 @@ const formatNumber = (n: number | null | undefined): string => {
   return n.toLocaleString();
 };
 
-export function SpecSheetDialog({ listing, open, onOpenChange, onPlaceBid, isSupplier = false }: SpecSheetDialogProps) {
+export function SpecSheetDialog({ listing, open, onOpenChange, onPlaceBid, isSupplier = false, accessToken }: SpecSheetDialogProps) {
   if (!listing) return null;
 
   const specs = listing.design_specs as any;
@@ -258,6 +259,7 @@ export function SpecSheetDialog({ listing, open, onOpenChange, onPlaceBid, isSup
           <QASection
             listingId={listing.id}
             canAsk={isSupplier}
+            accessToken={accessToken}
           />
         </div>
 

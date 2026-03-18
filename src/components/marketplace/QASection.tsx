@@ -26,6 +26,7 @@ interface QASectionProps {
   canAsk?: boolean;       // supplier can ask questions
   canAnswer?: boolean;    // customer/fluxco can answer
   className?: string;
+  accessToken?: string | null; // pass token directly to avoid getSession issues
 }
 
 function formatDate(dateStr: string) {
@@ -37,7 +38,7 @@ function formatDate(dateStr: string) {
   });
 }
 
-export function QASection({ listingId, canAsk = false, canAnswer = false, className = "" }: QASectionProps) {
+export function QASection({ listingId, canAsk = false, canAnswer = false, className = "", accessToken: propToken }: QASectionProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [newQuestion, setNewQuestion] = useState("");
@@ -66,8 +67,7 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
     if (!newQuestion.trim()) return;
     setSubmitting(true);
 
-    const session = await supabase.auth.getSession();
-    const token = session.data.session?.access_token;
+    const token = propToken || (await supabase.auth.getSession()).data.session?.access_token;
     if (!token) { setSubmitting(false); return; }
 
     try {
@@ -94,8 +94,7 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
     if (!answer) return;
     setAnsweringId(questionId);
 
-    const session = await supabase.auth.getSession();
-    const token = session.data.session?.access_token;
+    const token = propToken || (await supabase.auth.getSession()).data.session?.access_token;
     if (!token) { setAnsweringId(null); return; }
 
     try {
