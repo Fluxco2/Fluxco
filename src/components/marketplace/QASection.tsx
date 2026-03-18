@@ -151,8 +151,8 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
                   </div>
                   <p className="text-sm">{q.question}</p>
                 </div>
-                <Badge variant="outline" className="text-xs text-yellow-500 border-yellow-500/30 flex-shrink-0">
-                  Pending
+                <Badge variant="outline" className="text-xs text-muted-foreground border-border flex-shrink-0">
+                  Awaiting Reply
                 </Badge>
               </div>
 

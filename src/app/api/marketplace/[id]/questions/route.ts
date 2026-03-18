@@ -80,7 +80,7 @@ export async function POST(
     // Verify listing exists
     const { data: listing } = await supabase
       .from("marketplace_listings")
-      .select("id, rated_power_kva, customer_project_id")
+      .select("id, rated_power_kva, serial_number, customer_project_id, contact_email")
       .eq("id", id)
       .single();
     if (!listing) {
@@ -106,13 +106,13 @@ export async function POST(
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
-    // Notify FluxCo team + customer (if linked to a customer project)
+    // Notify FluxCo team + listing owner
     const apiKey = process.env.RESEND_API_KEY;
     if (apiKey) {
       const resend = new Resend(apiKey);
-      const recipients = ["brian@fluxco.com"];
+      const recipients = new Set(["brian@fluxco.com"]);
 
-      // If linked to customer project, also notify the customer
+      // If linked to customer project, notify the customer
       if (listing.customer_project_id) {
         const { data: proj } = await supabase
           .from("customer_projects")
@@ -126,23 +126,32 @@ export async function POST(
             .eq("id", proj.customer_id)
             .single();
           if (projCustomer?.email) {
-            recipients.push(projCustomer.email);
+            recipients.add(projCustomer.email);
           }
         }
       }
 
+      // Also notify the listing contact email (whoever submitted the spec)
+      if (listing.contact_email) {
+        recipients.add(listing.contact_email);
+      }
+
+      const listingLabel = listing.serial_number
+        ? `${listing.serial_number} (${listing.rated_power_kva?.toLocaleString() || ""} kVA)`
+        : `${listing.rated_power_kva?.toLocaleString() || ""} kVA Listing`;
+
       try {
         await resend.emails.send({
           from: "FluxCo <noreply@fluxco.com>",
-          to: recipients,
-          subject: `New Question on ${listing.rated_power_kva?.toLocaleString() || ""} kVA Listing`,
+          to: Array.from(recipients),
+          subject: `New Question on ${listingLabel}`,
           html: `
-            <h2>New Question from ${questionData.asked_by_company || questionData.asked_by_name}</h2>
+            <h2>New Question on ${listingLabel}</h2>
             <p><strong>From:</strong> ${questionData.asked_by_name} (${questionData.asked_by_company || "N/A"})</p>
             <blockquote style="border-left: 3px solid #ccc; padding-left: 12px; color: #333;">
               ${body.question.trim()}
             </blockquote>
-            <p><a href="https://fluxco.com/portal/marketplace">View on Marketplace</a></p>
+            <p>Log in to reply: <a href="https://fluxco.com/customer">Customer Portal</a></p>
           `,
         });
       } catch (emailErr) {
