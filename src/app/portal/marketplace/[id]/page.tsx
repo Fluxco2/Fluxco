@@ -24,6 +24,7 @@ import { designTransformer } from "@/engine/TransformerDesignEngine";
 import { STEEL_GRADES, CONDUCTOR_TYPES, COOLING_CLASSES, VECTOR_GROUPS } from "@/engine/constants/materials";
 import { DesignSummary } from "@/components/transformer/output/DesignSummary";
 import { CalculationSteps } from "@/components/transformer/calculations/CalculationSteps";
+import { CostEstimate } from "@/components/transformer/output/CostEstimate";
 import { BillOfMaterials } from "@/components/transformer/output/BillOfMaterials";
 import { SpecificationSheet } from "@/components/transformer/output/SpecificationSheet";
 import { AssemblyDrawing } from "@/components/transformer/drawings/AssemblyDrawing";
@@ -338,16 +339,17 @@ export default function ListingDetailPage({
       <div>
         {hasDesign ? (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`grid w-full ${specMode === "pro" ? "grid-cols-5" : "grid-cols-4"}`}>
+            <TabsList className={`grid w-full ${specMode === "pro" ? "grid-cols-6" : "grid-cols-5"}`}>
               <TabsTrigger value="summary">Summary</TabsTrigger>
               {specMode === "pro" && <TabsTrigger value="specifications">Specifications</TabsTrigger>}
               <TabsTrigger value="calculations">Calculations</TabsTrigger>
               <TabsTrigger value="drawings">Drawings</TabsTrigger>
               <TabsTrigger value="bom">BOM</TabsTrigger>
+              <TabsTrigger value="cost">Cost Estimate</TabsTrigger>
             </TabsList>
 
             <TabsContent value="summary">
-              <DesignSummary design={design!} requirements={requirements!} hideSensitive />
+              <DesignSummary design={design!} requirements={requirements!} />
             </TabsContent>
 
             {specMode === "pro" && proSpec && (
@@ -419,6 +421,10 @@ export default function ListingDetailPage({
 
             <TabsContent value="bom">
               <BillOfMaterials design={design!} />
+            </TabsContent>
+
+            <TabsContent value="cost">
+              <CostEstimate design={design!} requirements={requirements!} />
             </TabsContent>
           </Tabs>
         ) : (
