@@ -51,6 +51,7 @@ export async function POST(
     const designReqs = project.design_requirements || {};
     const listingData: Record<string, any> = {
       customer_project_id: id,
+      serial_number: project.project_number,
       rated_power_kva: project.rated_power_kva,
       primary_voltage: project.primary_voltage,
       secondary_voltage: project.secondary_voltage,
