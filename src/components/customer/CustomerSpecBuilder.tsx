@@ -321,16 +321,17 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
     const token = session.data.session?.access_token;
 
     try {
-      const res = await fetch(`/api/customer/projects/${currentProjectId}`, {
-        method: "PUT",
+      const res = await fetch(`/api/customer/projects/${currentProjectId}/submit`, {
+        method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ status: "submitted" }),
       });
       if (res.ok) {
         setProjectStatus("submitted");
+      } else {
+        const data = await res.json();
+        console.error("Submit error:", data.error);
       }
     } catch (err) {
       console.error("Submit error:", err);
