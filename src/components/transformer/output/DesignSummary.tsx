@@ -6,9 +6,10 @@ import { calculatePowerRatings } from '@/engine/constants/materials';
 interface DesignSummaryProps {
   design: TransformerDesign;
   requirements: DesignRequirements;
+  hideSensitive?: boolean;
 }
 
-export function DesignSummary({ design, requirements }: DesignSummaryProps) {
+export function DesignSummary({ design, requirements, hideSensitive = false }: DesignSummaryProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {/* Electrical Data */}
@@ -133,14 +134,18 @@ export function DesignSummary({ design, requirements }: DesignSummaryProps) {
               <dt className="text-muted-foreground">Overall Height</dt>
               <dd className="font-medium">{design.tank.overallHeight} mm</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Tank Weight</dt>
-              <dd className="font-medium">{design.tank.tankWeight.toFixed(0)} kg</dd>
-            </div>
-            <div className="flex justify-between border-t pt-2 mt-2">
-              <dt className="text-muted-foreground">Total Weight</dt>
-              <dd className="font-medium text-lg">{design.tank.totalWeight.toFixed(0)} kg</dd>
-            </div>
+            {!hideSensitive && (
+              <>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Tank Weight</dt>
+                  <dd className="font-medium">{design.tank.tankWeight.toFixed(0)} kg</dd>
+                </div>
+                <div className="flex justify-between border-t pt-2 mt-2">
+                  <dt className="text-muted-foreground">Total Weight</dt>
+                  <dd className="font-medium text-lg">{design.tank.totalWeight.toFixed(0)} kg</dd>
+                </div>
+              </>
+            )}
           </dl>
         </CardContent>
       </Card>
