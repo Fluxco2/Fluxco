@@ -7,11 +7,11 @@ import { OrganizationSchema, WebSiteSchema } from "@/components/SchemaOrg";
 export const metadata: Metadata = {
   metadataBase: new URL("https://fluxco.com"),
   title: {
-    default: "FluxCo | Your Chief Transformer Officer | Procurement, Leasing & Service",
+    default: "FluxCo | One Call. Global Power. | Procurement, Leasing & Service",
     template: "%s | FluxCo",
   },
   description:
-    "Your Chief Transformer Officer. Procurement, leasing, service and warranty for padmount, substation, and distribution transformers from 100+ global suppliers. DOE 2027 compliant.",
+    "One Call. Global Power. Procurement, leasing, service and warranty for padmount, substation, and distribution transformers from 100+ global suppliers. DOE 2027 compliant.",
   keywords: [
     "transformer procurement",
     "transformer leasing",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     "Made in USA transformers",
   ],
   openGraph: {
-    title: "FluxCo | Your Chief Transformer Officer",
+    title: "FluxCo | One Call. Global Power.",
     description:
       "Procurement, leasing, service and warranty for padmount, substation, and distribution transformers from 100+ global suppliers.",
     type: "website",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "FluxCo | Your Chief Transformer Officer",
+    title: "FluxCo | One Call. Global Power.",
     description:
       "Procurement, leasing, service and warranty for transformers from 100+ global suppliers.",
   },
