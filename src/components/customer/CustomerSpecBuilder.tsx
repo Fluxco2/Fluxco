@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, Send, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -96,6 +96,52 @@ function deserializeRequirements(data: any): DesignRequirements {
   };
 }
 
+const PROJECT_STAGES = [
+  { key: "draft", label: "Draft", color: "bg-yellow-500" },
+  { key: "submitted", label: "Submitted", color: "bg-blue-500" },
+  { key: "quoted", label: "Quoted", color: "bg-purple-500" },
+  { key: "ordered", label: "Ordered", color: "bg-green-500" },
+  { key: "completed", label: "Completed", color: "bg-emerald-500" },
+];
+
+function ProjectStatusTracker({ status }: { status: string }) {
+  const currentIndex = PROJECT_STAGES.findIndex((s) => s.key === status);
+
+  return (
+    <div className="flex items-center gap-1 w-full">
+      {PROJECT_STAGES.map((stage, i) => {
+        const isActive = i === currentIndex;
+        const isPast = i < currentIndex;
+
+        return (
+          <div key={stage.key} className="flex-1 flex flex-col items-center gap-1.5">
+            <div
+              className={`h-2 w-full rounded-full transition-colors ${
+                isActive
+                  ? stage.color
+                  : isPast
+                  ? `${stage.color} opacity-40`
+                  : "bg-muted"
+              }`}
+            />
+            <span
+              className={`text-xs transition-colors ${
+                isActive
+                  ? "text-foreground font-medium"
+                  : isPast
+                  ? "text-muted-foreground"
+                  : "text-muted-foreground/50"
+              }`}
+            >
+              {stage.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 interface CustomerSpecBuilderProps {
   customerId: string;
   projectId?: string; // If provided, load existing project
@@ -114,8 +160,10 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
   const [projectNumber, setProjectNumber] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [loadingProject, setLoadingProject] = useState(!!projectId);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
+  const [projectStatus, setProjectStatus] = useState("draft");
 
   // Load existing project
   useEffect(() => {
@@ -134,6 +182,7 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
         const { project } = await res.json();
         setProjectName(project.name || "");
         setProjectNumber(project.project_number);
+        setProjectStatus(project.status || "draft");
         setSpecMode(project.spec_mode || "lite");
 
         if (project.design_requirements) {
@@ -255,6 +304,34 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
     }
   };
 
+  const handleSubmit = async () => {
+    if (!currentProjectId) return;
+    setSubmitting(true);
+
+    // Save first to capture any unsaved changes
+    await handleSave();
+
+    const session = await supabase.auth.getSession();
+    const token = session.data.session?.access_token;
+
+    try {
+      const res = await fetch(`/api/customer/projects/${currentProjectId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "submitted" }),
+      });
+      if (res.ok) {
+        setProjectStatus("submitted");
+      }
+    } catch (err) {
+      console.error("Submit error:", err);
+    }
+    setSubmitting(false);
+  };
+
   if (loadingProject) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -275,6 +352,11 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
         />
       )}
 
+      {/* Status Tracker */}
+      {currentProjectId && (
+        <ProjectStatusTracker status={projectStatus} />
+      )}
+
       {/* Project Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-1">
@@ -283,6 +365,7 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
             onChange={(e) => setProjectName(e.target.value)}
             placeholder="Project Name (e.g. 'Dallas Data Center')"
             className="max-w-md text-lg font-semibold"
+            disabled={projectStatus !== "draft"}
           />
           {projectNumber && (
             <span className="text-sm text-muted-foreground font-mono bg-muted px-3 py-1 rounded">
@@ -290,14 +373,32 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
             </span>
           )}
         </div>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4 mr-2" />
+        <div className="flex items-center gap-2">
+          <Button onClick={handleSave} disabled={saving || projectStatus !== "draft"} variant="outline">
+            {saving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            {saved ? "Saved!" : saving ? "Saving..." : "Save"}
+          </Button>
+          {projectStatus === "draft" && currentProjectId && (
+            <Button onClick={handleSubmit} disabled={submitting}>
+              {submitting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              {submitting ? "Submitting..." : "Submit for Quoting"}
+            </Button>
           )}
-          {saved ? "Saved!" : saving ? "Saving..." : "Save Project"}
-        </Button>
+          {projectStatus === "submitted" && (
+            <div className="flex items-center gap-2 text-sm text-blue-500 font-medium px-3">
+              <Check className="h-4 w-4" />
+              Submitted
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Spec Builder Form */}
