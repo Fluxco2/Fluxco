@@ -1,5 +1,5 @@
 "use client";
-import { Calculator, Info } from 'lucide-react';
+import { Calculator, Info, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -244,6 +244,92 @@ export function ProDesignForm({
                 </Select>
               </div>
             </FieldRow>
+
+            {/* Manufacturing Region & Compliance */}
+            <div className="space-y-3 mt-2">
+              <Label>Manufacturing Region & Compliance</Label>
+              <p className="text-xs text-muted-foreground -mt-1">
+                Select all regions you would accept. More regions = wider price and lead time range.
+              </p>
+              <div className="grid gap-2 md:grid-cols-2">
+                {([
+                  { id: 'usa' as const, label: 'USA', desc: 'Premium pricing, 26-52 week lead time', feoc: true },
+                  { id: 'northAmerica' as const, label: 'North America', desc: 'USA/Canada/Mexico, 20-40 weeks', feoc: true },
+                  { id: 'global' as const, label: 'Global (excl. China)', desc: 'Broader supplier pool, 16-36 weeks', feoc: true },
+                  { id: 'china' as const, label: 'China', desc: 'Lowest pricing, 12-24 weeks', feoc: false },
+                ]).map((region) => {
+                  const regions = requirements.manufacturingRegions || ['usa'];
+                  const isChecked = regions.includes(region.id);
+                  const toggleRegion = () => {
+                    const next = isChecked
+                      ? regions.filter(r => r !== region.id)
+                      : [...regions, region.id];
+                    if (next.length > 0) updateReq('manufacturingRegions', next);
+                  };
+                  return (
+                    <div
+                      key={region.id}
+                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        isChecked
+                          ? 'bg-secondary/50 border-primary/30'
+                          : 'bg-secondary/10 border-transparent opacity-60'
+                      }`}
+                      onClick={toggleRegion}
+                    >
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() => toggleRegion()}
+                        className="mt-0.5"
+                      />
+                      <div>
+                        <p className="text-sm font-medium">{region.label}</p>
+                        <p className="text-xs text-muted-foreground">{region.desc}</p>
+                        {!region.feoc && (
+                          <p className="text-xs text-red-600 mt-0.5 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Not FEOC compliant
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* FEOC Compliance */}
+              <div
+                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  requirements.requireFEOC
+                    ? 'bg-green-500/10 border-green-500/40'
+                    : 'bg-secondary/30 border-transparent'
+                }`}
+                onClick={() => updateReq('requireFEOC', !requirements.requireFEOC)}
+              >
+                <Checkbox
+                  checked={requirements.requireFEOC ?? true}
+                  onCheckedChange={(checked) => updateReq('requireFEOC', checked === true)}
+                  className="mt-0.5"
+                />
+                <div>
+                  <p className="text-sm font-medium flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-green-600" />
+                    Require FEOC Compliance
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Required for IRA Section 45X tax credits, federal/state projects, and critical infrastructure.
+                  </p>
+                </div>
+              </div>
+              {requirements.requireFEOC && (requirements.manufacturingRegions || ['usa']).includes('china') && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-red-700 dark:text-red-300">
+                    <strong>Conflict:</strong> China is selected but does not meet FEOC requirements.
+                    China will be excluded from your cost estimate while FEOC is required.
+                  </p>
+                </div>
+              )}
+            </div>
           </AccordionContent>
         </AccordionItem>
 
