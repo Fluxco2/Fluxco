@@ -84,6 +84,55 @@ export async function PUT(
       }
     }
 
+    // Check if spec fields are changing (not just status updates)
+    const specFields = [
+      "name", "spec_mode", "rated_power_kva", "primary_voltage",
+      "secondary_voltage", "frequency", "phases", "design_requirements",
+      "pro_spec", "estimated_cost",
+    ];
+    const hasSpecChanges = specFields.some((f) => f in updateData);
+
+    // Snapshot current state as a version before applying changes
+    if (hasSpecChanges) {
+      const currentVersion = project.version || 1;
+
+      // Build change summary
+      const changes: string[] = [];
+      for (const field of specFields) {
+        if (field in updateData) {
+          const oldVal = project[field];
+          const newVal = updateData[field];
+          if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+            changes.push(field.replace(/_/g, " "));
+          }
+        }
+      }
+
+      if (changes.length > 0) {
+        // Save snapshot of current state
+        await supabase.from("customer_project_versions").insert({
+          project_id: id,
+          version: currentVersion,
+          name: project.name,
+          spec_mode: project.spec_mode,
+          rated_power_kva: project.rated_power_kva,
+          primary_voltage: project.primary_voltage,
+          secondary_voltage: project.secondary_voltage,
+          frequency: project.frequency,
+          phases: project.phases,
+          design_requirements: project.design_requirements,
+          pro_spec: project.pro_spec,
+          estimated_cost: project.estimated_cost,
+          status: project.status,
+          change_summary: `Updated: ${changes.join(", ")}`,
+          changed_by: "customer",
+        });
+
+        // Bump version on the project
+        updateData.version = currentVersion + 1;
+      }
+    }
+
     const { data, error } = await supabase
       .from("customer_projects")
       .update(updateData)

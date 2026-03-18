@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Loader2, Send, Check } from "lucide-react";
+import { Save, Loader2, Send, Check, History, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -164,6 +164,10 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
   const [loadingProject, setLoadingProject] = useState(!!projectId);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(projectId || null);
   const [projectStatus, setProjectStatus] = useState("draft");
+  const [projectVersion, setProjectVersion] = useState(1);
+  const [versions, setVersions] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [loadingVersions, setLoadingVersions] = useState(false);
 
   // Load existing project
   useEffect(() => {
@@ -183,6 +187,7 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
         setProjectName(project.name || "");
         setProjectNumber(project.project_number);
         setProjectStatus(project.status || "draft");
+        setProjectVersion(project.version || 1);
         setSpecMode(project.spec_mode || "lite");
 
         if (project.design_requirements) {
@@ -276,6 +281,7 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
         if (res.ok) {
           const { project } = await res.json();
           setProjectNumber(project.project_number);
+          if (project.version) setProjectVersion(project.version);
           setSaved(true);
         }
       } else {
@@ -332,6 +338,34 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
     setSubmitting(false);
   };
 
+  const fetchVersionHistory = async () => {
+    if (!currentProjectId) return;
+    setLoadingVersions(true);
+    const session = await supabase.auth.getSession();
+    const token = session.data.session?.access_token;
+    if (!token) { setLoadingVersions(false); return; }
+
+    try {
+      const res = await fetch(`/api/customer/projects/${currentProjectId}/versions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const { versions: v } = await res.json();
+        setVersions(v || []);
+      }
+    } catch (err) {
+      console.error("Error fetching versions:", err);
+    }
+    setLoadingVersions(false);
+  };
+
+  const toggleHistory = () => {
+    if (!showHistory && versions.length === 0) {
+      fetchVersionHistory();
+    }
+    setShowHistory(!showHistory);
+  };
+
   if (loadingProject) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -372,6 +406,16 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
               {projectNumber}
             </span>
           )}
+          {currentProjectId && (
+            <button
+              onClick={toggleHistory}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground bg-muted px-3 py-1 rounded transition-colors"
+            >
+              <History className="w-3.5 h-3.5" />
+              v{projectVersion}
+              {showHistory ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Button onClick={handleSave} disabled={saving || projectStatus !== "draft"} variant="outline">
@@ -400,6 +444,60 @@ export function CustomerSpecBuilder({ customerId, projectId }: CustomerSpecBuild
           )}
         </div>
       </div>
+
+      {/* Version History */}
+      {showHistory && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <History className="w-4 h-4" />
+              Version History
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingVersions ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" /> Loading...
+              </div>
+            ) : versions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No previous versions yet. Version history is saved each time you update the spec.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {versions.map((v) => (
+                  <div
+                    key={v.id}
+                    className="flex items-start justify-between border border-border rounded-lg p-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">v{v.version}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(v.created_at).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        {v.change_summary || "Initial version"}
+                      </p>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {v.rated_power_kva && `${Number(v.rated_power_kva).toLocaleString()} kVA`}
+                      {v.estimated_cost && ` · $${Number(v.estimated_cost).toLocaleString()}`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Spec Builder Form */}
       <Card>

@@ -259,6 +259,7 @@ export interface CustomerProject {
   design_result: Record<string, unknown> | null;
   estimated_cost: number | null;
   status: 'draft' | 'submitted' | 'quoted' | 'ordered' | 'completed';
+  version: number;
   created_at: string;
   updated_at: string;
 }
