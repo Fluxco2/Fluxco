@@ -72,7 +72,13 @@ export default function ListingDetailPage({
 
   const handleDownloadPDF = async () => {
     if (!listing) return;
-    // Use browser print to PDF — captures the exact on-screen layout
+
+    // Expand all accordion sections before printing
+    const triggers = document.querySelectorAll<HTMLButtonElement>('[data-state="closed"][role="button"]');
+    triggers.forEach((t) => t.click());
+
+    // Wait for animations to finish, then print
+    await new Promise((r) => setTimeout(r, 300));
     window.print();
   };
 
