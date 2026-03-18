@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 
+const VECTOR_GROUP_NAMES: Record<string, string> = {
+  dyn11: "Dyn11", dyn1: "Dyn1", ynd11: "YNd11", dd0: "Dd0", yy0: "Yy0",
+};
+function vectorGroupName(id?: string): string | null {
+  if (!id) return null;
+  return VECTOR_GROUP_NAMES[id] || id;
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -58,7 +66,7 @@ export async function POST(
       frequency: project.frequency || 60,
       phases: project.phases || 3,
       impedance_percent: designReqs.targetImpedance || null,
-      vector_group: designReqs.vectorGroupId || null,
+      vector_group: vectorGroupName(designReqs.vectorGroupId),
       cooling_class: designReqs.coolingClassId?.toUpperCase() || null,
       conductor_type: designReqs.conductorTypeId || null,
       steel_grade: designReqs.steelGradeId || null,

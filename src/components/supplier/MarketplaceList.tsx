@@ -171,11 +171,11 @@ export function MarketplaceList() {
                       {listing.frequency} Hz
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs whitespace-nowrap">
                         {listing.phases}-Ph
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
+                    <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                       {listing.vector_group || "-"}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
