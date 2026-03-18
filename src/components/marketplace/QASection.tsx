@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Send, Loader2, CheckCircle, User, Building2 } from "lucide-react";
+import { MessageCircle, Send, Loader2, CheckCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 interface Question {
@@ -116,9 +116,6 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
     setAnsweringId(null);
   };
 
-  const unanswered = questions.filter((q) => !q.answer);
-  const answered = questions.filter((q) => q.answer);
-
   return (
     <div className={className}>
       <h3 className="font-semibold flex items-center gap-2 mb-4">
@@ -137,27 +134,43 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Unanswered questions */}
-          {unanswered.map((q) => (
+          {/* Questions */}
+          {questions.map((q, idx) => (
             <div key={q.id} className="border border-border rounded-lg p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-4 h-4 text-blue-500" />
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-sm font-semibold text-muted-foreground">
+                  {idx + 1}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium">{q.asked_by_company || q.asked_by_name}</span>
                     <span className="text-xs text-muted-foreground">{formatDate(q.created_at)}</span>
+                    {q.answer ? (
+                      <Badge variant="outline" className="text-xs text-green-500 border-green-500/30">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Answered
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs text-muted-foreground border-border">
+                        Awaiting Reply
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-sm">{q.question}</p>
                 </div>
-                <Badge variant="outline" className="text-xs text-muted-foreground border-border flex-shrink-0">
-                  Awaiting Reply
-                </Badge>
               </div>
 
+              {/* Answer */}
+              {q.answer && (
+                <div className="pl-11 border-l-2 border-green-500/30 ml-4">
+                  <p className="text-sm pl-3">{q.answer}</p>
+                  {q.answered_at && (
+                    <span className="text-xs text-muted-foreground pl-3">{formatDate(q.answered_at)}</span>
+                  )}
+                </div>
+              )}
+
               {/* Answer form */}
-              {canAnswer && (
+              {!q.answer && canAnswer && (
                 <div className="pl-11 space-y-2">
                   <Textarea
                     placeholder="Type your answer..."
@@ -180,49 +193,6 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
                   </Button>
                 </div>
               )}
-            </div>
-          ))}
-
-          {/* Answered questions */}
-          {answered.map((q) => (
-            <div key={q.id} className="border border-border rounded-lg p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-4 h-4 text-blue-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium">{q.asked_by_company || q.asked_by_name}</span>
-                    <span className="text-xs text-muted-foreground">{formatDate(q.created_at)}</span>
-                  </div>
-                  <p className="text-sm">{q.question}</p>
-                </div>
-                <Badge variant="outline" className="text-xs text-green-500 border-green-500/30 flex-shrink-0">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Answered
-                </Badge>
-              </div>
-
-              {/* Answer */}
-              <div className="flex items-start gap-3 pl-11">
-                <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-green-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium">
-                      {q.answered_by_name}
-                    </span>
-                    <Badge variant="secondary" className="text-xs">
-                      {q.answered_by_type === "fluxco" ? "FluxCo" : "Customer"}
-                    </Badge>
-                    {q.answered_at && (
-                      <span className="text-xs text-muted-foreground">{formatDate(q.answered_at)}</span>
-                    )}
-                  </div>
-                  <p className="text-sm">{q.answer}</p>
-                </div>
-              </div>
             </div>
           ))}
 

@@ -147,7 +147,6 @@ export async function POST(
           subject: `New Question on ${listingLabel}`,
           html: `
             <h2>New Question on ${listingLabel}</h2>
-            <p><strong>From:</strong> ${questionData.asked_by_name} (${questionData.asked_by_company || "N/A"})</p>
             <blockquote style="border-left: 3px solid #ccc; padding-left: 12px; color: #333;">
               ${body.question.trim()}
             </blockquote>
