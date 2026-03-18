@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useSupplierAuth } from "@/hooks/useSupplierAuth";
+import { SupplierAuthProvider, useSupplierAuthContext } from "@/context/SupplierAuthContext";
 import { Loader2, Zap, LayoutDashboard, Store, UserCircle, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,19 @@ export default function PortalLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, supplier, loading, signOut } = useSupplierAuth();
+  return (
+    <SupplierAuthProvider>
+      <PortalLayoutInner>{children}</PortalLayoutInner>
+    </SupplierAuthProvider>
+  );
+}
+
+function PortalLayoutInner({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, supplier, loading, signOut } = useSupplierAuthContext();
   const router = useRouter();
   const pathname = usePathname();
 

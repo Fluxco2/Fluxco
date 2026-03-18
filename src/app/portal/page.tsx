@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSupplierAuth } from "@/hooks/useSupplierAuth";
+import { useSupplierAuthContext } from "@/context/SupplierAuthContext";
 import { useSupplierDashboard } from "@/hooks/useMarketplace";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,7 @@ const formatVoltage = (voltage: number): string => {
 
 export default function PortalPage() {
   const router = useRouter();
-  const { supplier, loading } = useSupplierAuth();
+  const { supplier, loading } = useSupplierAuthContext();
   const dashboard = useSupplierDashboard(supplier?.id);
 
   useEffect(() => {

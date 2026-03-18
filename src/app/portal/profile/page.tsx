@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSupplierAuth } from "@/hooks/useSupplierAuth";
+import { useSupplierAuthContext } from "@/context/SupplierAuthContext";
 import { ProfileForm } from "@/components/supplier/ProfileForm";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { supplier, loading } = useSupplierAuth();
+  const { supplier, loading } = useSupplierAuthContext();
 
   useEffect(() => {
     if (!loading && !supplier) {
