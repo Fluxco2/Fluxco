@@ -5,21 +5,16 @@ import { useSupplierAuthContext } from "@/context/SupplierAuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  ArrowLeft,
-  Download,
-  Send,
-  MapPin,
-  Loader2,
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Download, Send, MapPin } from "lucide-react";
 import Link from "next/link";
 import { MarketplaceListing } from "@/lib/supabase";
 import { QASection } from "@/components/marketplace/QASection";
-import { ReadOnlySpecSheet } from "@/components/marketplace/ReadOnlySpecSheet";
 import { BidDialog } from "@/components/supplier/BidDialog";
-
-// For deserializing stored requirements
+import { ProDesignForm } from "@/components/transformer/inputs/ProDesignForm";
+import { DesignRequirementsForm } from "@/components/transformer/inputs/DesignRequirementsForm";
 import { STEEL_GRADES, CONDUCTOR_TYPES, COOLING_CLASSES, VECTOR_GROUPS } from "@/engine/constants/materials";
+import { getDefaultProSpec } from "@/engine/constants/proDefaults";
 import type { DesignRequirements } from "@/engine/types/transformer.types";
 import type { ProSpecData } from "@/engine/types/proSpec.types";
 
@@ -57,7 +52,7 @@ export default function ListingDetailPage({
   const [loading, setLoading] = useState(true);
   const [bidOpen, setBidOpen] = useState(false);
   const [requirements, setRequirements] = useState<DesignRequirements | null>(null);
-  const [proSpec, setProSpec] = useState<ProSpecData | null>(null);
+  const [proSpec, setProSpec] = useState<ProSpecData>(getDefaultProSpec());
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -65,7 +60,6 @@ export default function ListingDetailPage({
       if (res.ok) {
         const { listing: l } = await res.json();
         setListing(l);
-
         const specs = l.design_specs as any;
         if (specs?.requirements) {
           setRequirements(deserializeRequirements(specs.requirements));
@@ -78,150 +72,9 @@ export default function ListingDetailPage({
   }, [id]);
 
   const handleDownloadPDF = async () => {
-    if (!listing || !requirements) return;
-    const { jsPDF } = await import("jspdf");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pw = pdf.internal.pageSize.getWidth();
-    let y = 15;
-
-    const formatV = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)} kV` : `${v} V`);
-
-    // Header
-    pdf.setFontSize(18);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("FLUXCO — Transformer Specification Sheet", 15, y);
-    y += 10;
-    pdf.setFontSize(11);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(`${listing.serial_number || ""} — ${listing.rated_power_kva.toLocaleString()} kVA, ${listing.phases}-Phase`, 15, y);
-    y += 6;
-    pdf.text(`Posted: ${new Date(listing.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`, 15, y);
-    y += 3;
-    pdf.setDrawColor(200); pdf.line(15, y, pw - 15, y); y += 8;
-
-    const addSection = (title: string, rows: [string, string | undefined][]) => {
-      const validRows = rows.filter(([, v]) => v !== undefined && v !== null && v !== "") as [string, string][];
-      if (validRows.length === 0) return;
-      if (y > 255) { pdf.addPage(); y = 15; }
-      pdf.setFontSize(11);
-      pdf.setFont("helvetica", "bold");
-      pdf.text(title, 15, y);
-      y += 6;
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "normal");
-      for (const [label, value] of validRows) {
-        if (y > 275) { pdf.addPage(); y = 15; }
-        pdf.text(label, 20, y);
-        pdf.text(value, pw - 15, y, { align: "right" });
-        y += 5;
-      }
-      y += 4;
-    };
-
-    const r = requirements;
-    const boolStr = (v?: boolean) => v === true ? "Yes" : v === false ? "No" : undefined;
-    const reqStr = (v?: string) => v === "required" ? "Required" : v === "not_required" ? "Not Required" : v;
-
-    // Rating & System
-    addSection("Rating & System Parameters", [
-      ["Base Rating", `${r.ratedPower.toLocaleString()} kVA`],
-      ["Primary Voltage", formatV(r.primaryVoltage)],
-      ["Secondary Voltage", formatV(r.secondaryVoltage)],
-      ["Frequency", `${r.frequency} Hz`],
-      ["Phases", `${r.phases}-Phase`],
-      ["Vector Group", r.vectorGroup.name],
-      ["Cooling Class", r.coolingClass.name],
-      ["Target Impedance", `${r.targetImpedance}%`],
-      ["Conductor", r.conductorType.name],
-      ["Core Steel", r.steelGrade.name],
-      ["Tap Changer", r.tapChangerType === "onLoad" ? "On-Load (OLTC)" : "No-Load (NLTC)"],
-      ["Oil Type", r.oilType],
-      ["Oil Preservation", r.oilPreservation],
-      ["Includes TAC", boolStr(r.includeTAC)],
-      ["Manufacturing Regions", r.manufacturingRegions?.map((rg: string) => rg === "usa" ? "USA" : rg === "north_america" ? "N. America" : rg === "global" ? "Global" : rg).join(", ")],
-      ["FEOC Required", boolStr(r.requireFEOC)],
-      ["Altitude", r.altitude ? `${r.altitude} m` : undefined],
-      ["Ambient Temperature", r.ambientTemperature ? `${r.ambientTemperature}°C` : undefined],
-    ]);
-
-    // Pro sections
-    if (proSpec) {
-      const p = proSpec;
-      addSection("Site Conditions", [
-        ["Altitude", p.siteConditions.altitude ? `${p.siteConditions.altitude} ${p.siteConditions.altitudeUnit || "ft"}` : undefined],
-        ["Max Ambient Temp", p.siteConditions.ambientTempMax ? `${p.siteConditions.ambientTempMax}°C` : undefined],
-        ["Min Ambient Temp", p.siteConditions.ambientTempMin ? `${p.siteConditions.ambientTempMin}°C` : undefined],
-        ["Seismic Qualification", reqStr(p.siteConditions.seismicQualification)],
-        ["Moist/Corrosive Environment", boolStr(p.siteConditions.moistCorrosiveEnvironment)],
-      ]);
-      addSection("Certifications", [
-        ["NRTL Listing", reqStr(p.nrtlListing)],
-        ["FM Approved", reqStr(p.fmApproved)],
-      ]);
-      addSection("Windings & Temperature Rise", [
-        ["Avg Temperature Rise", p.windingsAndTempRise.averageTempRise ? `${p.windingsAndTempRise.averageTempRise}°C` : undefined],
-        ["Primary Connection", p.windingsAndTempRise.primaryConnection],
-        ["Primary Material", p.windingsAndTempRise.primaryMaterial],
-        ["Secondary Connection", p.windingsAndTempRise.secondaryConnection],
-        ["Secondary Material", p.windingsAndTempRise.secondaryMaterial],
-      ]);
-      addSection("Losses & Efficiency", [
-        ["Loss Evaluation Required", boolStr(p.losses.lossEvaluationRequired)],
-        ["$/kW Offset", p.losses.dollarPerKwOffset ? `$${p.losses.dollarPerKwOffset}` : undefined],
-      ]);
-      addSection("Air Terminal Chamber", [
-        ["Required", reqStr(p.airTerminalChamber.required)],
-        ["Front Cover", p.airTerminalChamber.frontCover],
-        ["Cable Entry", p.airTerminalChamber.cableEntry],
-      ]);
-      addSection("Tank", [
-        ["Cover Type", p.tank.coverType],
-        ["Jacking Pads", reqStr(p.tank.jackingPads)],
-        ["Vacuum Rated", reqStr(p.tank.tankVacuumRated)],
-      ]);
-      addSection("Cooling", [
-        ["Radiator Type", p.cooling.radiatorType],
-        ["Radiator Material", p.cooling.radiatorMaterial],
-        ["Removable Radiators", boolStr(p.cooling.removableRadiators)],
-        ["Fans", p.fans.status === "required" ? `Required (${p.fans.mounting || ""} mount)` : reqStr(p.fans.status)],
-      ]);
-      addSection("Tap Changer", [
-        ["No-Load", reqStr(p.tapChanger.noLoad.required)],
-        ["No-Load Description", p.tapChanger.noLoad.description],
-        ["On-Load", reqStr(p.tapChanger.onLoad.required)],
-        ["Regulation Range", p.tapChanger.onLoad.regulationRange],
-      ]);
-      addSection("BIL", [
-        ["Primary BIL", p.bil.primaryBilKv ? `${p.bil.primaryBilKv} kV` : undefined],
-        ["Secondary BIL", p.bil.secondaryBilKv ? `${p.bil.secondaryBilKv} kV` : undefined],
-      ]);
-      addSection("Insulating Liquid", [
-        ["Type", p.insulatingLiquid.type?.replace(/_/g, " ")],
-        ["Preservation", p.liquidPreservation.type?.replace(/_/g, " ")],
-      ]);
-      addSection("Tests", [
-        ["No-Load & Load Loss", boolStr(p.tests.noLoadAndLoadLoss)],
-        ["Temperature Rise", boolStr(p.tests.tempRise)],
-        ["Lightning Impulse", boolStr(p.tests.lightningImpulse)],
-        ["Switching Impulse", boolStr(p.tests.switchingImpulse)],
-        ["Audible Sound Level", boolStr(p.tests.audibleSoundLevel)],
-        ["Witnessed", p.tests.witnessed === "witnessed" ? "Yes" : "No"],
-      ]);
-      if (p.otherRequirements) {
-        addSection("Other Requirements", [["Notes", p.otherRequirements]]);
-      }
-    }
-
-    // Footer
-    if (y > 270) { pdf.addPage(); y = 15; }
-    y += 3;
-    pdf.setDrawColor(200); pdf.line(15, y, pw - 15, y); y += 5;
-    pdf.setFontSize(8);
-    pdf.setTextColor(128, 128, 128);
-    pdf.text("Generated by FluxCo — fluxco.com", 15, y);
-    pdf.text(new Date().toLocaleDateString(), pw - 15, y, { align: "right" });
-
-    pdf.save(`${listing.serial_number || "spec"}-specification.pdf`);
+    if (!listing) return;
+    // Use browser print to PDF — captures the exact on-screen layout
+    window.print();
   };
 
   if (loading || authLoading) {
@@ -233,7 +86,7 @@ export default function ListingDetailPage({
     );
   }
 
-  if (!listing) {
+  if (!listing || !requirements) {
     return (
       <div className="text-center py-20">
         <p className="text-muted-foreground">Listing not found.</p>
@@ -248,8 +101,8 @@ export default function ListingDetailPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      {/* Header — hidden in print */}
+      <div className="flex items-center justify-between flex-wrap gap-4 print:hidden">
         <div className="flex items-center gap-4">
           <Link
             href="/portal/marketplace"
@@ -278,7 +131,7 @@ export default function ListingDetailPage({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleDownloadPDF} disabled={!requirements}>
+          <Button variant="outline" onClick={handleDownloadPDF}>
             <Download className="w-4 h-4 mr-2" />
             Download PDF
           </Button>
@@ -291,26 +144,53 @@ export default function ListingDetailPage({
         </div>
       </div>
 
-      {/* Read-Only Spec Sheet */}
-      {requirements ? (
-        <ReadOnlySpecSheet
-          requirements={requirements}
-          proSpec={proSpec}
-          specMode={specMode}
-        />
-      ) : (
-        <div className="text-center py-12 text-muted-foreground">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 opacity-50" />
-          <p>Specification data not available.</p>
-        </div>
-      )}
+      {/* Print header */}
+      <div className="hidden print:block mb-6">
+        <h1 className="text-xl font-bold">
+          FluxCo — {listing.serial_number} — {listing.rated_power_kva.toLocaleString()} kVA {listing.phases}-Phase Transformer Specification
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Posted {new Date(listing.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+        </p>
+      </div>
 
-      {/* Q&A */}
-      <QASection
-        listingId={listing.id}
-        canAsk={!!supplier}
-        accessToken={session?.access_token}
-      />
+      {/* Spec Builder Form — read-only */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>Design Requirements</CardTitle>
+          <Badge variant={specMode === "pro" ? "default" : "secondary"} className={specMode === "pro" ? "bg-blue-600" : ""}>
+            {specMode === "pro" ? "Pro" : "Lite"}
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="pointer-events-none">
+            {specMode === "pro" ? (
+              <ProDesignForm
+                requirements={requirements}
+                proSpec={proSpec}
+                onChange={() => {}}
+                onProSpecChange={() => {}}
+                onCalculate={() => {}}
+              />
+            ) : (
+              <DesignRequirementsForm
+                requirements={requirements}
+                onChange={() => {}}
+                onCalculate={() => {}}
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Q&A — hidden in print */}
+      <div className="print:hidden">
+        <QASection
+          listingId={listing.id}
+          canAsk={!!supplier}
+          accessToken={session?.access_token}
+        />
+      </div>
 
       {/* Bid Dialog */}
       <BidDialog
