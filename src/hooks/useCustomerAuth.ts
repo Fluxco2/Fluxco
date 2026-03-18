@@ -96,7 +96,7 @@ export function useCustomerAuth(): UseCustomerAuthReturn {
         // getSession can hang if token refresh fails — add timeout
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("getSession timeout")), 2000)
+          setTimeout(() => reject(new Error("getSession timeout")), 8000)
         );
 
         let currentSession: any = null;
