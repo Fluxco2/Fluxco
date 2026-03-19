@@ -27,20 +27,25 @@ export default async function ProposalPage({ params }: Props) {
     return <PasswordGate slug={slug} />;
   }
 
-  // Fetch project data from Notion
-  const project = await getProjectBySlug(slug);
-  if (!project) {
-    notFound();
+  try {
+    // Fetch project data from Notion
+    const project = await getProjectBySlug(slug);
+    if (!project) {
+      notFound();
+    }
+
+    // Fetch quotes linked to this project
+    const quotes = await getQuotesForProject(project.id);
+    const stats = computeStats(quotes);
+
+    const oemIds = quotes
+      .filter(q => q.recommended && q.oemId)
+      .map(q => q.oemId as string);
+    const oemQualityData = await getOEMQualityData(oemIds);
+
+    return <ProposalClient project={project} quotes={quotes} stats={stats} oemQualityData={oemQualityData} />;
+  } catch (err) {
+    console.error("[ProposalPage] Server error for slug:", slug, err);
+    throw err;
   }
-
-  // Fetch quotes linked to this project
-  const quotes = await getQuotesForProject(project.id);
-  const stats = computeStats(quotes);
-
-  const oemIds = quotes
-    .filter(q => q.recommended && q.oemId)
-    .map(q => q.oemId as string);
-  const oemQualityData = await getOEMQualityData(oemIds);
-
-  return <ProposalClient project={project} quotes={quotes} stats={stats} oemQualityData={oemQualityData} />;
 }
