@@ -235,9 +235,10 @@ function extractCapacityData(body: string): ParsedOEMEmail["capacityData"] {
   }
 
   // Extract voltage: "34.5kv", "up to 34.5 kV", "13.8kV primary"
+  // kv must NOT be followed by 'a' (to avoid matching kVA as kV)
   const voltagePatterns = [
-    /(?:up\s+to|max(?:imum)?)\s+(\d+(?:\.\d+)?)\s*kv/gi,
-    /(\d+(?:\.\d+)?)\s*kv(?:\s+(?:primary|secondary|class))?/gi,
+    /(?:up\s+to|max(?:imum)?)\s+(\d+(?:\.\d+)?)\s*kv(?!a)/gi,
+    /(\d+(?:\.\d+)?)\s*kv(?!a)(?:\s+(?:primary|secondary|class))?/gi,
   ];
   for (const pattern of voltagePatterns) {
     const matches = [...body.matchAll(pattern)];
