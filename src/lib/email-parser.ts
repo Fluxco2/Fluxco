@@ -30,6 +30,14 @@ export interface ParsedOEMEmail {
     capabilities?: string;
     limitations?: string;
   };
+  capacityData: {
+    kvaMin?: number;
+    kvaMax?: number;
+    mvaMax?: number;
+    voltageMax?: number;
+    transformerTypes?: string[];
+    limitations?: string[];
+  };
   summary: string;
 }
 
@@ -184,6 +192,92 @@ function extractData(body: string): ParsedOEMEmail["extractedData"] {
   return data;
 }
 
+function extractCapacityData(body: string): ParsedOEMEmail["capacityData"] {
+  const data: ParsedOEMEmail["capacityData"] = {};
+  const lower = body.toLowerCase();
+
+  // Extract kVA ranges: "up to 5000 kVA", "max 2500kva", "500-5000 kVA", "750 kVA and above"
+  const kvaPatterns = [
+    /(?:up\s+to|max(?:imum)?(?:\s+is)?|max'?s?\s+(?:are|is))\s+(\d[\d,]*)\s*kva/gi,
+    /(\d[\d,]*)\s*(?:to|-|–)\s*(\d[\d,]*)\s*kva/gi,
+    /(\d[\d,]*)\s*kva\s+(?:max|maximum|and\s+above|and\s+below|or\s+less)/gi,
+  ];
+
+  for (const pattern of kvaPatterns) {
+    const matches = [...body.matchAll(pattern)];
+    for (const m of matches) {
+      const v1 = parseInt(m[1]?.replace(/,/g, "") || "0");
+      const v2 = m[2] ? parseInt(m[2].replace(/,/g, "")) : undefined;
+      if (v2) {
+        data.kvaMin = Math.min(v1, v2);
+        data.kvaMax = Math.max(v1, v2);
+      } else if (v1 > 0) {
+        data.kvaMax = v1;
+      }
+    }
+  }
+
+  // Extract MVA: "up to 5MVA", "max 10 MVA", "5MVA"
+  const mvaPatterns = [
+    /(?:up\s+to|max(?:imum)?(?:\s+is)?|max'?s?\s+(?:are|is))\s+(\d+(?:\.\d+)?)\s*mva/gi,
+    /(\d+(?:\.\d+)?)\s*mva/gi,
+  ];
+  for (const pattern of mvaPatterns) {
+    const matches = [...body.matchAll(pattern)];
+    for (const m of matches) {
+      const v = parseFloat(m[1]);
+      if (v > 0) {
+        data.mvaMax = v;
+        // Also set kVA if not already set
+        if (!data.kvaMax) data.kvaMax = v * 1000;
+      }
+    }
+  }
+
+  // Extract voltage: "34.5kv", "up to 34.5 kV", "13.8kV primary"
+  const voltagePatterns = [
+    /(?:up\s+to|max(?:imum)?)\s+(\d+(?:\.\d+)?)\s*kv/gi,
+    /(\d+(?:\.\d+)?)\s*kv(?:\s+(?:primary|secondary|class))?/gi,
+  ];
+  for (const pattern of voltagePatterns) {
+    const matches = [...body.matchAll(pattern)];
+    for (const m of matches) {
+      const v = parseFloat(m[1]);
+      if (v > 0 && (!data.voltageMax || v > data.voltageMax)) {
+        data.voltageMax = v;
+      }
+    }
+  }
+
+  // Extract transformer types
+  const types: Set<string> = new Set();
+  if (/pad[\s-]?mount/i.test(lower)) types.add("Pad-mount");
+  if (/dry[\s-]?type/i.test(lower)) types.add("Dry Type");
+  if (/oil[\s-]?(?:filled|immersed)/i.test(lower)) types.add("Oil-Immersed");
+  if (/liquid[\s-]?(?:filled|immersed)/i.test(lower)) types.add("Liquid-Immersed");
+  if (/distribution/i.test(lower)) types.add("Distribution");
+  if (/power\s+transformer/i.test(lower)) types.add("Power");
+  if (/substation/i.test(lower)) types.add("Substation");
+  if (/cast\s+resin/i.test(lower)) types.add("Cast Resin");
+  if (/medium\s+voltage/i.test(lower)) types.add("Medium Voltage");
+  if (types.size > 0) data.transformerTypes = [...types];
+
+  // Extract limitations
+  const limitations: string[] = [];
+  const limitPatterns = [
+    /too\s+big[^.!?]*[.!?]/i,
+    /(?:cannot|can't|unable)\s+(?:do|build|handle|fit)[^.!?]*[.!?]/i,
+    /(?:outside|beyond|exceed)\s+(?:our|the)\s+(?:capability|range|scope)[^.!?]*[.!?]/i,
+  ];
+  for (const p of limitPatterns) {
+    const m = body.match(p);
+    if (m) limitations.push(m[0].trim());
+  }
+  if (limitations.length > 0) data.limitations = limitations;
+
+  return data;
+}
+
 function generateSummary(
   responseType: OEMResponseType,
   extractedData: ParsedOEMEmail["extractedData"],
@@ -240,6 +334,7 @@ export function parseOEMEmail(
 
   // Extract data points
   const extractedData = extractData(body);
+  const capacityData = extractCapacityData(body);
 
   // Generate summary
   const summary = generateSummary(responseType, extractedData, body.slice(0, 200));
@@ -252,6 +347,7 @@ export function parseOEMEmail(
     suggestedStatus,
     contactInfo,
     extractedData,
+    capacityData,
     summary,
   };
 }

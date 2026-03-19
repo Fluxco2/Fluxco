@@ -321,6 +321,63 @@ export async function updateOEMContact(
   }
 }
 
+export async function updateOEMCapabilities(
+  oemPageId: string,
+  capacityData: {
+    kvaMin?: number;
+    kvaMax?: number;
+    mvaMax?: number;
+    voltageMax?: number;
+    transformerTypes?: string[];
+    limitations?: string[];
+  }
+): Promise<boolean> {
+  if (!capacityData.kvaMax && !capacityData.voltageMax && !capacityData.transformerTypes?.length) {
+    return false; // Nothing to update
+  }
+
+  const notion = getNotionClient();
+  const properties: Record<string, any> = {};
+
+  // Build a capability summary for the Notes field
+  const parts: string[] = [];
+  if (capacityData.kvaMax) {
+    parts.push(`Max capacity: ${capacityData.kvaMax >= 1000 ? `${capacityData.kvaMax / 1000} MVA` : `${capacityData.kvaMax} kVA`}`);
+  }
+  if (capacityData.kvaMin) {
+    parts.push(`Min capacity: ${capacityData.kvaMin} kVA`);
+  }
+  if (capacityData.voltageMax) {
+    parts.push(`Max voltage: ${capacityData.voltageMax} kV`);
+  }
+  if (capacityData.transformerTypes?.length) {
+    parts.push(`Types: ${capacityData.transformerTypes.join(", ")}`);
+  }
+  if (capacityData.limitations?.length) {
+    parts.push(`Limitations: ${capacityData.limitations.join("; ").slice(0, 200)}`);
+  }
+
+  if (parts.length === 0) return false;
+
+  // Append capability info to Notes with timestamp
+  const page = (await notion.pages.retrieve({ page_id: oemPageId })) as any;
+  const existingNotes = getText(page.properties["Notes"]);
+  const timestamp = new Date().toLocaleDateString("en-US", {
+    month: "short", day: "numeric", year: "numeric",
+  });
+  const capNote = `[${timestamp}] Capability: ${parts.join(". ")}`;
+  const updatedNotes = existingNotes
+    ? `${existingNotes}\n${capNote}`
+    : capNote;
+
+  properties["Notes"] = {
+    rich_text: [{ text: { content: updatedNotes.slice(0, 2000) } }],
+  };
+
+  await notion.pages.update({ page_id: oemPageId, properties });
+  return true;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Create OEM record in Notion from email data                        */
 /* ------------------------------------------------------------------ */

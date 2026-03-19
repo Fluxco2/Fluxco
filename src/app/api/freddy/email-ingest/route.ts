@@ -5,6 +5,7 @@ import {
   updateOEMStatus,
   updateOEMNotes,
   updateOEMContact,
+  updateOEMCapabilities,
   createOEMRecord,
 } from "@/lib/freddy";
 
@@ -118,6 +119,11 @@ export async function POST(request: NextRequest) {
             await updateOEMContact(oem.id, {
               phone: parsed.contactInfo.phone,
             });
+          }
+
+          // Update capability/capacity data if found
+          if (parsed.capacityData) {
+            await updateOEMCapabilities(oem.id, parsed.capacityData);
           }
 
           result.notionUpdated = true;
