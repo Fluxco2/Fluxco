@@ -143,7 +143,6 @@ export function QASection({ listingId, canAsk = false, canAnswer = false, classN
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium">{q.asked_by_company || q.asked_by_name}</span>
                     <span className="text-xs text-muted-foreground">{formatDate(q.created_at)}</span>
                     {q.answer ? (
                       <Badge variant="outline" className="text-xs text-green-500 border-green-500/30">
