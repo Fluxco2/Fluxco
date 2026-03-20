@@ -283,45 +283,45 @@ const QUALITY_SUPPLIERS: {
 /*  Scatter chart data — 40 of 69 OEMs responded                      */
 /* ------------------------------------------------------------------ */
 const CHART_DATA: { name: string; price: number; weeks: number; type: string; quality: number; recommended?: boolean }[] = [
-  { name: "Supplier A", price: 195500, weeks: 20, type: "fluxco", quality: 7.0 },
-  { name: "Supplier B", price: 367866, weeks: 22, type: "fluxco", quality: 8.5, recommended: true },
-  { name: "Supplier C", price: 280000, weeks: 24, type: "fluxco", quality: 6.0 },
-  { name: "Supplier D", price: 340000, weeks: 25, type: "fluxco", quality: 7.5 },
-  { name: "Supplier E", price: 415000, weeks: 26, type: "fluxco", quality: 8.0 },
-  { name: "Supplier F", price: 380000, weeks: 27, type: "client", quality: 6.5 },
-  { name: "Supplier G", price: 305500, weeks: 28, type: "fluxco", quality: 9.0, recommended: true },
-  { name: "Supplier H", price: 450000, weeks: 29, type: "fluxco", quality: 7.0 },
+  { name: "Supplier A", price: 195500, weeks: 20, type: "fluxco", quality: 5.5 },
+  { name: "Supplier B", price: 367866, weeks: 22, type: "fluxco", quality: 9.0, recommended: true },
+  { name: "Supplier C", price: 280000, weeks: 24, type: "fluxco", quality: 4.5 },
+  { name: "Supplier D", price: 340000, weeks: 25, type: "fluxco", quality: 7.0 },
+  { name: "Supplier E", price: 415000, weeks: 26, type: "fluxco", quality: 8.5 },
+  { name: "Supplier F", price: 380000, weeks: 27, type: "fluxco", quality: 5.0 },
+  { name: "Supplier G", price: 305500, weeks: 28, type: "fluxco", quality: 9.5, recommended: true },
+  { name: "Supplier H", price: 450000, weeks: 29, type: "fluxco", quality: 6.0 },
   { name: "Supplier I", price: 475000, weeks: 30, type: "fluxco", quality: 7.5 },
-  { name: "Supplier J", price: 604737, weeks: 31, type: "client", quality: 7.5 },
-  { name: "Supplier K", price: 520000, weeks: 32, type: "fluxco", quality: 6.0 },
-  { name: "Supplier L", price: 550000, weeks: 33, type: "fluxco", quality: 7.0 },
-  { name: "Supplier M", price: 1121100, weeks: 34, type: "fluxco", quality: 6.5 },
-  { name: "Supplier N", price: 1197500, weeks: 35, type: "fluxco", quality: 7.0 },
+  { name: "Supplier J", price: 604737, weeks: 31, type: "fluxco", quality: 6.5 },
+  { name: "Supplier K", price: 520000, weeks: 32, type: "fluxco", quality: 4.0 },
+  { name: "Supplier L", price: 550000, weeks: 33, type: "fluxco", quality: 6.0 },
+  { name: "Supplier M", price: 1121100, weeks: 34, type: "fluxco", quality: 5.0 },
+  { name: "Supplier N", price: 1197500, weeks: 35, type: "fluxco", quality: 5.5 },
   { name: "Supplier O", price: 610000, weeks: 36, type: "fluxco", quality: 8.0 },
-  { name: "Supplier P", price: 635000, weeks: 37, type: "client", quality: 6.5 },
-  { name: "Supplier Q", price: 660000, weeks: 38, type: "fluxco", quality: 7.0 },
-  { name: "Supplier R", price: 572297, weeks: 40, type: "fluxco", quality: 8.5, recommended: true },
-  { name: "Supplier S", price: 852068, weeks: 40, type: "client", quality: 7.0 },
-  { name: "Supplier T", price: 981875, weeks: 41, type: "client", quality: 6.5 },
-  { name: "Supplier U", price: 720000, weeks: 42, type: "fluxco", quality: 7.5 },
-  { name: "Supplier V", price: 750000, weeks: 44, type: "fluxco", quality: 8.0 },
-  { name: "Supplier W", price: 780000, weeks: 45, type: "fluxco", quality: 6.0 },
+  { name: "Supplier P", price: 635000, weeks: 37, type: "fluxco", quality: 4.5 },
+  { name: "Supplier Q", price: 660000, weeks: 38, type: "fluxco", quality: 6.5 },
+  { name: "Supplier R", price: 572297, weeks: 40, type: "fluxco", quality: 9.0, recommended: true },
+  { name: "Supplier S", price: 852068, weeks: 40, type: "fluxco", quality: 5.5 },
+  { name: "Supplier T", price: 981875, weeks: 41, type: "fluxco", quality: 3.5 },
+  { name: "Supplier U", price: 720000, weeks: 42, type: "fluxco", quality: 7.0 },
+  { name: "Supplier V", price: 750000, weeks: 44, type: "fluxco", quality: 8.5 },
+  { name: "Supplier W", price: 780000, weeks: 45, type: "fluxco", quality: 4.0 },
   { name: "Supplier X", price: 830000, weeks: 46, type: "fluxco", quality: 7.5 },
-  { name: "Supplier Y", price: 967771, weeks: 48, type: "client", quality: 7.0 },
-  { name: "Supplier Z", price: 642000, weeks: 50, type: "fluxco", quality: 7.5 },
-  { name: "Supplier AA", price: 596730, weeks: 51, type: "fluxco", quality: 8.0 },
-  { name: "Supplier AB", price: 890000, weeks: 52, type: "fluxco", quality: 7.0 },
-  { name: "Supplier AC", price: 950000, weeks: 55, type: "client", quality: 8.0 },
-  { name: "Supplier AD", price: 1050000, weeks: 58, type: "fluxco", quality: 6.5 },
-  { name: "Supplier AE", price: 1150000, weeks: 60, type: "fluxco", quality: 7.0 },
-  { name: "Supplier AF", price: 693790, weeks: 66, type: "fluxco", quality: 7.0 },
-  { name: "Supplier AG", price: 1350000, weeks: 72, type: "fluxco", quality: 8.5 },
-  { name: "Supplier AH", price: 1500000, weeks: 80, type: "client", quality: 7.0 },
+  { name: "Supplier Y", price: 967771, weeks: 48, type: "fluxco", quality: 5.0 },
+  { name: "Supplier Z", price: 642000, weeks: 50, type: "fluxco", quality: 7.0 },
+  { name: "Supplier AA", price: 596730, weeks: 51, type: "fluxco", quality: 8.5 },
+  { name: "Supplier AB", price: 890000, weeks: 52, type: "fluxco", quality: 5.5 },
+  { name: "Supplier AC", price: 950000, weeks: 55, type: "fluxco", quality: 7.5 },
+  { name: "Supplier AD", price: 1050000, weeks: 58, type: "fluxco", quality: 4.5 },
+  { name: "Supplier AE", price: 1150000, weeks: 60, type: "fluxco", quality: 6.0 },
+  { name: "Supplier AF", price: 693790, weeks: 66, type: "fluxco", quality: 6.5 },
+  { name: "Supplier AG", price: 1350000, weeks: 72, type: "fluxco", quality: 9.0 },
+  { name: "Supplier AH", price: 1500000, weeks: 80, type: "fluxco", quality: 5.0 },
   { name: "Supplier AI", price: 1650000, weeks: 90, type: "fluxco", quality: 8.0 },
-  { name: "Supplier AJ", price: 729565, weeks: 94, type: "fluxco", quality: 8.0 },
-  { name: "Supplier AK", price: 1800000, weeks: 110, type: "fluxco", quality: 7.5 },
-  { name: "Supplier AL", price: 2200000, weeks: 140, type: "fluxco", quality: 9.0 },
-  { name: "Supplier AM", price: 2000000, weeks: 159, type: "fluxco", quality: 9.5 },
+  { name: "Supplier AJ", price: 729565, weeks: 94, type: "fluxco", quality: 7.0 },
+  { name: "Supplier AK", price: 1800000, weeks: 110, type: "fluxco", quality: 6.0 },
+  { name: "Supplier AL", price: 2200000, weeks: 140, type: "fluxco", quality: 9.5 },
+  { name: "Supplier AM", price: 2000000, weeks: 159, type: "fluxco", quality: 10.0 },
   { name: "Supplier AN", price: 2750000, weeks: 214, type: "fluxco", quality: 9.5 },
 ];
 
@@ -381,9 +381,8 @@ function ScatterChart({ inView }: { inView: boolean }) {
       {CHART_DATA.map((d, i) => {
         const cx = x(d.weeks);
         const cy = y(d.price);
-        const isClient = d.type === "client";
         const isRec = d.recommended;
-        const dotR = 3 + (d.quality / 10) * 4;
+        const dotR = 3 + (d.quality / 10) * 5;
         return (
           <g key={d.name} style={{
             opacity: inView ? 1 : 0,
@@ -395,17 +394,16 @@ function ScatterChart({ inView }: { inView: boolean }) {
             <circle
               cx={cx} cy={cy}
               r={dotR}
-              fill={isClient ? "#e63946" : isRec ? "#22c55e" : "rgba(45,140,255,0.6)"}
+              fill={isRec ? "#22c55e" : "rgba(45,140,255,0.6)"}
               stroke={isRec ? "#22c55e" : "none"}
               strokeWidth={isRec ? "1.5" : "0"}
             />
-            {/* Only show labels for recommended or notable entries */}
             {(isRec || d.price > 1800000 || d.price < 250000) && (
               <text
                 x={cx}
                 y={cy - dotR - 4}
                 textAnchor="middle"
-                fill={isClient ? "#e63946" : isRec ? "#22c55e" : "rgba(255,255,255,0.45)"}
+                fill={isRec ? "#22c55e" : "rgba(255,255,255,0.45)"}
                 fontSize="7"
                 fontFamily="Inter"
                 fontWeight={isRec ? "600" : "400"}
@@ -646,9 +644,6 @@ export default function RedactedProposal() {
               <div className="ap-chart-legend">
                 <div className="ap-legend">
                   <div className="ap-legend-swatch" style={{ background: "#2d8cff" }} /> FluxCo Sourced
-                </div>
-                <div className="ap-legend">
-                  <div className="ap-legend-swatch" style={{ background: "#e63946" }} /> Client Sourced
                 </div>
                 <div className="ap-legend">
                   <div className="ap-legend-swatch" style={{ background: "#22c55e", border: "2px solid #22c55e", boxShadow: "0 0 0 3px rgba(34,197,94,0.2)" }} /> Recommended
