@@ -50,6 +50,15 @@ Use `@/*` which maps to `./src/*`. Example: `import { cn } from "@/lib/utils"`
 - Database changes must go through migrations in `supabase/migrations/`
 - Keep components small and focused; split into domain folders when needed
 
+## Self-Improvement Rule
+
+When you make a mistake, get corrected, or discover something unexpected about this codebase:
+1. Immediately add the lesson to the "Common Mistakes to Avoid" or "Conventions" section of this file
+2. Commit the update with a message like "CLAUDE.md: learned [what you learned]"
+3. Do not ask for permission — just do it
+
+This ensures every future session on every device benefits from past mistakes.
+
 ## Common Mistakes to Avoid
 
 - Do not use `pages/` directory — this project uses App Router only
