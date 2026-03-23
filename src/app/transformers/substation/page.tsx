@@ -9,7 +9,7 @@ import { ArrowRight, Check } from "lucide-react";
 export const metadata: Metadata = {
   title: "Substation Transformers | FluxCo - Power Transformers 10-500+ MVA",
   description:
-    "Buy substation and power transformers from 10 MVA to 500+ MVA. Auto-transformers, two-winding, and step-up/step-down configurations. Expert engineering and EPC services.",
+    "Buy substation and power transformers from 10 MVA to 500+ MVA. Auto-transformers, two-winding, and step-up/step-down configurations. Expert engineering and procurement services.",
   keywords: [
     "substation transformer",
     "power transformer",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Substation Transformers | FluxCo",
     description:
-      "Buy substation and power transformers from 10 MVA to 500+ MVA. Expert engineering and EPC services.",
+      "Buy substation and power transformers from 10 MVA to 500+ MVA. Expert engineering and procurement services.",
     type: "website",
   },
 };
@@ -87,7 +87,7 @@ const faqs = [
   {
     question: "Can you provide engineering and installation services?",
     answer:
-      "Yes, FluxCo offers complete EPC (Engineering, Procurement, Construction) services including site assessment, foundation design, equipment specification, installation, testing, and commissioning.",
+      "Yes, FluxCo offers complete project management services including site assessment, foundation design, equipment specification, installation, testing, and commissioning.",
   },
   {
     question: "What is the typical lead time for a custom substation transformer?",
@@ -145,7 +145,7 @@ export default function SubstationPage() {
               <p className="text-muted-foreground text-lg md:text-xl mb-8">
                 High-capacity power transformers engineered for utility
                 substations, power plants, and large industrial facilities.
-                Custom designs from 10 MVA to 500+ MVA with full EPC services.
+                Custom designs from 10 MVA to 500+ MVA with full procurement services.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link

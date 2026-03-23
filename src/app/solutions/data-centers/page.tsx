@@ -9,7 +9,7 @@ import { ArrowRight, Check, Server, Zap, Shield, Clock } from "lucide-react";
 export const metadata: Metadata = {
   title: "Data Center Transformers | FluxCo - Power Infrastructure Solutions",
   description:
-    "Transformer solutions for data centers: padmount, dry-type, and substation transformers from 500 kVA to 100+ MVA. Fast lead times, redundant configurations, and EPC services.",
+    "Transformer solutions for data centers: padmount, dry-type, and substation transformers from 500 kVA to 100+ MVA. Fast lead times and redundant configurations.",
   keywords: [
     "data center transformer",
     "data center power infrastructure",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Data Center Transformers | FluxCo",
     description:
-      "Transformer solutions for data centers from 500 kVA to 100+ MVA. Fast lead times and EPC services.",
+      "Transformer solutions for data centers from 500 kVA to 100+ MVA. Fast lead times and turnkey delivery.",
     type: "website",
   },
 };
@@ -50,7 +50,7 @@ const benefits = [
     icon: Server,
     title: "Complete Solution",
     description:
-      "Full EPC services from site assessment through commissioning and testing.",
+      "Full-service support from site assessment through commissioning and testing.",
   },
 ];
 
@@ -254,7 +254,7 @@ export default function DataCentersPage() {
                     3
                   </span>
                   <div>
-                    <p className="font-medium text-foreground">Full EPC</p>
+                    <p className="font-medium text-foreground">Turnkey Delivery</p>
                     <p className="text-muted-foreground text-sm">
                       Engineering through commissioning for turnkey delivery.
                     </p>

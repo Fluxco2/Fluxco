@@ -311,7 +311,7 @@ export default function IndustrialPage() {
                   <Check className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">
-                      Turnkey EPC
+                      Turnkey Delivery
                     </p>
                     <p className="text-muted-foreground text-sm">
                       Complete installation and commissioning services for

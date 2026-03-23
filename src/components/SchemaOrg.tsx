@@ -20,7 +20,7 @@ export function OrganizationSchema() {
       "Transformer Sales",
       "Transformer Procurement",
       "Engineering Services",
-      "EPC Services",
+      "Project Management",
     ],
   };
 
@@ -39,7 +39,7 @@ export function WebSiteSchema() {
     name: "FluxCo",
     url: "https://fluxco.com",
     description:
-      "In-stock padmount and substation transformers with full EPC services.",
+      "In-stock padmount and substation transformers with full procurement services.",
     potentialAction: {
       "@type": "SearchAction",
       target: "https://fluxco.com/inventory?q={search_term_string}",

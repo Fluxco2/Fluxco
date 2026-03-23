@@ -89,7 +89,7 @@ const solutions = [
 const projectTypes = [
   {
     name: "Utility-Scale Solar",
-    description: "50 MW – 500+ MW solar farms requiring full EPC services",
+    description: "50 MW – 500+ MW solar farms requiring full procurement services",
   },
   {
     name: "Community Solar",

@@ -768,15 +768,27 @@ export default function Deck2Page() {
           <div className={`d2-content ${isMobile || s9.inView ? "in" : ""}`}>
             <div className="d2-slide-label">THE TEAM</div>
             <h2 className="d2-h2">Built to Execute</h2>
+            {/* Featured CEO card */}
+            <a
+              href="https://www.linkedin.com/in/briantochman/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="d2-team-card d2-team-featured"
+              style={{ animationDelay: "0.2s", textDecoration: "none" }}
+            >
+              <div className="d2-team-photo d2-team-photo-lg">
+                <img src="/team/brian.jpg" alt="Brian Tochman" />
+              </div>
+              <div>
+                <div className="d2-team-name d2-team-name-lg">Brian Tochman</div>
+                <div className="d2-team-title">CEO &amp; Founder</div>
+                <div className="d2-team-bio">Multi-time founder. Venture investor in numerous energy tech companies. 10+ years in manufacturing and supply chain leadership.</div>
+              </div>
+            </a>
+
+            {/* Supporting team */}
             <div className="d2-team-grid">
               {[
-                {
-                  photo: "/team/brian.jpg",
-                  name: "Brian Tochman",
-                  title: "CEO",
-                  bio: "Multi-time founder. Venture investor in numerous energy tech companies. 10+ years in manufacturing and supply chain leadership.",
-                  linkedin: "https://www.linkedin.com/in/briantochman/",
-                },
                 {
                   photo: "/team/eric.jpg",
                   name: "Eric Hobby",
@@ -805,7 +817,7 @@ export default function Deck2Page() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="d2-team-card"
-                  style={{ animationDelay: `${0.2 + i * 0.15}s`, textDecoration: "none" }}
+                  style={{ animationDelay: `${0.35 + i * 0.15}s`, textDecoration: "none" }}
                 >
                   <div className="d2-team-photo">
                     <img src={member.photo} alt={member.name} />
@@ -1173,6 +1185,7 @@ const mobileDeckStyles = `
   .d2-content .d2-rev-stats,
   .d2-content .d2-rev-grid,
   .d2-content .d2-rev-insight,
+  .d2-content .d2-team-featured,
   .d2-content .d2-team-grid,
   .d2-content .d2-logo-strip,
   .d2-content .d2-timeline {
@@ -1752,18 +1765,30 @@ const mobileDeckStyles = `
   .d2-capital-footnote a:hover { text-decoration: underline; }
 
   /* ---- TEAM ---- */
+  .d2-team-featured {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 16px; padding: 24px 16px; border-radius: var(--d2-radius);
+    background: var(--d2-surface); border: 1px solid rgba(45,140,255,0.25);
+    text-align: center; margin-bottom: 16px; width: 100%;
+  }
+  .d2-team-photo-lg {
+    width: 100px; height: 100px; border-radius: 50%; overflow: hidden;
+    border: 3px solid rgba(45,140,255,0.4); flex-shrink: 0;
+  }
+  .d2-team-photo-lg img { width: 100%; height: 100%; object-fit: cover; }
+  .d2-team-name-lg { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; color: #fff; }
   .d2-team-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
   }
   .d2-team-card {
     display: flex; flex-direction: column; align-items: center;
-    gap: 10px; padding: 24px 16px; border-radius: var(--d2-radius);
+    gap: 8px; padding: 16px 10px; border-radius: var(--d2-radius);
     background: var(--d2-surface); border: 1px solid var(--d2-border);
     text-align: center;
   }
   .d2-team-photo {
-    width: 80px; height: 80px; border-radius: 50%; overflow: hidden;
+    width: 60px; height: 60px; border-radius: 50%; overflow: hidden;
     border: 2px solid rgba(45,140,255,0.3);
   }
   .d2-team-photo img { width: 100%; height: 100%; object-fit: cover; }
@@ -2037,6 +2062,7 @@ const deck2Styles = `
   .d2-content.in .d2-rev-stats,
   .d2-content.in .d2-rev-grid,
   .d2-content.in .d2-rev-insight,
+  .d2-content.in .d2-team-featured,
   .d2-content.in .d2-team-grid,
   .d2-content.in .d2-logo-strip,
   .d2-content.in .d2-timeline,
@@ -2056,7 +2082,8 @@ const deck2Styles = `
   .d2-content .d2-rev-stats { opacity: 0; animation-delay: 0.15s; }
   .d2-content .d2-rev-grid { opacity: 0; animation-delay: 0.25s; }
   .d2-content .d2-rev-insight { opacity: 0; animation-delay: 0.5s; }
-  .d2-content .d2-team-grid { opacity: 0; animation-delay: 0.2s; }
+  .d2-content .d2-team-featured { opacity: 0; animation-delay: 0.15s; }
+  .d2-content .d2-team-grid { opacity: 0; animation-delay: 0.3s; }
   .d2-content .d2-logo-strip { opacity: 0; animation-delay: 0.8s; }
   .d2-content .d2-timeline { opacity: 0; animation-delay: 0.2s; }
 
@@ -2670,25 +2697,43 @@ const deck2Styles = `
   .d2-capital-footnote a:hover { text-decoration: underline; }
 
   /* ---- TEAM (slide 9) ---- */
+  .d2-team-featured {
+    display: flex; flex-direction: row; align-items: center;
+    gap: 28px; padding: 36px 40px; border-radius: var(--d2-radius);
+    background: var(--d2-surface); border: 1px solid rgba(45,140,255,0.25);
+    text-align: left; transition: all 0.3s; cursor: pointer;
+    margin-bottom: 20px; width: 100%; max-width: 560px; margin-left: auto; margin-right: auto;
+  }
+  .d2-team-featured:hover { border-color: rgba(45,140,255,0.5); transform: translateY(-4px); box-shadow: 0 0 40px rgba(45,140,255,0.12); }
+  .d2-team-featured .d2-team-bio { font-size: 14px; }
+  .d2-team-featured .d2-team-title { margin-top: 4px; margin-bottom: 8px; }
+  .d2-team-photo-lg {
+    width: 130px; height: 130px; border-radius: 50%; overflow: hidden;
+    border: 3px solid rgba(45,140,255,0.4);
+    box-shadow: 0 0 30px rgba(45,140,255,0.15);
+    flex-shrink: 0;
+  }
+  .d2-team-photo-lg img { width: 100%; height: 100%; object-fit: cover; }
+  .d2-team-name-lg { font-size: 22px; }
   .d2-team-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
+    display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
   .d2-team-card {
     display: flex; flex-direction: column; align-items: center;
-    gap: 12px; padding: 32px 20px; border-radius: var(--d2-radius);
+    gap: 10px; padding: 28px 16px; border-radius: var(--d2-radius);
     background: var(--d2-surface); border: 1px solid var(--d2-border);
     text-align: center; transition: all 0.3s; cursor: pointer;
   }
   .d2-team-card:hover { border-color: rgba(45,140,255,0.3); transform: translateY(-4px); box-shadow: 0 0 30px rgba(45,140,255,0.1); }
   .d2-team-photo {
-    width: 100px; height: 100px; border-radius: 50%; overflow: hidden;
+    width: 80px; height: 80px; border-radius: 50%; overflow: hidden;
     border: 2px solid rgba(45,140,255,0.3);
     box-shadow: 0 0 20px rgba(45,140,255,0.1);
   }
   .d2-team-photo img { width: 100%; height: 100%; object-fit: cover; }
   .d2-team-name {
-    font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 600;
+    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600;
     color: #fff;
   }
   .d2-team-title {
@@ -2697,7 +2742,7 @@ const deck2Styles = `
     font-weight: 500;
   }
   .d2-team-bio {
-    font-family: 'Inter', sans-serif; font-size: 13px;
+    font-family: 'Inter', sans-serif; font-size: 12px;
     color: var(--d2-text); line-height: 1.5;
   }
   .d2-glow-6 {
@@ -2847,7 +2892,11 @@ const deck2Styles = `
     .d2-rev-stats { flex-wrap: wrap; }
     .d2-rev-stat { min-width: calc(50% - 12px); }
     .d2-rev-grid { grid-template-columns: 1fr; }
-    .d2-team-grid { grid-template-columns: 1fr 1fr; }
+    .d2-team-featured { flex-direction: column; text-align: center; padding: 24px 16px; gap: 16px; max-width: 100%; }
+    .d2-team-photo-lg { width: 100px; height: 100px; }
+    .d2-team-name-lg { font-size: 18px; }
+    .d2-team-featured .d2-team-bio { font-size: 12px; }
+    .d2-team-grid { grid-template-columns: 1fr 1fr 1fr; }
     .d2-logo-row { gap: 24px; }
     .d2-logo-item { height: 24px; }
     .d2-compare { flex-direction: column; }

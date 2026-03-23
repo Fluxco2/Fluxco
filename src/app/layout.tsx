@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     "in-stock transformers",
     "DOE 2027 compliant transformers",
     "FEOC compliant transformers",
-    "EPC transformer services",
+    "transformer procurement services",
     "data center transformers",
     "renewable energy transformers",
     "transformer lead times",

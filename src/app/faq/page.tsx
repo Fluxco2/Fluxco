@@ -108,7 +108,7 @@ const faqCategories = [
       {
         question: "Do you provide installation services?",
         answer:
-          "Yes, through our EPC (Engineering, Procurement, Construction) services. We can handle everything from site assessment and foundation design through equipment installation, testing, and commissioning. Available for single units or complete substation projects.",
+          "Yes, we can handle everything from site assessment and foundation design through equipment installation, testing, and commissioning. Available for single units or complete substation projects.",
       },
       {
         question: "What engineering services do you offer?",

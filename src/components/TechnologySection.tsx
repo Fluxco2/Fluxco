@@ -44,7 +44,7 @@ const TechnologySection = () => {
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="font-display text-4xl md:text-5xl text-foreground mb-4">
-            FULL EPC SERVICES
+            FULL-SERVICE PROCUREMENT
           </h2>
           <p className="text-muted-foreground text-lg">
             Engineering, Procurement & Construction—all under one roof.
