@@ -1,37 +1,42 @@
 'use client';
 
-import { PenTool, ShoppingCart, Truck, KeyRound, ShieldCheck, HeadphonesIcon } from 'lucide-react';
+import { ClipboardCheck, Award, ShoppingCart, Truck, KeyRound, Zap, ShieldCheck } from 'lucide-react';
 
 const services = [
   {
-    icon: PenTool,
-    title: 'Engineering',
-    description: 'Custom specifications and technical design support',
+    icon: ClipboardCheck,
+    title: 'Facility Audits',
+    description: 'Comprehensive on-site assessments to evaluate transformer needs, infrastructure readiness, and compliance',
+  },
+  {
+    icon: Award,
+    title: 'IEEE, IEC & UL Certification',
+    description: 'Full certification support across IEEE, IEC, and UL standards to ensure your equipment meets all requirements',
   },
   {
     icon: ShoppingCart,
-    title: 'Procurement',
-    description: 'Global sourcing from certified manufacturers',
+    title: 'Full Competitive Procurement',
+    description: 'End-to-end sourcing from a global network of certified manufacturers with transparent, competitive bidding',
   },
   {
     icon: Truck,
     title: 'Logistics',
-    description: 'End-to-end shipping and delivery coordination',
+    description: 'Coordinated shipping, heavy-haul transport, and delivery management from factory to site',
   },
   {
     icon: KeyRound,
-    title: 'Leasing',
-    description: 'Flexible lease and finance options to fit your budget and timeline',
+    title: 'Leasing — Transformer as a Service',
+    description: 'Flexible lease and finance options that eliminate large capital outlays and match your project timeline',
+  },
+  {
+    icon: Zap,
+    title: 'Site Commissioning',
+    description: 'Professional installation oversight, testing, and energization to get your transformers online safely',
   },
   {
     icon: ShieldCheck,
-    title: 'Service & Warranty',
-    description: 'Ongoing maintenance, repairs, and warranty management for the life of your equipment',
-  },
-  {
-    icon: HeadphonesIcon,
-    title: 'Ongoing Support',
-    description: '24/7 technical support and maintenance services',
+    title: 'Servicing & Warranty',
+    description: 'Ongoing maintenance, repairs, and warranty management for the full lifecycle of your equipment',
   },
 ];
 
@@ -55,7 +60,7 @@ export default function GlobalServices() {
             GLOBAL REACH, LOCAL SERVICE
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Procurement, leasing, and lifecycle support for every transformer
+            From audits and certification to procurement, commissioning, and beyond
           </p>
         </div>
 
